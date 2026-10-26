@@ -1297,21 +1297,20 @@
       document.getElementById('firstSetupWealth').value = Number(child.initialWealth ?? 0);
       document.getElementById('firstSetupError').classList.add('hidden');
     }
+    // STEP15.1: 入力中は記録を一切保存しない。登録データ保存と画面更新の失敗を分ける。
     function completeFirstSetup() {
       const id = document.getElementById('firstSetupChild').value;
       const name = document.getElementById('firstSetupName').value.trim();
       const wealthText = document.getElementById('firstSetupWealth').value.trim();
       const wealth = Number(wealthText);
       const error = document.getElementById('firstSetupError');
+      const fail = message => { error.textContent = message; error.classList.remove('hidden'); };
       if (!familyIndex.children.some(c => c.id === id) || !name || !wealthText || !Number.isSafeInteger(wealth) || wealth < 0) {
-        error.textContent = '名前と、0円以上の正しい金額を入力してください。';
-        error.classList.remove('hidden'); return;
+        fail('名前と、0円以上の正しい金額を入力してください。'); return;
       }
       if (hasRegisteredChild(id)) {
-        error.textContent = 'この子の記録はすでにあります。上書きせず、別の子を選んでください。';
-        error.classList.remove('hidden'); return;
+        fail('この子の記録はすでにあります。上書きせず、別の子を選んでください。'); return;
       }
-      // 別の子のデータをコピーせず、選択IDの新しい記録を作る。
       const fresh = structuredClone(defaultState);
       fresh.userName = name;
       fresh.monthlyHistory = [];
@@ -1323,20 +1322,43 @@
       fresh.redeemedPoints = 0;
       fresh.__firstSetupComplete = true;
       fresh.__bootstrapPlaceholder = false;
-      // ホームの総資産は「貯金＋今月残高」。入力した総資産に一致させる。
       const rules = publicFamilyConfig?.children.find(c => c.id === id)?.rules || parentRulesFor(id);
-      fresh.baseSavings = wealth - Number(rules.monthlyAllowance || 0);
+      // 月のお小遣いをまだ受け取っていない初回状態に合わせて資産を設定。
+      // 表示上の合計は貯金と今月残高の和なので、初回時点の残高を差し引く。
+      const monthlyAllowance = Number(rules.monthlyAllowance || 0);
+      fresh.baseSavings = wealth - monthlyAllowance;
+      const dataKey = childStorageKey(id);
+      const oldData = localStorage.getItem(dataKey); // 旧版の仮データを戻せるよう保持
+      const oldIndex = JSON.stringify(familyIndex);
+      // 保存はこの時点で初めて行う。保存に失敗したら元の仮データを維持する。
       try {
-        localStorage.setItem(childStorageKey(id), JSON.stringify(fresh));
-        activeChildId = id; familyIndex.activeId = id; persistFamilyIndex();
+        localStorage.setItem(dataKey, JSON.stringify(fresh));
+        const nextIndex = {...familyIndex, activeId:id};
+        localStorage.setItem(FAMILY_INDEX_KEY, JSON.stringify(nextIndex));
+      } catch (e) {
+        console.error('初回登録の保存エラー', e);
+        try {
+          if (oldData === null) localStorage.removeItem(dataKey);
+          else localStorage.setItem(dataKey, oldData);
+          localStorage.setItem(FAMILY_INDEX_KEY, oldIndex);
+        } catch (rollbackError) { console.error('初回登録のロールバックエラー',rollbackError); }
+        fail(e?.name === 'QuotaExceededError' ? '保存容量が不足しています。ブラウザの保存領域を確認してください。' : '登録データの保存に失敗しました：'+String(e?.message || e));
+        return;
+      }
+      // ここからは保存成功。画面更新に失敗しても「容量不足」とは表示しない。
+      activeChildId = id;
+      familyIndex.activeId = id;
+      try {
         state = loadState();
-        applyCurrentTheme(); renderAll(); refreshParentChildFields();
+        applyCurrentTheme();
+        renderAll();
+        refreshParentChildFields();
         document.getElementById('firstSetupModal').classList.add('hidden');
         document.getElementById('firstSetupModal').classList.remove('flex');
         showToast('ようこそ、'+name+'！');
       } catch (e) {
-        error.textContent = '保存に失敗しました。ブラウザの空き容量を確認してください。';
-        error.classList.remove('hidden'); console.error(e);
+        console.error('初回登録後の画面更新エラー', e);
+        fail('登録は保存されましたが画面の更新に失敗しました。ページを再読み込みしてください。詳細：'+String(e?.message || e));
       }
     }
 
@@ -1530,6 +1552,9 @@
       }
     }
     function saveState() {
+      // 初回登録前の仮データは、通常操作や起動時の描画で登録済みに変えない。
+      // 既存の実記録には影響させない。
+      if (!hasRegisteredChild(activeChildId)) return;
       try {
         const stored = {...state, __bootstrapPlaceholder: false};
         if (publicFamilyConfig) {
