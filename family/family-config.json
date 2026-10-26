@@ -4,19 +4,19 @@
   "children": [
     {
       "id": "child_01",
-      "label": "れい",
-      "initialWealth": 0
+      "label": "レイ",
+      "initialWealth": 10000
     },
     {
       "id": "child_02",
-      "label": "りんた",
-      "initialWealth": 0
+      "label": "リンゾウ",
+      "initialWealth": 5000
     }
   ],
   "rules": {
-    "monthlyAllowance": 5000,
+    "monthlyAllowance": 2000,
     "interestRate": 30,
-    "pointRate": 5,
+    "pointRate": 1,
     "silverMaxDays": 5,
     "silverRate": 50,
     "streakBonusInterval": 7,
@@ -25,7 +25,17 @@
       "bonusInterval": 7,
       "bonusPts": 50
     },
+    "theme": "theme-sakura",
     "missions": [
+      {
+        "id": "m0",
+        "title": "デュオリンゴ (英語・語学)",
+        "pts": 10,
+        "icon": "fa-dove",
+        "color": "#58cc02",
+        "bonusInterval": 7,
+        "bonusPts": 50
+      },
       {
         "id": "m1",
         "title": "算数・漢字の宿題",
