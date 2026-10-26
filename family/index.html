@@ -701,7 +701,7 @@
       <!-- 設定本体（ロック解除後） -->
       <div id="parentConfigBox" class="hidden space-y-5 max-h-[75vh] overflow-y-auto pr-1">
 
-        <!-- STEP13: 同一ブラウザ内の子供別データ管理 -->
+        <!-- STEP14.4: 子供別公開設定・自動保存 -->
         <div class="space-y-2" aria-label="管理対象の子供">
           <div class="flex items-center gap-2">
             <label for="parentChildSelector" class="text-xs font-bold shrink-0">管理する子供</label>
@@ -728,17 +728,12 @@
           </button>
         </div>
 
-        <!-- STEP13.3: 全タブ共通の保存ボタン。モーダルを閉じずに保存する -->
-        <button id="parentSaveConfigBtn" type="button" onclick="saveParentConfig()" class="w-full py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold rounded-xl text-xs shadow-lg">
-          <i class="fa-solid fa-floppy-disk mr-1"></i> 設定を保存する
-        </button>
-
         <!-- STEP14.1: 親がGitHubへ配置する公開ルールだけを書き出す。個人記録・PINは含めない -->
         <div id="publicConfigExportBox" class="inner-box rounded-xl p-3 space-y-2 border border-sky-500/30">
-          <div class="text-xs font-extrabold text-sky-400">🌐 公開設定ファイル（STEP 14.2）</div>
-          <p class="text-[11px] opacity-85">保存済みのルール、初期カラー、子供ID、公開用の仮ニックネーム・仮の初期総資産を <code>family-config.json</code> に書き出します。子供が登録した名前・実際の資産・履歴・合言葉は含みません。</p>
+          <div class="text-xs font-extrabold text-sky-400">🌐 公開設定ファイル（STEP 14.4）</div>
+          <p class="text-[11px] opacity-85">子供ごとの保存済みルール、初期カラー、子供ID、公開用の仮ニックネーム・仮の初期総資産を <code>family-config.json</code> に書き出します。子供が登録した名前・実際の資産・履歴・合言葉は含みません。</p>
           <button type="button" onclick="exportPublicFamilyConfig()" class="w-full py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs"><i class="fa-solid fa-file-arrow-down mr-1"></i> 公開設定JSONを書き出す</button>
-          <p class="text-[10px] opacity-65">※ 変更した設定は先に「設定を保存する」を押してください。公開後は起動時に自動読み込みします。</p>
+          <p class="text-[10px] opacity-65">※ 編集は自動保存されます。子供の端末へ反映するにはJSONを再出力してGitHub上で更新してください。</p>
         </div>
 
         <div id="publicConfigLoadStatus" role="status" aria-live="polite" class="inner-box rounded-xl p-3 text-[11px] opacity-90">🌐 公開設定：確認中…</div>
@@ -904,10 +899,6 @@
               </div>
             </div>
             <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="opacity-75 font-bold block mb-1">これまでの貯金残高（円）</label>
-                <input type="number" id="cfgBaseSavings" class="w-full inner-box rounded-xl px-3 py-2 text-amber-500 font-bold">
-              </div>
               <div>
                 <label class="opacity-75 font-bold block mb-1">1ポイント＝何円？</label>
                 <input type="number" step="0.1" id="cfgPointRate" class="w-full inner-box rounded-xl px-3 py-2 text-amber-500 font-bold">
@@ -1207,6 +1198,8 @@
     const FAMILY_INDEX_KEY = 'ko_zenitendo_family_index_v1';
     const CHILD_DATA_PREFIX = 'ko_zenitendo_child_v1_';
     const PUBLIC_CONFIG_CACHE_KEY = 'ko_zenitendo_public_config_cache_v1';
+    const PARENT_RULES_KEY = 'ko_zenitendo_parent_rules_v2';
+    const PUBLIC_RULE_KEYS = ['monthlyAllowance','interestRate','pointRate','silverMaxDays','silverRate','streakBonusInterval','streakBonusPts'];
     const VALID_THEMES = ['theme-classic','theme-sakura','theme-matcha','theme-sky','theme-cyber','theme-sunset','theme-mint','theme-obsidian'];
     let familyIndex = initializeFamilyIndex();
     let activeChildId = familyIndex.activeId;
@@ -1279,14 +1272,49 @@
         monthlyHistory: parsed.monthlyHistory || defaultState.monthlyHistory
       };
     }
-    const PUBLIC_RULE_KEYS = ['monthlyAllowance','interestRate','pointRate','silverMaxDays','silverRate','streakBonusInterval','streakBonusPts'];
+
+    function rulesFromState(source) {
+      const r = {};
+      for (const key of PUBLIC_RULE_KEYS) r[key] = Number(source[key] ?? defaultState[key]);
+      r.checkBonus = structuredClone(source.checkBonus || defaultState.checkBonus);
+      r.missions = structuredClone(source.missions || defaultMissions);
+      r.theme = VALID_THEMES.includes(source.theme) ? source.theme : 'theme-classic';
+      return r;
+    }
+    function readParentRules() {
+      try { return JSON.parse(localStorage.getItem(PARENT_RULES_KEY) || '{}') || {}; }
+      catch (_) { return {}; }
+    }
+    function parentRulesFor(id) {
+      const stored = readParentRules();
+      if (stored[id]) return structuredClone(stored[id]);
+      const remote = publicFamilyConfig?.children.find(c => c.id === id);
+      if (remote?.rules) return structuredClone(remote.rules);
+      try { const legacy = JSON.parse(localStorage.getItem(childStorageKey(id)) || 'null'); if (legacy && !legacy.__bootstrapPlaceholder) return rulesFromState(legacy); } catch (_) {}
+      return rulesFromState(defaultState);
+    }
+    function writeParentRules(id, rules) {
+      const stored = readParentRules();
+      stored[id] = structuredClone(rules);
+      localStorage.setItem(PARENT_RULES_KEY, JSON.stringify(stored));
+    }
     function applyPublicRulesToState(target) {
-      if (!publicFamilyConfig) return target;
-      const rules = publicFamilyConfig.rules;
-      for (const key of PUBLIC_RULE_KEYS) target[key] = rules[key];
-      target.checkBonus = structuredClone(rules.checkBonus);
-      target.missions = structuredClone(rules.missions);
+      // 公開JSONの子供別ルールは、表示・計算時だけ適用。履歴は再計算しない。
+      const child = publicFamilyConfig?.children.find(c => c.id === activeChildId);
+      if (!child?.rules) return target;
+      for (const key of PUBLIC_RULE_KEYS) target[key] = child.rules[key];
+      target.checkBonus = structuredClone(child.rules.checkBonus);
+      target.missions = structuredClone(child.rules.missions);
       return target;
+    }
+    function refreshEffectiveRules() {
+      if (publicFamilyConfig) applyPublicRulesToState(state);
+      else Object.assign(state, parentRulesFor(activeChildId));
+    }
+    function saveParentRulesForCurrent() {
+      const rules = rulesFromState(state);
+      rules.theme = familyIndex.children.find(c => c.id === activeChildId)?.theme || 'theme-classic';
+      writeParentRules(activeChildId, rules);
     }
     function updatePublicConfigStatus(message) {
       publicConfigStatus = message;
@@ -1294,32 +1322,35 @@
       if (el) el.textContent = message;
     }
     function validatePublicFamilyConfig(value) {
-      if (!value || value.schemaVersion !== 1 || !Array.isArray(value.children) || !value.children.length || !value.rules || typeof value.rules !== 'object') throw Error('公開設定の形式が不正です');
+      if (!value || ![1,2].includes(value.schemaVersion) || !Array.isArray(value.children) || !value.children.length) throw Error('公開設定の形式が不正です');
       const seen = new Set();
+      function validRules(raw) {
+        if (!raw || typeof raw !== 'object') throw Error('子供別ルールがありません');
+        const rules = {};
+        for (const key of PUBLIC_RULE_KEYS) {
+          const n = raw[key];
+          if (typeof n !== 'number' || !Number.isFinite(n) || n < 0) throw Error('ルール数値が不正です: '+key);
+          rules[key] = n;
+        }
+        if (!Array.isArray(raw.missions) || !raw.checkBonus || raw.missions.length > 100) throw Error('ミッション形式が不正です');
+        rules.missions = raw.missions.map(m => {
+          if (!m || typeof m.id !== 'string' || typeof m.title !== 'string' || typeof m.pts !== 'number' || !Number.isFinite(m.pts) || m.pts < 0) throw Error('ミッション形式が不正です');
+          return {id:m.id,title:m.title,pts:m.pts,icon:typeof m.icon==='string'?m.icon:'fa-star',color:typeof m.color==='string'?m.color:'#f59e0b',bonusInterval:Number(m.bonusInterval)||7,bonusPts:Number(m.bonusPts)||0};
+        });
+        const b = raw.checkBonus;
+        if (!Number.isFinite(b.bonusInterval) || !Number.isFinite(b.bonusPts) || b.bonusInterval < 1 || b.bonusPts < 0) throw Error('ボーナス形式が不正です');
+        rules.checkBonus = {bonusInterval:b.bonusInterval,bonusPts:b.bonusPts};
+        rules.theme = VALID_THEMES.includes(raw.theme) ? raw.theme : 'theme-classic';
+        return rules;
+      }
       const children = value.children.map(c => {
         if (!c || typeof c.id !== 'string' || !/^child_[a-zA-Z0-9_-]+$/.test(c.id) || seen.has(c.id)) throw Error('子供IDが不正です');
         seen.add(c.id);
         if (typeof c.label !== 'string' || !c.label.trim() || c.label.length > 30) throw Error('仮ニックネームが不正です');
         if (!Number.isSafeInteger(c.initialWealth) || c.initialWealth < 0) throw Error('仮の初期総資産が不正です');
-        return {id:c.id,label:c.label,initialWealth:c.initialWealth};
+        return {id:c.id,label:c.label,initialWealth:c.initialWealth,rules:validRules(value.schemaVersion===2 ? c.rules : value.rules)};
       });
-      const rules = {};
-      for (const key of PUBLIC_RULE_KEYS) {
-        const n = value.rules[key];
-        if (typeof n !== 'number' || !Number.isFinite(n) || n < 0) throw Error('ルール数値が不正です: '+key);
-        rules[key] = n;
-      }
-      if (!Array.isArray(value.rules.missions) || !value.rules.checkBonus) throw Error('ミッション形式が不正です');
-      if (value.rules.missions.length > 100) throw Error('ミッション数が多すぎます');
-      rules.missions = value.rules.missions.map(m => {
-        if (!m || typeof m.id !== 'string' || typeof m.title !== 'string' || typeof m.pts !== 'number' || !Number.isFinite(m.pts) || m.pts < 0) throw Error('ミッションの形式が不正です');
-        return {id:m.id,title:m.title,pts:m.pts,icon:typeof m.icon === 'string'?m.icon:'fa-star',color:typeof m.color === 'string'?m.color:'#f59e0b',bonusInterval:Number(m.bonusInterval)||7,bonusPts:Number(m.bonusPts)||0};
-      });
-      const b = value.rules.checkBonus;
-      if (!Number.isFinite(b.bonusInterval) || !Number.isFinite(b.bonusPts) || b.bonusInterval < 1 || b.bonusPts < 0) throw Error('ボーナス形式が不正です');
-      rules.checkBonus = {bonusInterval:b.bonusInterval,bonusPts:b.bonusPts};
-      rules.theme = VALID_THEMES.includes(value.rules.theme) ? value.rules.theme : 'theme-classic';
-      return {schemaVersion:1,children,rules};
+      return {schemaVersion:2,children};
     }
     async function loadPublicFamilyConfig() {
       updatePublicConfigStatus('🌐 公開設定：読み込み中…');
@@ -1334,8 +1365,9 @@
         publicFamilyConfig = parsed;
         // 公開JSONが管理するのは「利用対象の子供一覧」。端末に残った旧IDは削除せず非表示にする。
         const oldChildren = familyIndex.children;
-        familyIndex.children = parsed.children.map(c => ({...c}));
-        familyIndex.publicTheme = parsed.rules.theme;
+        familyIndex.children = parsed.children.map(c => ({id:c.id,label:c.label,initialWealth:c.initialWealth,theme:c.rules.theme}));
+        // 端末内の親編集用ルールと公開ルールを区別する。公開JSONが正本。
+        for (const child of parsed.children) writeParentRules(child.id, child.rules);
         if (!familyIndex.children.some(c => c.id === activeChildId)) {
           activeChildId = familyIndex.children[0].id;
           familyIndex.activeId = activeChildId;
@@ -1354,7 +1386,7 @@
         console.warn('公開設定JSONの自動読み込みに失敗',e);
         const cached = localStorage.getItem(PUBLIC_CONFIG_CACHE_KEY);
         if (cached) {
-          try { publicFamilyConfig = validatePublicFamilyConfig(JSON.parse(cached)); applyPublicRulesToState(state); applyCurrentTheme(); renderAll(); } catch (_) {}
+          try { publicFamilyConfig = validatePublicFamilyConfig(JSON.parse(cached)); familyIndex.children = publicFamilyConfig.children.map(c=>({id:c.id,label:c.label,initialWealth:c.initialWealth,theme:c.rules.theme})); if (!familyIndex.children.some(c=>c.id===activeChildId)) activeChildId=familyIndex.children[0].id; for (const c of publicFamilyConfig.children) writeParentRules(c.id,c.rules); state=loadState(); applyCurrentTheme(); renderAll(); } catch (_) {}
         }
         updatePublicConfigStatus('⚠️ 公開設定を読み込めません（'+String(e.message).slice(0,90)+'）。前回の設定または既存設定を使用中です。');
       }
@@ -1378,17 +1410,19 @@
     }
     function effectiveTheme() {
       return (VALID_THEMES.includes(state.themeOverride) && state.themeOverride)
-        || (publicFamilyConfig && publicFamilyConfig.rules.theme)
-        || familyIndex.publicTheme || state.theme || 'theme-classic';
+        || (publicFamilyConfig?.children.find(c=>c.id===activeChildId)?.rules.theme)
+        || familyIndex.children.find(c=>c.id===activeChildId)?.theme || state.theme || 'theme-classic';
     }
     function loadState() {
       try {
         const raw = localStorage.getItem(childStorageKey(activeChildId));
-        return applyPublicRulesToState(normalizeChildState(raw ? JSON.parse(raw) : structuredClone(defaultState)));
+        const loaded = normalizeChildState(raw ? JSON.parse(raw) : structuredClone(defaultState));
+        if (publicFamilyConfig) return applyPublicRulesToState(loaded);
+        return Object.assign(loaded, parentRulesFor(activeChildId));
       } catch (e) {
         // 壊れたデータは上書きせず、表示用に初期値を返す。
         console.error('子供データを読み込めませんでした', e);
-        return applyPublicRulesToState(structuredClone(defaultState));
+        return publicFamilyConfig ? applyPublicRulesToState(structuredClone(defaultState)) : Object.assign(structuredClone(defaultState), parentRulesFor(activeChildId));
       }
     }
     function saveState() {
@@ -1432,7 +1466,7 @@
       document.getElementById('parentModalPointsYen').textContent = Math.floor(Number(state.points || 0) * Number(state.pointRate || 0)).toLocaleString();
       const fields = {
         cfgAllowance: state.monthlyAllowance, cfgRate: state.interestRate,
-        cfgBaseSavings: state.baseSavings, cfgPointRate: state.pointRate,
+        cfgPointRate: state.pointRate,
         cfgSilverDays: state.silverMaxDays, cfgSilverRate: state.silverRate,
         cfgStreakInterval: state.streakBonusInterval, cfgStreakBonusPts: state.streakBonusPts,
         cfgPin: state.pin
@@ -1444,26 +1478,23 @@
     }
     function switchManagedChild(id) {
       if (!familyIndex.children.some(c => c.id === id) || id === activeChildId) return;
-      // 未保存の設定フォームは破棄されるため確認する。
-      openConfirmModal('管理する子供を切り替えます。保存していない設定の変更は破棄されます。よろしいですか？', () => {
-        activeChildId = id;
-        familyIndex.activeId = id;
-        persistFamilyIndex();
-        state = loadState();
-        if (!state.allowanceMonth) state.allowanceMonth = getTodayStr().slice(0, 7);
-        applyCurrentTheme();
-        renderAll();
-        refreshParentChildFields();
-        showToast('管理する子供を切り替えました');
-      });
-      renderChildSelector();
+      if (!commitParentInputs()) { renderChildSelector(); return; }
+      activeChildId = id;
+      familyIndex.activeId = id;
+      persistFamilyIndex();
+      state = loadState();
+      if (!state.allowanceMonth) state.allowanceMonth = getTodayStr().slice(0,7);
+      applyCurrentTheme();
+      renderAll();
+      refreshParentChildFields();
+      showToast('管理する子供を切り替えました');
     }
     // 仮の初期値は公開設定専用。現在の総資産・貯金には触れない。
     function savePublicInitialWealth(value) {
       const child = familyIndex.children.find(c => c.id === activeChildId);
       if (!child) return;
       const amount = Number(value);
-      if (!Number.isSafeInteger(amount) || amount < 0) {
+      if (!String(value).trim() || !Number.isSafeInteger(amount) || amount < 0) {
         showToast('仮の初期総資産は0以上の整数で入力してください');
         renderChildSelector();
         return;
@@ -1507,7 +1538,8 @@
       try {
         // 先に独立した空データを作成。既存データは変更しない。
         localStorage.setItem(childStorageKey(id), JSON.stringify(structuredClone(defaultState)));
-        familyIndex.children.push({ id, label: cleanLabel });
+        familyIndex.children.push({ id, label: cleanLabel, initialWealth:0, theme:'theme-classic' });
+        writeParentRules(id, rulesFromState(defaultState));
         persistFamilyIndex();
         renderChildSelector();
         showToast(`${cleanLabel}を追加しました。切替で表示できます`);
@@ -1545,19 +1577,21 @@
     // ==========================================
     function setAppTheme(themeName) {
       if (!VALID_THEMES.includes(themeName)) return;
+      if (!commitParentInputs()) return;
       playSE('tap');
-      // 親メニューのカラーは「公開する家族共通の初期カラー」。子供の個別カラーとは別。
-      familyIndex.publicTheme = themeName;
+      const child = familyIndex.children.find(c=>c.id===activeChildId);
+      if (child) child.theme = themeName;
       persistFamilyIndex();
+      saveParentRulesForCurrent();
       applyCurrentTheme();
-      showToast('公開用の初期カラーを変更しました。JSONを書き出して反映してください');
+      showToast('この子供の初期カラーを自動保存しました');
     }
     function applyCurrentTheme() {
       document.body.className = `${effectiveTheme()} pb-24 select-none`;
       updateThemeButtonsUI();
     }
     function updateThemeButtonsUI() {
-      const selected = familyIndex.publicTheme || (publicFamilyConfig && publicFamilyConfig.rules.theme) || 'theme-classic';
+      const selected = familyIndex.children.find(c=>c.id===activeChildId)?.theme || 'theme-classic';
       VALID_THEMES.forEach(t => {
         const btn = document.getElementById(`btn-${t}`);
         if (!btn) return;
@@ -1854,10 +1888,9 @@
       const cfg = missionId === CHECK_ID ? (state.checkBonus ||= {}) : state.missions.find(m => m.id === missionId);
       if (!cfg) return;
       cfg[key] = num;
-      recalcBonuses(missionId);
-      saveState();
+      saveParentRulesForCurrent();
       renderParentMissionsList();
-      showToast('連続ボーナスの設定を保存しました');
+      showToast('連続ボーナスの設定を自動保存しました（過去の獲得分は維持）');
     }
 
     function claimNoSpend(dateStr) {
@@ -2590,12 +2623,14 @@ ${backupCode}`;
     }
 
     function closeParentModal() {
+      if (!document.getElementById('parentConfigBox').classList.contains('hidden') && !commitParentInputs()) return;
       const modal = document.getElementById('parentModal');
       modal.classList.add('hidden');
       modal.classList.remove('flex');
     }
 
     function switchParentSubTab(subTab) {
+      if (!document.getElementById('parentConfigBox').classList.contains('hidden') && document.activeElement?.id in PARENT_FIELD_SPECS && !commitParentInputs()) return;
       const bMis = document.getElementById('parentSubTabMissionsBtn');
       const bRes = document.getElementById('parentSubTabRescueBtn');
       const bGen = document.getElementById('parentSubTabGeneralBtn');
@@ -2613,7 +2648,6 @@ ${backupCode}`;
       sMis.classList.toggle('hidden', subTab !== 'missions');
       sRes.classList.toggle('hidden', subTab !== 'rescue');
       sGen.classList.toggle('hidden', subTab !== 'general');
-      document.getElementById('parentSaveConfigBtn').classList.toggle('hidden', subTab === 'rescue');
       document.getElementById('publicConfigExportBox').classList.toggle('hidden', subTab === 'rescue');
 
       if (subTab === 'missions') renderParentMissionsList();
@@ -2733,7 +2767,6 @@ ${backupCode}`;
         renderChildSelector();
         document.getElementById('cfgAllowance').value = state.monthlyAllowance;
         document.getElementById('cfgRate').value = state.interestRate;
-        document.getElementById('cfgBaseSavings').value = state.baseSavings;
         document.getElementById('cfgPointRate').value = state.pointRate;
         document.getElementById('cfgSilverDays').value = state.silverMaxDays;
         document.getElementById('cfgSilverRate').value = state.silverRate;
@@ -2791,17 +2824,17 @@ ${backupCode}`;
       });
 
       document.getElementById('newMissionTitle').value = '';
-      saveState();
+      saveParentRulesForCurrent();
       renderParentMissionsList();
-      showToast('ミッションを追加しました！');
+      showToast('ミッションを追加して自動保存しました！');
     }
 
     function deleteMission(id) {
       openConfirmModal('このミッションを削除しますか？', () => {
         state.missions = state.missions.filter(m => m.id !== id);
-        saveState();
+        saveParentRulesForCurrent();
         renderParentMissionsList();
-        showToast('ミッションを削除しました');
+        showToast('ミッションを削除して自動保存しました');
       });
     }
 
@@ -2824,50 +2857,75 @@ ${backupCode}`;
       `).join('');
     }
 
-    function saveParentConfig() {
-      state.monthlyAllowance = Number(document.getElementById('cfgAllowance').value) || 0;
-      state.interestRate = Number(document.getElementById('cfgRate').value) || 0;
-      state.baseSavings = Number(document.getElementById('cfgBaseSavings').value) || 0;
-      state.pointRate = Number(document.getElementById('cfgPointRate').value) || 1;
-      state.silverMaxDays = Math.max(0, Number(document.getElementById('cfgSilverDays').value));
-      state.silverRate = Math.max(0, Math.min(100, Number(document.getElementById('cfgSilverRate').value)));
-      state.streakBonusInterval = Math.max(1, Number(document.getElementById('cfgStreakInterval').value) || 7);
-      state.streakBonusPts = Math.max(0, Number(document.getElementById('cfgStreakBonusPts').value) || 0);
-      state.pin = document.getElementById('cfgPin').value.trim() || '0000';
-
+    const PARENT_FIELD_SPECS = {
+      cfgAllowance:['monthlyAllowance',0,100000000,true],
+      cfgRate:['interestRate',0,100000,false],
+      cfgPointRate:['pointRate',0,100000,false],
+      cfgSilverDays:['silverMaxDays',0,30,true],
+      cfgSilverRate:['silverRate',0,100,false],
+      cfgStreakInterval:['streakBonusInterval',1,365,true],
+      cfgStreakBonusPts:['streakBonusPts',0,1000000,true]
+    };
+    function commitParentInputs() {
+      if (document.getElementById('parentConfigBox').classList.contains('hidden')) return true;
+      const changes = {};
+      for (const [id,[key,min,max,integer]] of Object.entries(PARENT_FIELD_SPECS)) {
+        const el = document.getElementById(id);
+        if (!el) continue;
+        const text = el.value.trim();
+        const n = Number(text);
+        if (!text || !Number.isFinite(n) || n<min || n>max || (integer && !Number.isSafeInteger(n))) {
+          el.setCustomValidity(`正しい数値を入力してください（${min}～${max}）`);
+          el.reportValidity(); el.focus(); return false;
+        }
+        el.setCustomValidity('');
+        changes[key] = n;
+      }
+      const pinEl = document.getElementById('cfgPin');
+      const pin = pinEl.value.trim();
+      if (!pin) { pinEl.setCustomValidity('合言葉を入力してください'); pinEl.reportValidity(); pinEl.focus(); return false; }
+      pinEl.setCustomValidity('');
+      const wealth = document.getElementById('publicInitialWealth');
+      const wText = wealth.value.trim(), w = Number(wText);
+      if (!wText || !Number.isSafeInteger(w) || w<0) { wealth.setCustomValidity('0以上の整数を入力してください'); wealth.reportValidity(); wealth.focus(); return false; }
+      wealth.setCustomValidity('');
+      const child = familyIndex.children.find(c=>c.id===activeChildId);
+      if (child) child.initialWealth = w;
+      Object.assign(state,changes);
+      state.pin = pin;
+      persistFamilyIndex();
+      saveParentRulesForCurrent();
+      // 合言葉は公開JSONへ出さない。既存の子供別記録側にだけ保存する。
       saveState();
-      // 親メニューを開いたままにし、選択中の子供・タブも維持する。
-      showToast('設定を保存しました！');
+      return true;
+    }
+    function saveParentConfig() { if (commitParentInputs()) showToast('設定を自動保存しました'); }
+    function setupParentAutoSave() {
+      const box = document.getElementById('parentConfigBox');
+      box.addEventListener('change', e => {
+        if (e.target.id in PARENT_FIELD_SPECS || e.target.id==='cfgPin' || e.target.id==='publicInitialWealth') commitParentInputs();
+      });
+      box.addEventListener('keydown', e => {
+        if (e.key==='Enter' && (e.target.id in PARENT_FIELD_SPECS || e.target.id==='cfgPin' || e.target.id==='publicInitialWealth')) { e.preventDefault(); e.target.blur(); }
+      });
     }
 
     // STEP14.1: 明示的な許可リスト方式。子供のローカルデータを丸ごとJSON化しない。
     function buildPublicFamilyConfig() {
-      const ruleFields = [
-        'monthlyAllowance', 'interestRate', 'pointRate', 'silverMaxDays',
-        'silverRate', 'streakBonusInterval', 'streakBonusPts'
-      ];
-      const rules = {};
-      for (const key of ruleFields) rules[key] = Number(state[key]);
-      rules.checkBonus = {
-        bonusInterval: Number((state.checkBonus || {}).bonusInterval ?? 7),
-        bonusPts: Number((state.checkBonus || {}).bonusPts ?? 50)
-      };
-      rules.theme = familyIndex.publicTheme || (publicFamilyConfig && publicFamilyConfig.rules.theme) || state.theme || 'theme-classic';
-      rules.missions = (state.missions || []).map(m => ({
-        id: String(m.id), title: String(m.title), pts: Number(m.pts),
-        icon: String(m.icon || 'fa-star'), color: String(m.color || '#f59e0b'),
-        bonusInterval: Number(m.bonusInterval ?? rules.streakBonusInterval),
-        bonusPts: Number(m.bonusPts ?? rules.streakBonusPts)
-      }));
+      if (!commitParentInputs()) throw Error('入力に誤りがあります');
       return {
-        schemaVersion: 1,
+        schemaVersion: 2,
         familyId: 'default',
-        children: familyIndex.children.map((c, i) => ({
-          id: c.id,
-          label: String(c.label || `子供${String.fromCharCode(65 + i)}`),
-          initialWealth: Number(c.initialWealth ?? 0)
-        })),
-        rules
+        children: familyIndex.children.map((c,i) => {
+          const rules = parentRulesFor(c.id);
+          rules.theme = VALID_THEMES.includes(c.theme) ? c.theme : 'theme-classic';
+          return {
+            id:c.id,
+            label:String(c.label || `子供${String.fromCharCode(65+i)}`),
+            initialWealth:Number(c.initialWealth ?? 0),
+            rules
+          };
+        })
       };
     }
 
@@ -3203,6 +3261,7 @@ ${backupCode}`;
     }
 
     window.onload = function () {
+      setupParentAutoSave();
       applyCurrentTheme();
       switchMainTab('matrix');
       renderAll();
