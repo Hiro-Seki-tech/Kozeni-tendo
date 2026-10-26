@@ -1383,6 +1383,8 @@
     function normalizeChildState(parsed) {
       return {
         ...defaultState, ...parsed,
+        // 初回登録直後も受取対象月を必ず有効な YYYY-MM に正規化する。
+        allowanceMonth: /^\d{4}-(0[1-9]|1[0-2])$/.test(String(parsed.allowanceMonth || '')) ? parsed.allowanceMonth : getTodayStr().slice(0,7),
         silverMaxDays: parsed.silverMaxDays !== undefined ? Number(parsed.silverMaxDays) : 5,
         silverRate: parsed.silverRate !== undefined ? Number(parsed.silverRate) : 50,
         streakBonusInterval: parsed.streakBonusInterval !== undefined ? Number(parsed.streakBonusInterval) : 7,
@@ -3079,7 +3081,9 @@ ${backupCode}`;
     }
 
     function shiftAllowanceMonth(ym, delta) {
-      const [y,m] = ym.split('-').map(Number);
+      // 旧データ・初回登録直後の null にも安全に対応する。
+      const safeYm = /^\d{4}-(0[1-9]|1[0-2])$/.test(String(ym || '')) ? ym : getTodayStr().slice(0,7);
+      const [y,m] = safeYm.split('-').map(Number);
       const d = new Date(y, m - 1 + delta, 1);
       return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
     }
