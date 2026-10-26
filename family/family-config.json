@@ -1,77 +1,111 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "familyId": "default",
   "children": [
     {
       "id": "child_01",
-      "label": "レイ",
-      "initialWealth": 10000
+      "label": "レイタロウ",
+      "initialWealth": 60000,
+      "rules": {
+        "monthlyAllowance": 5000,
+        "interestRate": 30,
+        "pointRate": 3.5,
+        "silverMaxDays": 5,
+        "silverRate": 50,
+        "streakBonusInterval": 7,
+        "streakBonusPts": 50,
+        "checkBonus": {
+          "bonusInterval": 7,
+          "bonusPts": 50
+        },
+        "missions": [
+          {
+            "id": "m1",
+            "title": "算数・漢字の宿題",
+            "pts": 10,
+            "icon": "fa-book",
+            "color": "#3b82f6"
+          },
+          {
+            "id": "m2",
+            "title": "お風呂そうじ",
+            "pts": 10,
+            "icon": "fa-bath",
+            "color": "#06b6d4"
+          },
+          {
+            "id": "m3",
+            "title": "げんかんの靴ならべ",
+            "pts": 5,
+            "icon": "fa-shoe-prints",
+            "color": "#10b981"
+          },
+          {
+            "id": "m4",
+            "title": "夜の歯みがき・仕上げ",
+            "pts": 5,
+            "icon": "fa-teeth",
+            "color": "#f59e0b"
+          }
+        ],
+        "theme": "theme-matcha"
+      }
     },
     {
       "id": "child_02",
       "label": "リンゾウ",
-      "initialWealth": 5000
-    }
-  ],
-  "rules": {
-    "monthlyAllowance": 2000,
-    "interestRate": 30,
-    "pointRate": 1,
-    "silverMaxDays": 5,
-    "silverRate": 50,
-    "streakBonusInterval": 7,
-    "streakBonusPts": 50,
-    "checkBonus": {
-      "bonusInterval": 7,
-      "bonusPts": 50
-    },
-    "theme": "theme-sakura",
-    "missions": [
-      {
-        "id": "m0",
-        "title": "デュオリンゴ (英語・語学)",
-        "pts": 10,
-        "icon": "fa-dove",
-        "color": "#58cc02",
-        "bonusInterval": 7,
-        "bonusPts": 50
-      },
-      {
-        "id": "m1",
-        "title": "算数・漢字の宿題",
-        "pts": 10,
-        "icon": "fa-book",
-        "color": "#3b82f6",
-        "bonusInterval": 7,
-        "bonusPts": 50
-      },
-      {
-        "id": "m2",
-        "title": "お風呂そうじ",
-        "pts": 10,
-        "icon": "fa-bath",
-        "color": "#06b6d4",
-        "bonusInterval": 7,
-        "bonusPts": 50
-      },
-      {
-        "id": "m3",
-        "title": "げんかんの靴ならべ",
-        "pts": 5,
-        "icon": "fa-shoe-prints",
-        "color": "#10b981",
-        "bonusInterval": 7,
-        "bonusPts": 50
-      },
-      {
-        "id": "m4",
-        "title": "夜の歯みがき・仕上げ",
-        "pts": 5,
-        "icon": "fa-teeth",
-        "color": "#f59e0b",
-        "bonusInterval": 7,
-        "bonusPts": 50
+      "initialWealth": 50000,
+      "rules": {
+        "monthlyAllowance": 2000,
+        "interestRate": 30,
+        "pointRate": 1.5,
+        "silverMaxDays": 5,
+        "silverRate": 50,
+        "streakBonusInterval": 7,
+        "streakBonusPts": 50,
+        "checkBonus": {
+          "bonusInterval": 7,
+          "bonusPts": 50
+        },
+        "missions": [
+          {
+            "id": "m0",
+            "title": "デュオリンゴ (英語・語学)",
+            "pts": 10,
+            "icon": "fa-dove",
+            "color": "#58cc02"
+          },
+          {
+            "id": "m1",
+            "title": "算数・漢字の宿題",
+            "pts": 10,
+            "icon": "fa-book",
+            "color": "#3b82f6"
+          },
+          {
+            "id": "m2",
+            "title": "お風呂そうじ",
+            "pts": 10,
+            "icon": "fa-bath",
+            "color": "#06b6d4"
+          },
+          {
+            "id": "m3",
+            "title": "げんかんの靴ならべ",
+            "pts": 5,
+            "icon": "fa-shoe-prints",
+            "color": "#10b981"
+          },
+          {
+            "id": "m4",
+            "title": "夜の歯みがき・仕上げ",
+            "pts": 5,
+            "icon": "fa-teeth",
+            "color": "#f59e0b"
+          }
+        ],
+        "theme": "theme-sky"
       }
-    ]
-  }
+    }
+  ]
 }
