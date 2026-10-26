@@ -679,6 +679,28 @@
     </div>
   </div>
 
+
+  <!-- STEP15: この端末の初回登録。公開設定のIDで本人の記録を分離する -->
+  <div id="firstSetupModal" class="fixed inset-0 z-[90] bg-black/90 backdrop-blur-sm hidden items-center justify-center p-4 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="firstSetupTitle">
+    <div class="glass-card rounded-3xl max-w-md w-full p-6 border border-amber-500/50 space-y-4 my-6">
+      <h2 id="firstSetupTitle" class="text-xl font-extrabold text-amber-400">🪙 ようこそ、小銭天童へ！</h2>
+      <p class="text-sm opacity-90">この端末で初めて使う人の情報を登録しよう。</p>
+      <div><label for="firstSetupChild" class="text-xs font-bold block mb-1">あなたはどの子？</label>
+        <select id="firstSetupChild" class="w-full inner-box rounded-xl p-3 font-bold" onchange="updateFirstSetupDefaults()"></select>
+      </div>
+      <div><label for="firstSetupName" class="text-xs font-bold block mb-1">あなたの名前（あとで変更できます）</label>
+        <input id="firstSetupName" type="text" maxlength="40" class="w-full inner-box rounded-xl p-3" placeholder="名前を入力">
+        <p class="text-[11px] opacity-75 mt-1">名前はこの端末と、報告を受け取った親の端末にだけ保存されます。公開設定ファイルには載らないので、本名でもOK。ただし報告コードや端末を他人に見せると名前も見えます。</p>
+      </div>
+      <div><label for="firstSetupWealth" class="text-xs font-bold block mb-1">今持っているお金の合計（円）</label>
+        <input id="firstSetupWealth" type="number" min="0" step="1" inputmode="numeric" class="w-full inner-box rounded-xl p-3 font-bold">
+        <p class="text-[11px] opacity-75 mt-1">現金と貯金を合わせた金額。0円でもOK。最初は親が用意した仮の金額を表示しています。</p>
+      </div>
+      <p id="firstSetupError" role="alert" class="text-xs text-red-400 hidden"></p>
+      <button type="button" onclick="completeFirstSetup()" class="w-full py-3 rounded-xl bg-amber-500 text-slate-950 font-extrabold">登録してはじめる！</button>
+    </div>
+  </div>
+
   <!-- ==========================================
        モーダル3：親の管理メニュー（合言葉ロック＋ミッション設定）
   =========================================== -->
@@ -1239,6 +1261,85 @@
     };
 
     function childStorageKey(id) { return CHILD_DATA_PREFIX + id; }
+    // STEP15: 既存の実データは登録済みとして扱い、空の端末だけ登録画面を出す。
+    const FIRST_SETUP_ACTIVE_KEY = 'ko_zenitendo_first_setup_active_v1';
+    function hasRegisteredChild(id) {
+      try {
+        const raw = localStorage.getItem(childStorageKey(id));
+        if (!raw) return false;
+        const data = JSON.parse(raw);
+        if (data.__firstSetupComplete === true) return true;
+        if (data.__bootstrapPlaceholder === true) return false;
+        // 旧バージョンの実記録は上書きせず登録済みとして保護する。
+        return true;
+      } catch (_) { return true; } // 壊れた記録も保護する
+    }
+    function showFirstSetupIfNeeded() {
+      const modal = document.getElementById('firstSetupModal');
+      if (!modal) return;
+      if (hasRegisteredChild(activeChildId)) {
+        modal.classList.add('hidden'); modal.classList.remove('flex');
+        return;
+      }
+      const options = familyIndex.children || [];
+      if (!options.length) return;
+      const select = document.getElementById('firstSetupChild');
+      select.innerHTML = options.map(c => `<option value="${escapeHtml(c.id)}">${escapeHtml(c.label)}</option>`).join('');
+      select.value = options.some(c => c.id === activeChildId) ? activeChildId : options[0].id;
+      updateFirstSetupDefaults();
+      modal.classList.remove('hidden'); modal.classList.add('flex');
+    }
+    function updateFirstSetupDefaults() {
+      const id = document.getElementById('firstSetupChild').value;
+      const child = familyIndex.children.find(c => c.id === id);
+      if (!child) return;
+      document.getElementById('firstSetupName').value = child.label || '';
+      document.getElementById('firstSetupWealth').value = Number(child.initialWealth ?? 0);
+      document.getElementById('firstSetupError').classList.add('hidden');
+    }
+    function completeFirstSetup() {
+      const id = document.getElementById('firstSetupChild').value;
+      const name = document.getElementById('firstSetupName').value.trim();
+      const wealthText = document.getElementById('firstSetupWealth').value.trim();
+      const wealth = Number(wealthText);
+      const error = document.getElementById('firstSetupError');
+      if (!familyIndex.children.some(c => c.id === id) || !name || !wealthText || !Number.isSafeInteger(wealth) || wealth < 0) {
+        error.textContent = '名前と、0円以上の正しい金額を入力してください。';
+        error.classList.remove('hidden'); return;
+      }
+      if (hasRegisteredChild(id)) {
+        error.textContent = 'この子の記録はすでにあります。上書きせず、別の子を選んでください。';
+        error.classList.remove('hidden'); return;
+      }
+      // 別の子のデータをコピーせず、選択IDの新しい記録を作る。
+      const fresh = structuredClone(defaultState);
+      fresh.userName = name;
+      fresh.monthlyHistory = [];
+      fresh.transactions = [];
+      fresh.archivedTransactions = [];
+      fresh.missionLogs = {};
+      fresh.stamps = {};
+      fresh.points = 0;
+      fresh.redeemedPoints = 0;
+      fresh.__firstSetupComplete = true;
+      fresh.__bootstrapPlaceholder = false;
+      // ホームの総資産は「貯金＋今月残高」。入力した総資産に一致させる。
+      const rules = publicFamilyConfig?.children.find(c => c.id === id)?.rules || parentRulesFor(id);
+      fresh.baseSavings = wealth - Number(rules.monthlyAllowance || 0);
+      try {
+        localStorage.setItem(childStorageKey(id), JSON.stringify(fresh));
+        activeChildId = id; familyIndex.activeId = id; persistFamilyIndex();
+        state = loadState();
+        applyCurrentTheme(); renderAll(); refreshParentChildFields();
+        document.getElementById('firstSetupModal').classList.add('hidden');
+        document.getElementById('firstSetupModal').classList.remove('flex');
+        showToast('ようこそ、'+name+'！');
+      } catch (e) {
+        error.textContent = '保存に失敗しました。ブラウザの空き容量を確認してください。';
+        error.classList.remove('hidden'); console.error(e);
+      }
+    }
+
     function readLegacyState() {
       return localStorage.getItem(STORAGE_KEY) || localStorage.getItem('ko_zenitendo_v1');
     }
@@ -1356,6 +1457,7 @@
       updatePublicConfigStatus('🌐 公開設定：読み込み中…');
       if (location.protocol === 'file:') {
         updatePublicConfigStatus('⚠️ ローカルファイルでは公開JSONを自動取得できません。既存設定を使用中です。');
+        showFirstSetupIfNeeded();
         return;
       }
       try {
@@ -1382,6 +1484,7 @@
         renderAll();
         refreshParentChildFields();
         updatePublicConfigStatus('✅ 公開設定：family-config.json を読み込みました（'+parsed.children.length+'人）');
+        showFirstSetupIfNeeded();
       } catch (e) {
         console.warn('公開設定JSONの自動読み込みに失敗',e);
         const cached = localStorage.getItem(PUBLIC_CONFIG_CACHE_KEY);
@@ -1389,6 +1492,7 @@
           try { publicFamilyConfig = validatePublicFamilyConfig(JSON.parse(cached)); familyIndex.children = publicFamilyConfig.children.map(c=>({id:c.id,label:c.label,initialWealth:c.initialWealth,theme:c.rules.theme})); if (!familyIndex.children.some(c=>c.id===activeChildId)) activeChildId=familyIndex.children[0].id; for (const c of publicFamilyConfig.children) writeParentRules(c.id,c.rules); state=loadState(); applyCurrentTheme(); renderAll(); } catch (_) {}
         }
         updatePublicConfigStatus('⚠️ 公開設定を読み込めません（'+String(e.message).slice(0,90)+'）。前回の設定または既存設定を使用中です。');
+        showFirstSetupIfNeeded();
       }
     }
     function initializeChildFromPublicDefaults(child) {
