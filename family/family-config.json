@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "familyId": "default",
+  "children": [
+    {
+      "id": "child_01",
+      "label": "れい",
+      "initialWealth": 0
+    },
+    {
+      "id": "child_02",
+      "label": "りんた",
+      "initialWealth": 0
+    }
+  ],
+  "rules": {
+    "monthlyAllowance": 5000,
+    "interestRate": 30,
+    "pointRate": 5,
+    "silverMaxDays": 5,
+    "silverRate": 50,
+    "streakBonusInterval": 7,
+    "streakBonusPts": 50,
+    "checkBonus": {
+      "bonusInterval": 7,
+      "bonusPts": 50
+    },
+    "missions": [
+      {
+        "id": "m1",
+        "title": "算数・漢字の宿題",
+        "pts": 10,
+        "icon": "fa-book",
+        "color": "#3b82f6",
+        "bonusInterval": 7,
+        "bonusPts": 50
+      },
+      {
+        "id": "m2",
+        "title": "お風呂そうじ",
+        "pts": 10,
+        "icon": "fa-bath",
+        "color": "#06b6d4",
+        "bonusInterval": 7,
+        "bonusPts": 50
+      },
+      {
+        "id": "m3",
+        "title": "げんかんの靴ならべ",
+        "pts": 5,
+        "icon": "fa-shoe-prints",
+        "color": "#10b981",
+        "bonusInterval": 7,
+        "bonusPts": 50
+      },
+      {
+        "id": "m4",
+        "title": "夜の歯みがき・仕上げ",
+        "pts": 5,
+        "icon": "fa-teeth",
+        "color": "#f59e0b",
+        "bonusInterval": 7,
+        "bonusPts": 50
+      }
+    ]
+  }
+}
