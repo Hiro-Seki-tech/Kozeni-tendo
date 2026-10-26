@@ -736,7 +736,7 @@
         <!-- STEP14.1: 親がGitHubへ配置する公開ルールだけを書き出す。個人記録・PINは含めない -->
         <div id="publicConfigExportBox" class="inner-box rounded-xl p-3 space-y-2 border border-sky-500/30">
           <div class="text-xs font-extrabold text-sky-400">🌐 公開設定ファイル（STEP 14.2）</div>
-          <p class="text-[11px] opacity-85">保存済みのルール、子供ID、公開用の仮ニックネーム・仮の初期総資産を <code>family-config.json</code> に書き出します。子供が登録した名前・実際の資産・履歴・合言葉は含みません。</p>
+          <p class="text-[11px] opacity-85">保存済みのルール、初期カラー、子供ID、公開用の仮ニックネーム・仮の初期総資産を <code>family-config.json</code> に書き出します。子供が登録した名前・実際の資産・履歴・合言葉は含みません。</p>
           <button type="button" onclick="exportPublicFamilyConfig()" class="w-full py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs"><i class="fa-solid fa-file-arrow-down mr-1"></i> 公開設定JSONを書き出す</button>
           <p class="text-[10px] opacity-65">※ 変更した設定は先に「設定を保存する」を押してください。公開後は起動時に自動読み込みします。</p>
         </div>
@@ -1206,6 +1206,8 @@
     // STEP13: 旧データは消さず、初回のみ子供別領域へコピーする。
     const FAMILY_INDEX_KEY = 'ko_zenitendo_family_index_v1';
     const CHILD_DATA_PREFIX = 'ko_zenitendo_child_v1_';
+    const PUBLIC_CONFIG_CACHE_KEY = 'ko_zenitendo_public_config_cache_v1';
+    const VALID_THEMES = ['theme-classic','theme-sakura','theme-matcha','theme-sky','theme-cyber','theme-sunset','theme-mint','theme-obsidian'];
     let familyIndex = initializeFamilyIndex();
     let activeChildId = familyIndex.activeId;
     // 公開ルールは子供の記録とは別の読み込み元として保持する。
@@ -1256,7 +1258,7 @@
       const firstId = 'child_01';
       const legacy = readLegacyState();
       if (!localStorage.getItem(childStorageKey(firstId))) {
-        localStorage.setItem(childStorageKey(firstId), legacy || JSON.stringify(defaultState));
+        localStorage.setItem(childStorageKey(firstId), legacy || JSON.stringify({...structuredClone(defaultState), __bootstrapPlaceholder: true}));
       }
       const index = { version: 1, activeId: firstId, children: [{ id: firstId, label: '子供A' }] };
       localStorage.setItem(FAMILY_INDEX_KEY, JSON.stringify(index));
@@ -1316,6 +1318,7 @@
       const b = value.rules.checkBonus;
       if (!Number.isFinite(b.bonusInterval) || !Number.isFinite(b.bonusPts) || b.bonusInterval < 1 || b.bonusPts < 0) throw Error('ボーナス形式が不正です');
       rules.checkBonus = {bonusInterval:b.bonusInterval,bonusPts:b.bonusPts};
+      rules.theme = VALID_THEMES.includes(value.rules.theme) ? value.rules.theme : 'theme-classic';
       return {schemaVersion:1,children,rules};
     }
     async function loadPublicFamilyConfig() {
@@ -1329,23 +1332,54 @@
         if (!response.ok) throw Error('HTTP '+response.status);
         const parsed = validatePublicFamilyConfig(await response.json());
         publicFamilyConfig = parsed;
-        // 子供のIDは変えない。公開の仮名・仮の初期額のみ更新する。
-        // 親PCの受信済みローカル記録と子供端末の記録は一切上書きしない。
-        const localIds = new Set(familyIndex.children.map(c => c.id));
-        for (const c of parsed.children) {
-          const existing = familyIndex.children.find(x => x.id === c.id);
-          if (existing) { existing.label = c.label; existing.initialWealth = c.initialWealth; }
-          else familyIndex.children.push({...c});
+        // 公開JSONが管理するのは「利用対象の子供一覧」。端末に残った旧IDは削除せず非表示にする。
+        const oldChildren = familyIndex.children;
+        familyIndex.children = parsed.children.map(c => ({...c}));
+        familyIndex.publicTheme = parsed.rules.theme;
+        if (!familyIndex.children.some(c => c.id === activeChildId)) {
+          activeChildId = familyIndex.children[0].id;
+          familyIndex.activeId = activeChildId;
         }
-        // JSONから消えた子供も記録保護のため削除しない。
         persistFamilyIndex();
-        applyPublicRulesToState(state);
+        // 子供ごとの初回初期値を、未登録の領域にだけ作る。既存の実記録は触らない。
+        for (const child of parsed.children) initializeChildFromPublicDefaults(child);
+        state = loadState();
+        if (!state.allowanceMonth) state.allowanceMonth = getTodayStr().slice(0,7);
+        localStorage.setItem(PUBLIC_CONFIG_CACHE_KEY, JSON.stringify(parsed));
+        applyCurrentTheme();
         renderAll();
+        refreshParentChildFields();
         updatePublicConfigStatus('✅ 公開設定：family-config.json を読み込みました（'+parsed.children.length+'人）');
       } catch (e) {
         console.warn('公開設定JSONの自動読み込みに失敗',e);
-        updatePublicConfigStatus('⚠️ 公開設定を読み込めません（'+String(e.message).slice(0,90)+'）。既存設定を使用中です。');
+        const cached = localStorage.getItem(PUBLIC_CONFIG_CACHE_KEY);
+        if (cached) {
+          try { publicFamilyConfig = validatePublicFamilyConfig(JSON.parse(cached)); applyPublicRulesToState(state); applyCurrentTheme(); renderAll(); } catch (_) {}
+        }
+        updatePublicConfigStatus('⚠️ 公開設定を読み込めません（'+String(e.message).slice(0,90)+'）。前回の設定または既存設定を使用中です。');
       }
+    }
+    function initializeChildFromPublicDefaults(child) {
+      const key = childStorageKey(child.id);
+      const raw = localStorage.getItem(key);
+      if (raw) {
+        try {
+          const existing = JSON.parse(raw);
+          // 旧版が自動生成した未使用の仮データのみ初期値へ置き換える。
+          if (!existing.__bootstrapPlaceholder) return;
+        } catch (_) { return; } // 壊れたデータは保護
+      }
+      const fresh = structuredClone(defaultState);
+      fresh.userName = 'キッズ'; // 初回の本人登録までは公開仮名を表示
+      fresh.baseSavings = child.initialWealth;
+      fresh.monthlyHistory = [];
+      fresh.__bootstrapPlaceholder = true;
+      localStorage.setItem(key, JSON.stringify(fresh));
+    }
+    function effectiveTheme() {
+      return (VALID_THEMES.includes(state.themeOverride) && state.themeOverride)
+        || (publicFamilyConfig && publicFamilyConfig.rules.theme)
+        || familyIndex.publicTheme || state.theme || 'theme-classic';
     }
     function loadState() {
       try {
@@ -1359,7 +1393,7 @@
     }
     function saveState() {
       try {
-        const stored = {...state};
+        const stored = {...state, __bootstrapPlaceholder: false};
         if (publicFamilyConfig) {
           const previous = JSON.parse(localStorage.getItem(childStorageKey(activeChildId)) || '{}');
           for (const key of [...PUBLIC_RULE_KEYS, 'checkBonus', 'missions']) {
@@ -1510,28 +1544,24 @@
     // テーマ切り替え
     // ==========================================
     function setAppTheme(themeName) {
+      if (!VALID_THEMES.includes(themeName)) return;
       playSE('tap');
-      document.body.className = `${themeName} pb-24 select-none`;
-      state.theme = themeName;
-      updateThemeButtonsUI();
-      saveState();
+      // 親メニューのカラーは「公開する家族共通の初期カラー」。子供の個別カラーとは別。
+      familyIndex.publicTheme = themeName;
+      persistFamilyIndex();
+      applyCurrentTheme();
+      showToast('公開用の初期カラーを変更しました。JSONを書き出して反映してください');
     }
-
     function applyCurrentTheme() {
-      const theme = state.theme || 'theme-classic';
-      document.body.className = `${theme} pb-24 select-none`;
+      document.body.className = `${effectiveTheme()} pb-24 select-none`;
       updateThemeButtonsUI();
     }
-
     function updateThemeButtonsUI() {
-      const themes = [
-        'theme-classic', 'theme-sakura', 'theme-matcha', 'theme-sky',
-        'theme-cyber', 'theme-sunset', 'theme-mint', 'theme-obsidian'
-      ];
-      themes.forEach(t => {
+      const selected = familyIndex.publicTheme || (publicFamilyConfig && publicFamilyConfig.rules.theme) || 'theme-classic';
+      VALID_THEMES.forEach(t => {
         const btn = document.getElementById(`btn-${t}`);
         if (!btn) return;
-        if (state.theme === t) {
+        if (selected === t) {
           btn.classList.add('border-amber-500', 'bg-amber-500/20');
           btn.classList.remove('border-slate-700', 'opacity-60');
         } else {
@@ -2822,6 +2852,7 @@ ${backupCode}`;
         bonusInterval: Number((state.checkBonus || {}).bonusInterval ?? 7),
         bonusPts: Number((state.checkBonus || {}).bonusPts ?? 50)
       };
+      rules.theme = familyIndex.publicTheme || (publicFamilyConfig && publicFamilyConfig.rules.theme) || state.theme || 'theme-classic';
       rules.missions = (state.missions || []).map(m => ({
         id: String(m.id), title: String(m.title), pts: Number(m.pts),
         icon: String(m.icon || 'fa-star'), color: String(m.color || '#f59e0b'),
