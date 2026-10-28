@@ -675,16 +675,25 @@
   <!-- ==========================================
        統合モーダル：日付詳細モーダル (ミッション＆出費・収入入力)
   =========================================== -->
-  <div id="dayDetailModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4 overflow-y-auto">
+  <div id="dayDetailModal" onclick="if(event.target===this)closeDayDetailModal()" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4 overflow-y-auto">
     <div class="glass-card rounded-3xl max-w-md w-full p-6 border border-amber-500/40 space-y-4 my-6 max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center pb-2 border-b border-slate-700/60">
         <div>
           <span class="text-xs font-bold text-amber-500" id="modalDaySubtitle">天童の日次帳面</span>
           <h3 class="font-extrabold text-lg text-white" id="modalDayTitle">2026年10月23日 (金)</h3>
         </div>
+        <div class="ml-auto text-right px-2" aria-live="polite">
+          <div class="text-[10px] font-bold text-amber-400">この日の総獲得ポイント</div>
+          <div id="modalDayEarnedPoints" class="text-lg font-extrabold text-amber-300 tabular-nums">+0pt</div>
+        </div>
         <button onclick="closeDayDetailModal()" class="opacity-60 hover:opacity-100 text-2xl p-1"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
+      <!-- お小遣いの記帳：既存のスタンプ・入力・記録一覧を一つの枠にまとめる -->
+      <section class="rounded-2xl border border-amber-500/45 bg-amber-500/5 p-3 space-y-3" aria-label="お小遣いの記帳">
+        <h4 class="font-extrabold text-sm text-amber-500 flex items-center gap-2">
+          <i class="fa-solid fa-wallet"></i> お小遣いの記帳
+        </h4>
       <!-- 達成状況は説明表示。操作ボタンとは別の見た目 -->
       <div id="modalDayStampStatus" class="inner-box rounded-2xl p-3 flex items-center justify-between gap-2 text-xs">
         <!-- JSで描画 -->
@@ -733,6 +742,10 @@
         </div>
       </div>
 
+      </section>
+
+      <!-- 天童ミッション：記帳とは別の枠で区別する -->
+      <section class="rounded-2xl border border-emerald-500/45 bg-emerald-500/5 p-3 space-y-2.5" aria-label="天童ミッション">
       <!-- 自由ミッション：お小遣いチェックの下に表示 -->
       <div class="pt-3 border-t border-slate-700/60 space-y-2.5">
         <div class="flex items-center justify-between">
@@ -745,7 +758,7 @@
           <!-- JSでミッションチェックリスト生成 -->
         </div>
       </div>
-
+      </section>
 
     </div>
   </div>
@@ -2341,19 +2354,58 @@
       document.getElementById('modalTxMemo').value = '';
       document.getElementById('modalTxAmount').value = '';
 
+      dayDetailInputBaseline = getDayDetailInputSnapshot();
       const modal = document.getElementById('dayDetailModal');
       modal.classList.remove('hidden');
       modal.classList.add('flex');
     }
 
+    // 保存前の入力・選択変更がある場合だけ、閉じる前に確認する。
+    let dayDetailInputBaseline = null;
+    function getDayDetailInputSnapshot() {
+      return JSON.stringify({
+        memo: document.getElementById('modalTxMemo').value,
+        amount: document.getElementById('modalTxAmount').value,
+        type: currentModalTxType,
+        category: modalSelectedCategory
+      });
+    }
+
     function closeDayDetailModal() {
       const modal = document.getElementById('dayDetailModal');
+      if (modal.classList.contains('hidden')) return;
+      if (dayDetailInputBaseline !== null && getDayDetailInputSnapshot() !== dayDetailInputBaseline) {
+        if (!window.confirm('入力した内容が残っています。記録せずに閉じますか？')) return;
+      }
+      dayDetailInputBaseline = null;
       modal.classList.add('hidden');
       modal.classList.remove('flex');
       renderAll();
     }
 
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape' && !document.getElementById('dayDetailModal').classList.contains('hidden')) {
+        event.preventDefault();
+        closeDayDetailModal();
+      }
+    });
+
+    // 表示中の日付に紐づく獲得ポイント（お小遣いチェック＋各ミッション＋継続ボーナス）。
+    function renderModalDayEarnedPoints() {
+      const dateStr = currentDetailDate;
+      const stamp = state.stamps?.[dateStr];
+      let total = stamp ? (Number(stamp.pts) || 0) + (Number(stamp.bonusPts) || 0) : 0;
+      const entries = state.missionLogs?.[dateStr] || {};
+      Object.values(entries).forEach(entry => {
+        if (entry && entry.done) {
+          total += (Number(entry.pts) || 0) + (Number(entry.bonusPts) || 0);
+        }
+      });
+      document.getElementById('modalDayEarnedPoints').textContent = `+${total}pt`;
+    }
+
     function renderModalStampStatus() {
+      renderModalDayEarnedPoints();
       const stamp = state.stamps[currentDetailDate];
       const box = document.getElementById('modalDayStampStatus');
       const noSpendAction = document.getElementById('modalNoSpendAction');
@@ -2384,6 +2436,7 @@
     }
 
     function renderModalMissions() {
+      renderModalDayEarnedPoints();
       const container = document.getElementById('modalMissionsList');
       const missions = state.missions || [];
       if (missions.length === 0) {
@@ -2604,6 +2657,7 @@
 
       document.getElementById('modalTxMemo').value = '';
       document.getElementById('modalTxAmount').value = '';
+      dayDetailInputBaseline = getDayDetailInputSnapshot();
 
       saveState();
       renderModalTransactions();
