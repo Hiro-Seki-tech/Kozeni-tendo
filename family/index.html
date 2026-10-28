@@ -231,6 +231,12 @@
     #matrixContainer .habit-matrix thead .matrix-fixed-right { z-index:7; }
     #matrixContainer .habit-matrix .matrix-fixed-left .matrix-name { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     #matrixContainer .habit-matrix .matrix-fixed-right { text-align:center; }
+    /* STEP 16-5: スマホのみ、左右の固定列を縮めて日付・スタンプ列を広げる */
+    @media (max-width:767px) {
+      #matrixContainer .habit-matrix col:first-child { width:96px !important; }
+      #matrixContainer .habit-matrix col:not(:first-child):not(:last-child) { width:53px !important; }
+      #matrixContainer .habit-matrix col:last-child { width:64px !important; }
+    }
     .today-pressable { background:linear-gradient(160deg,#ffffff,#f0f4f4) !important; color:#334155 !important; border:2px solid #d7e0e5 !important; box-shadow:0 4px 0 #94a3b8,0 0 0 2px rgba(255,255,255,.22) !important; transform:scale(1.12); position:relative; z-index:2; font-weight:900; cursor:pointer; transition:transform .12s,box-shadow .12s; }
     .today-pressable:active { transform:scale(1.03) translateY(3px) !important; box-shadow:0 1px 0 #94a3b8 !important; }
     .today-column { background:rgba(255,255,255,.075); }
@@ -758,6 +764,10 @@
 
       <p class="text-xs opacity-80 leading-relaxed">
         下のボタンからLINEやメールを選んでお家の人に送ってね！一番下の「復元コード」でお家の人のスマホにも同じ画面が映せるよ。
+      </p>
+
+      <p class="text-xs opacity-80 leading-relaxed">
+        LINEやメールの画面が開いた後は、スマホの「戻る」操作を数回行うと、小銭天童に戻れます。
       </p>
 
       <textarea id="reportTextPreview" readonly rows="8" class="w-full inner-box rounded-2xl p-3 text-xs font-mono focus:outline-none"></textarea>
