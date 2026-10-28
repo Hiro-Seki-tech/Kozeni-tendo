@@ -627,7 +627,7 @@
     <div id="footer-now-playing" class="kozen-footer-line kozen-now-playing" aria-live="polite">Now Playing：—</div>
     <div class="kozen-footer-line">無断転載及びハルシネーションはお断り申し上げます。</div>
     <div class="kozen-footer-meta">
-      <span id="footer-version">Version 0.9（開発版 STEP 16-14）</span><span aria-hidden="true">／</span>
+      <span id="footer-version">Version 0.9（開発版 STEP 16-15）</span><span aria-hidden="true">／</span>
       <span id="footer-updated">更新日 2026.10.28</span><span aria-hidden="true">／</span>
       <button type="button" id="open-trajectory" class="kozen-trajectory-button" onclick="openKozenTrajectory()">📜 小銭天童の軌跡</button>
     </div>
@@ -645,7 +645,8 @@
         <article>
           <h3>Version 0.9　2026.10.28</h3>
           <ul>
-            <li>称号を30階級に拡張し、過去救済を含む歴代最高連続日数で昇格・維持する方式へ変更。資産・ポイントによるLv表示を廃止。</li>
+            <li>称号を30階級に拡張し、過去救済を含む歴代最高連続日数で昇格・維持する方式へ変更。資産・ポイントによるLv表示を廃止。
+            <li>今日の全ミッション達成時にテンちゃん・キンちゃんの4種類の声をランダム再生（1日1回・音声がない場合は無音）。</li></li>
             <li>スマホのヘッダー・ミッション一覧表示を調整し、報告ボタンや案内の言葉をわかりやすく改善。</li>
             <li>日付詳細画面で、お小遣いの記帳とミッションを枠で区分し、その日の獲得ポイントを表示。</li>
             <li>日付詳細画面の枠外タップ・閉じる操作に、入力内容を守る確認を追加。</li>
@@ -1170,6 +1171,42 @@
       osc.stop(start + duration + 0.02);
     }
 
+    // STEP16-15: 全ミッション達成ボイス。既存の効果音とは独立して再生する。
+    const DAILY_COMPLETE_VOICES = ['se/ten1.mp3', 'se/ten2.mp3', 'se/kin1.mp3', 'se/kin2.mp3'];
+    function isAllTodayMissionsDone(dateStr) {
+      const missions = state.missions || [];
+      // 現行仕様ではお小遣いチェックは固定。将来任意化する場合は設定に従って対象に含める。
+      const checkEnabled = true;
+      const total = missions.length + (checkEnabled ? 1 : 0);
+      return total > 0 && (!checkEnabled || !!state.stamps?.[dateStr])
+        && missions.every(m => !!getMissionEntry(dateStr, m.id));
+    }
+
+    function playDailyCompleteVoice() {
+      if (state.soundMuted) return;
+      const candidates = DAILY_COMPLETE_VOICES.slice();
+      // 欠落ファイルはスキップし、利用できる声だけを再生する。
+      const tryNext = () => {
+        if (!candidates.length || state.soundMuted) return;
+        const index = Math.floor(Math.random() * candidates.length);
+        const src = candidates.splice(index, 1)[0];
+        const audio = new Audio(src);
+        audio.volume = 0.85;
+        audio.onerror = tryNext;
+        audio.play().catch(tryNext);
+      };
+      // スタンプ音と同時に鳴らさないため、少し遅らせる。
+      setTimeout(tryNext, 650);
+    }
+
+    function markDailyCompletionIfNew(dateStr, wasComplete) {
+      if (dateStr !== getTodayStr() || wasComplete || !isAllTodayMissionsDone(dateStr)) return false;
+      state.dailyCompleteVoiceDates ||= {};
+      if (state.dailyCompleteVoiceDates[dateStr]) return false;
+      state.dailyCompleteVoiceDates[dateStr] = true;
+      return true;
+    }
+
     function playSE(effectName) {
       if (state && state.soundMuted) return;
       try {
@@ -1324,6 +1361,7 @@
       baseSavings: 3000,
       pointRate: 1,
       points: 0,
+      dailyCompleteVoiceDates: {}, // 日別の達成ボイス再生済み記録
       habitBestStreak: 0, // 歴代最高連続日数。ミッション削除後も維持
       redeemedPoints: 0, // STEP4以降の換金済み累計（旧換金履歴は復元不可）
       pointsRedemptionUndo: null, // STEP13.6: 直前の換金の取り消し用（子供ごとに保持）
@@ -2268,13 +2306,16 @@
       if (state.transactions.some(t => t.dateStr === dateStr && t.type === 'expense')) {
         playSE('error'); showToast('この日は支出があるので無出費スタンプは押せないよ！'); return;
       }
+      const wasComplete = isAllTodayMissionsDone(dateStr);
       const pts = dateStr === getTodayStr() ? 5 : 1;
       state.stamps[dateStr] = { type: 'green', pts, bonusPts: 0 };
       state.points += pts;
       const bonus = recalcBonuses(CHECK_ID);
+      const celebrate = markDailyCompletionIfNew(dateStr, wasComplete);
       saveState();
       renderModalStampStatus();
       playSE('green');
+      if (celebrate) playDailyCompleteVoice();
       showToast(`🌱 お小遣いチェック！ +${pts}小銭${bonus > 0 ? `、連続ボーナス+${bonus}小銭` : ''}`);
     }
 
@@ -2546,6 +2587,7 @@
     }
 
     function toggleMissionCompletion(dateStr, missionId) {
+      const wasComplete = isAllTodayMissionsDone(dateStr);
       if (!state.missionLogs[dateStr]) {
         state.missionLogs[dateStr] = {};
       }
@@ -2609,7 +2651,9 @@
         showToast('ミッションの達成を取り消しました');
       }
 
+      const celebrate = markDailyCompletionIfNew(dateStr, wasComplete);
       saveState();
+      if (celebrate) playDailyCompleteVoice();
       renderModalMissions();
       if (currentMainTab === 'matrix') renderMatrix();
     }
@@ -2688,6 +2732,7 @@
         targetPts = 0;
       }
 
+      const wasComplete = isAllTodayMissionsDone(currentDetailDate);
       const existing = state.stamps[currentDetailDate];
       if (!existing) {
         state.stamps[currentDetailDate] = { type: targetStampType, pts: targetPts, bonusPts: 0 };
@@ -2709,8 +2754,10 @@
       document.getElementById('modalTxMemo').value = '';
       document.getElementById('modalTxAmount').value = '';
       dayDetailInputBaseline = getDayDetailInputSnapshot();
+      const celebrate = markDailyCompletionIfNew(currentDetailDate, wasComplete);
 
       saveState();
+      if (celebrate) playDailyCompleteVoice();
       renderModalTransactions();
       renderModalStampStatus();
 
