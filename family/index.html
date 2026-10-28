@@ -530,15 +530,15 @@
         </div>
 
         <div class="flex flex-wrap items-center justify-between text-[10px] opacity-85 inner-box px-3 py-2 rounded-xl gap-1">
-          <span id="matrixRuleLegend">凡例: <strong class="text-amber-400">🌟当日(100%)</strong> / <strong class="text-slate-300">🥈5日内(50%)</strong> / <strong class="text-orange-400">🥉6日超(0pt)</strong></span>
-          <span class="font-bold text-emerald-500" id="matrixStreakBonusInfo"><i class="fa-solid fa-gift mr-0.5"></i>7日ごとに継続ボーナス +50pt！</span>
+          <span id="matrixRuleLegend"><strong class="text-amber-400">🌟 今日できたら、ポイントぜんぶ！</strong> / <strong class="text-slate-300">🥈 あとから5日以内なら、ポイント半分！</strong> / <strong class="text-orange-400">🥉 6日以上前でも、記録は残せるよ！</strong></span>
+          <span class="font-bold text-emerald-500" id="matrixStreakBonusInfo">🎁 7日つづけたら、ボーナスがもらえるよ！</span>
         </div>
       </div>
 
       <!-- 今日のワンタップアクション -->
       <div class="pt-2 border-t border-slate-700/50 space-y-2">
         <div class="flex items-center justify-between text-xs">
-          <span class="font-bold"><i class="fa-solid fa-calendar-day text-amber-500 mr-1"></i> 今日のワンタップ報告</span>
+          <span class="font-bold"><i class="fa-solid fa-calendar-day text-amber-500 mr-1"></i> 今日のワンタップお小遣い報告</span>
           <span id="todayStampStatusBadge" class="text-[11px] text-amber-500 font-bold">スタンプ未獲得</span>
         </div>
         <div class="grid grid-cols-2 gap-2.5">
@@ -546,7 +546,7 @@
             <span>🌱 今日は使わなかった (+5pt)</span>
           </button>
           <button onclick="openDayDetailModal(getTodayStr())" class="tendo-raised tendo-raised-mission py-3 px-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-lg active:scale-95 transition">
-            <span>🌟 今日のミッション＆出費を開く</span>
+            <span>🌟 今日は使った（記帳で＋15ポイント）</span>
           </button>
         </div>
       </div>
@@ -1981,13 +1981,13 @@
 
       const legendEl = document.getElementById('matrixRuleLegend');
       if (legendEl) {
-        legendEl.innerHTML = `凡例: <strong class="text-amber-400">🌟当日(100%)</strong> / <strong class="text-slate-300">🥈${sDays}日内(${sRate}%)</strong> / <strong class="text-orange-400">🥉${sDays + 1}日〜(0pt)</strong>`;
+        legendEl.innerHTML = `<strong class="text-amber-400">🌟 今日できたら、ポイントぜんぶ！</strong> / <strong class="text-slate-300">🥈 ${sDays > 0 ? `あとから${sDays}日以内なら、ポイント${sRate}%！` : "あとからの記録はポイントなし"}</strong> / <strong class="text-orange-400">🥉 ${sDays + 1}日以上前でも、記録は残せるよ！</strong>`;
       }
       const bonusInfoEl = document.getElementById('matrixStreakBonusInfo');
       if (bonusInfoEl) {
         bonusInfoEl.innerHTML = state.streakBonusPts > 0
-          ? `<i class="fa-solid fa-gift mr-0.5"></i>${state.streakBonusInterval}日連続ごとにボーナス（ミッション別設定）`
-          : `<i class="fa-solid fa-fire mr-0.5"></i>どのメダルでも連続記録は継続！`;
+          ? `🎁 ${state.streakBonusInterval}日つづけたら、ボーナスがもらえるよ！（ミッション別設定）`
+          : `🔥 どのメダルでも、連続記録はつづくよ！`;
       }
 
       document.getElementById('totalWealthDisplay').textContent = fin.totalWealth.toLocaleString();
