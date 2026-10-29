@@ -340,21 +340,48 @@
     @media (max-width:767px) {.kozen-desktop-only {display:none!important}}
     @media (prefers-reduced-motion:reduce) {.kozen-symbol-area .plip-template-bubble-float,.kozen-symbol-area .plip-template-bulb,.kozen-symbol-area .plip-template-bolt {animation:none}}
 
-    /* スマホ用ヘッダー配置：機能・ID・PC表示は変更しない */
+    /* ヘッダー配置試作：タイトル上段、左にシンボルと名前、右に3段の操作 */
+    .kozen-main-header {
+      position:sticky; display:grid!important; grid-template-columns:minmax(0,1fr) 190px;
+      align-items:center; column-gap:10px; padding:42px 12px 8px; min-height:181px;
+    }
+    .kozen-header-title {
+      position:absolute; top:7px; left:0; right:0; display:flex; align-items:baseline;
+      justify-content:center; gap:5px; white-space:nowrap; line-height:28px;
+      font-size:23px; pointer-events:none;
+    }
+    .kozen-header-reading {font-family:'M PLUS Rounded 1c',sans-serif;font-size:.57em;font-weight:700;letter-spacing:0;}
+    .kozen-header-identity {min-width:0; align-items:center; gap:12px;}
+    .kozen-header-profile {min-width:0; flex:1;}
+    .kozen-header-name {display:flex; align-items:flex-start;}
+    #headerUserName {font-size:14px; width:max-content; max-width:100%; white-space:normal; overflow-wrap:break-word;}
+    .kozen-header-badges {margin-top:8px;}
+    #streakTitleBadge {font-size:12px; width:max-content; max-width:100%; white-space:normal; overflow-wrap:break-word; line-height:1.45;}
+    .kozen-header-actions {
+      display:grid!important; grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:7px 5px; align-content:center; justify-items:center; min-width:0;
+    }
+    .kozen-header-actions .kozen-plip-action {min-width:0;width:100%;padding:5px 3px;font-size:11px;}
+    .kozen-header-actions .kozen-plip-action:first-child {grid-column:1 / 3;grid-row:1;}
+    .kozen-header-actions .kozen-plip-action:nth-child(2) {grid-column:3;grid-row:1;}
+    #soundToggleBtn {grid-column:1;grid-row:2;}
+    .kozen-header-theme {grid-column:2;grid-row:2;}
+    .kozen-header-parent {grid-column:3;grid-row:2;}
+    .kozen-header-report {grid-column:1 / 4;grid-row:3;width:100%;min-height:38px;justify-content:center;}
     @media (max-width:767px) {
-      .kozen-main-header {position:sticky; display:grid; grid-template-columns:minmax(0,1fr) 116px; align-items:start; gap:8px; padding:39px 10px 8px; min-height:148px;}
-      .kozen-header-identity {min-width:0; gap:8px; align-items:flex-start;}
-      .kozen-header-title {position:absolute; top:7px; left:0; right:0; text-align:center; white-space:nowrap; font-size:20px; line-height:26px; pointer-events:none;}
-      .kozen-header-profile {min-width:0; padding-top:5px;}
-      .kozen-header-name {display:flex; flex-wrap:wrap; gap:3px;}
-      #headerUserName {max-width:100%; overflow-wrap:anywhere;}
-      .kozen-header-badges {display:flex; flex-direction:column; align-items:flex-start; gap:4px; margin-top:5px;}
-      .kozen-header-badges > span {max-width:100%; white-space:normal; overflow-wrap:anywhere;}
-      .kozen-header-actions {display:grid; grid-template-columns:repeat(3,36px); justify-content:center; align-content:start; gap:5px 4px; padding-top:3px;}
-      #soundToggleBtn {grid-column:1; grid-row:1;}
-      .kozen-header-theme {grid-column:2; grid-row:1;}
-      .kozen-header-parent {grid-column:3; grid-row:1;}
-      .kozen-header-report {grid-column:1 / 4; grid-row:2; justify-content:center; width:100%; min-height:38px;}
+      .kozen-main-header {grid-template-columns:minmax(0,1fr) 124px;gap:6px;padding:38px 7px 6px;min-height:166px;}
+      .kozen-header-title {font-size:19px;top:5px;line-height:26px;}
+      .kozen-header-identity {gap:6px;align-items:center;}
+      .kozen-header-actions {gap:6px 3px;}
+      .kozen-header-actions .kozen-plip-action {font-size:10px;min-height:30px;padding:4px 2px;}
+      .kozen-header-actions .kozen-plip-action:first-child {font-size:9px;}
+      .kozen-header-actions #soundToggleBtn,
+      .kozen-header-actions .kozen-header-theme,
+      .kozen-header-actions .kozen-header-parent {width:34px;height:34px;}
+      .kozen-header-report {padding:6px 3px;font-size:11px;min-height:36px;}
+      #headerUserName {font-size:12px;padding:3px 6px;}
+      #streakTitleBadge {font-size:11px;padding:3px 5px;}
+      .kozen-header-badges {margin-top:6px;}
     }
 
     /* STEP 16-2: PLIP共通フッター。小銭天童の既存テーマ変数を利用 */
@@ -375,6 +402,7 @@
 
   <!-- トップヘッダー -->
   <header class="kozen-main-header sticky top-0 z-30 glass-card px-4 py-2.5 flex items-center justify-between border-b border-amber-500/30">
+    <h1 class="kozen-header-title font-tendo text-xl font-bold text-amber-500 drop-shadow tracking-wider">小銭天童<span class="kozen-header-reading">（こぜにてんどう）</span></h1>
     <div class="kozen-header-identity flex items-center gap-2.5">
       <!-- PLIP参照式シンボルボタン：既存の招き猫アイコンと置換 -->
       <div class="kozen-symbol-area" aria-label="小銭天童シンボル">
@@ -421,7 +449,6 @@
 
       <div class="kozen-header-profile">
         <div class="kozen-header-name flex items-center gap-2">
-          <h1 class="kozen-header-title font-tendo text-xl font-bold text-amber-500 drop-shadow tracking-wider">小銭天童</h1>
           <span class="text-[11px] bg-amber-500/20 border border-amber-400/40 text-amber-600 dark:text-amber-300 px-2 py-0.5 rounded-full font-bold" id="headerUserName">キッズ</span>
         </div>
         <div class="kozen-header-badges flex flex-wrap items-center gap-1.5 mt-0.5">
@@ -431,19 +458,19 @@
     </div>
 
     <div class="kozen-header-actions flex items-center gap-1.5">
-      <!-- PLIP共通ボタンはPC幅のみ表示。子供のスマホ画面は従来の操作を優先 -->
+      <!-- PLIP共通ボタンはPCのみ表示。PCは3段、スマホは2段 -->
       <a class="kozen-plip-action kozen-desktop-only" href="https://hiro-seki-tech.github.io/Produce-your-Life-with-IP/links" target="_blank" rel="noopener noreferrer" title="PLIP LINK HP">💡⚡ リンク</a>
       <button type="button" class="kozen-plip-action kozen-desktop-only" onclick="openKozenUsage()">使い方？</button>
       <button id="soundToggleBtn" onclick="toggleSoundMute()" class="tendo-raised tendo-raised-sound bg-slate-800/80 hover:bg-slate-700 text-amber-400 w-9 h-9 rounded-xl border border-amber-500/40 flex items-center justify-center active:scale-95 transition" title="効果音 ON/OFF">
         <i id="soundToggleIcon" class="fa-solid fa-volume-high text-xs"></i>
       </button>
       <button onclick="openChildThemeModal()" class="kozen-header-theme bg-slate-800/80 hover:bg-slate-700 text-amber-400 w-9 h-9 rounded-xl border border-amber-500/40 flex items-center justify-center active:scale-95 transition" title="自分の画面カラーを変更" aria-label="自分の画面カラーを変更"><i class="fa-solid fa-palette"></i></button>
+      <button onclick="openParentModal()" class="kozen-header-parent bg-slate-800/80 hover:bg-slate-700 text-amber-400 w-9 h-9 rounded-xl border border-amber-500/40 flex items-center justify-center active:scale-95 transition" title="親御さんの設定モード">
+        <i class="fa-solid fa-key"></i>
+      </button>
       <button onclick="openReportModal()" title="今の自分の状態をメールやLINEで親御さんへ報告します" aria-label="親へ報告" class="kozen-header-report tendo-raised tendo-raised-report bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white text-xs font-bold px-3 py-2 rounded-xl shadow-lg flex items-center gap-1.5 active:scale-95 transition">
         <i class="fa-solid fa-paper-plane"></i>
         <span>親へ報告</span>
-      </button>
-      <button onclick="openParentModal()" class="kozen-header-parent bg-slate-800/80 hover:bg-slate-700 text-amber-400 w-9 h-9 rounded-xl border border-amber-500/40 flex items-center justify-center active:scale-95 transition" title="親御さんの設定モード">
-        <i class="fa-solid fa-key"></i>
       </button>
     </div>
   </header>
