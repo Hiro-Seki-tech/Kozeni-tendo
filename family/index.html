@@ -482,15 +482,15 @@
     <section class="bg-gradient-to-r from-amber-950 via-yellow-950 to-slate-950 text-white rounded-2xl px-3 py-2.5 border border-amber-400/60 shadow-lg space-y-1">
       <div class="text-xs font-extrabold text-amber-300">🪙 本日（<span id="todayTreasureDate" class="text-yellow-300 font-black">----</span>）のあなたの小銭</div>
       <div class="flex items-center justify-between gap-2">
-        <div class="grid grid-cols-2 gap-2 flex-1 min-w-0">
+        <div id="pointsSummaryGrid" class="grid grid-cols-2 gap-2 flex-1 min-w-0">
           <div><div class="text-[10px] text-amber-200">これまでの総獲得</div><div class="text-xl sm:text-2xl font-black text-amber-300"><span id="lifetimePointsDisplay">0</span><span class="text-xs ml-1">pt</span></div></div>
-          <div><div class="text-[10px] text-amber-200">いま交換できる</div><div class="text-xl sm:text-2xl font-black text-yellow-300"><span id="totalPointsDisplay">0</span><span class="text-xs ml-1">pt</span></div></div>
+          <div id="availablePointsSummary"><div class="text-[10px] text-amber-200">いま交換できる</div><div class="text-xl sm:text-2xl font-black text-yellow-300"><span id="totalPointsDisplay">0</span><span class="text-xs ml-1">pt</span></div></div>
         </div>
         <button id="redeemPointsBtn" type="button" title="1.5秒長押しでポイントを換金" class="shrink-0 px-2 py-1.5 text-[10px] font-extrabold rounded-xl border border-yellow-500 bg-gradient-to-b from-yellow-100 to-amber-300 text-amber-950 shadow-[0_3px_0_#b45309] touch-none select-none"><span>🪙 換金する</span><br><span class="text-[9px] opacity-75">長押し</span></button>
       </div>
-      <div class="text-[10px] text-amber-100/80">交換できる金額：<span id="pointsYenValueDisplay">0</span>円相当</div>
+      <div id="pointsYenValueRow" class="text-[10px] text-amber-100/80">交換できる金額：<span id="pointsYenValueDisplay">0</span>円相当</div>
     </section>
-    <section class="glass-card rounded-2xl px-3 py-2.5 border border-emerald-500/30 space-y-1.5">
+    <section id="allowanceOverviewCard" class="glass-card rounded-2xl px-3 py-2.5 border border-emerald-500/30 space-y-1.5">
       <div class="flex items-center justify-between gap-2"><div class="min-w-0"><div class="text-xs font-extrabold">💴 <span id="nextAllowanceMonthLabel">来月</span>のお小遣い予定</div><div class="font-black text-xl text-emerald-500 whitespace-nowrap"><span id="nextAllowanceTotalDisplay">0</span>円</div></div><button id="receiveAllowanceBtn" type="button" title="約1.5秒長押しで受取確認" class="shrink-0 px-2 py-1.5 text-[10px] font-extrabold rounded-xl border border-emerald-600 bg-white text-emerald-800 shadow-[0_3px_0_#047857] active:translate-y-[2px] active:shadow-none touch-none select-none"><span id="receiveAllowanceBtnLabel">次月分を受取</span><br><span class="text-[9px] opacity-75">長押し</span></button></div>
       <div class="text-[11px] opacity-85">基本 <span id="nextAllowanceBaseDisplay">0</span>円 ＋ 利子 <span id="expectedBonusDisplay">0</span>円</div>
       <div class="flex justify-between gap-2 text-[11px]"><span><span id="thisAllowanceMonthLabel">今月</span>のお小遣い残り：<b id="allowanceRemBig">0</b>円</span><span class="opacity-75 inline-flex items-center gap-1">総資産：<span id="totalWealthDisplay">0</span>円 <button type="button" onclick="openWealthCorrectionModal()" title="総資産を修正" aria-label="総資産を修正" class="rounded-md border border-current px-1.5 py-0.5 text-[10px] font-bold opacity-90">✎ 修正</button></span></div>
@@ -568,7 +568,7 @@
       </div>
 
       <!-- 今日のワンタップアクション -->
-      <div class="pt-2 border-t border-slate-700/50 space-y-2">
+      <div id="allowanceQuickReport" class="pt-2 border-t border-slate-700/50 space-y-2">
         <div class="flex items-center justify-between text-xs">
           <span class="font-bold"><i class="fa-solid fa-calendar-day text-amber-500 mr-1"></i> 今日のワンタップお小遣い報告</span>
           <span id="todayStampStatusBadge" class="text-[11px] text-amber-500 font-bold">スタンプ未獲得</span>
@@ -587,7 +587,7 @@
     <!-- ==========================================
          4. 下段スクロール領域：お金の分析グラフ絵巻
     =========================================== -->
-    <section class="glass-card rounded-3xl p-5 border border-cyan-500/30 space-y-6">
+    <section id="allowanceAnalysisSection" class="glass-card rounded-3xl p-5 border border-cyan-500/30 space-y-6">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">
           <div class="w-8 h-8 rounded-xl bg-cyan-500/20 border border-cyan-400/40 flex items-center justify-center text-cyan-500">
@@ -637,7 +637,7 @@
     <!-- ==========================================
          5. 今月のきろく一覧（履歴）
     =========================================== -->
-    <section class="glass-card rounded-3xl p-5">
+    <section id="allowanceHistorySection" class="glass-card rounded-3xl p-5">
       <div class="flex items-center justify-between mb-3">
         <h2 class="font-extrabold text-base flex items-center gap-2">
           <i class="fa-solid fa-scroll text-amber-500"></i>
@@ -661,7 +661,7 @@
     <div class="kozen-footer-line">無断転載及びハルシネーションはお断り申し上げます。</div>
     <div class="kozen-footer-meta">
       <span id="footer-version">Version 0.9（開発版 STEP 16-18）</span><span aria-hidden="true">／</span>
-      <span id="footer-updated">更新日 2026.10.29</span><span aria-hidden="true">／</span>
+      <span id="footer-updated">更新日 2026.10.31</span><span aria-hidden="true">／</span>
       <button type="button" id="open-trajectory" class="kozen-trajectory-button" onclick="openKozenTrajectory()">📜 小銭天童の軌跡</button>
     </div>
   </footer>
@@ -675,6 +675,14 @@
       </div>
       <div id="plip-history-modal" class="kozen-history text-sm leading-relaxed">
         <span class="sr-only">小銭天童の軌跡</span>
+        <article>
+          <h3>Version 0.9　2026.10.31</h3>
+          <ul>
+            <li>親設定を4連タブに整理し、ミッション追加・編集カードを統一。ボーナスポイント欄の配置と色を改善。</li>
+            <li>小銭ポイントの累計・残高を独立管理し、連続ボーナスを当日のみ付与・取り消しする方式へ変更。</li>
+            <li>子供ごとのタブ表示と換金設定を追加し、親設定の配置と説明を整理。</li>
+          </ul>
+        </article>
         <article>
           <h3>Version 0.9　2026.10.29</h3>
           <ul>
@@ -878,7 +886,7 @@
     <div class="glass-card rounded-3xl max-w-md w-full p-6 border border-amber-500/40 space-y-4 my-6">
       <div class="flex justify-between items-center">
         <h3 class="font-extrabold text-base text-amber-500 flex items-center gap-2">
-          <i class="fa-solid fa-key"></i> お家の人メニュー（小銭天童 帳場管理）
+          <i class="fa-solid fa-key"></i> 親による設定メニュー（小銭天童 帳場管理）
         </h3>
         <button onclick="closeParentModal()" class="opacity-60 hover:opacity-100 text-xl"><i class="fa-solid fa-xmark"></i></button>
       </div>
@@ -903,6 +911,15 @@
           </div>
           <div class="flex items-center gap-2 text-xs"><label for="publicInitialWealth" class="shrink-0">親が入力する子供の仮の総資産額</label><input id="publicInitialWealth" type="number" min="0" step="1" class="inner-box rounded-lg px-2 py-1 w-28" onchange="savePublicInitialWealth(this.value)"><span>円</span></div>
           <p class="text-[10px] opacity-70">管理する子供の切り替えはホームのカレンダー・統計などの各情報にも反映されます。各子供の記録は別々に保存します。</p>
+          <!-- 親設定タブの表示選択。子供ごとにこの端末へ保存する（機能本体は変更しない） -->
+          <div class="inner-box rounded-xl p-3 space-y-3 text-xs" aria-label="使う設定メニューを選ぶ">
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+              <span class="font-bold">子供のお小遣いを管理する</span>
+              <select id="parentUseAllowance" aria-label="子供のお小遣いを管理するか" onchange="saveParentTabPreference('allowance',this.value)" class="inner-box rounded-lg px-2 py-1 font-bold">
+                <option value="yes">管理する</option><option value="no">管理しない</option>
+              </select>
+            </div>
+          </div>
           <p class="text-[10px] opacity-70">管理する子供の名前と親が入力する子供の仮の総資産額は公開設定JSONに掲載されます。本名は入力しないでください。子供による初回登録後は、子供が端末で登録した名前・資産が優先されます。</p>
           <span id="parentCurrentChildName" class="hidden"></span>
         </div>
@@ -920,10 +937,13 @@
         <div id="publicConfigLoadStatus" role="status" aria-live="polite" class="inner-box rounded-xl p-3 text-[11px] opacity-90">🌐 公開設定：確認中…</div>
         </div>
 
-        <!-- 既存の横並び3タブ。順序のみ変更 -->
-        <div class="grid grid-cols-3 gap-1.5 inner-box p-1 rounded-xl">
+        <!-- 親設定の横並び4タブ -->
+        <div id="parentSubTabBar" class="grid grid-cols-4 gap-1 inner-box p-1 rounded-xl">
           <button id="parentSubTabGeneralBtn" onclick="switchParentSubTab('general')" class="py-2 rounded-lg font-bold text-[11px] bg-amber-500 text-slate-950 transition">
             <i class="fa-solid fa-gears mr-0.5"></i> 基本設定
+          </button>
+          <button id="parentSubTabAllowanceBtn" onclick="switchParentSubTab('allowance')" class="py-2 rounded-lg font-bold text-[11px] opacity-70 hover:opacity-100 transition">
+            <i class="fa-solid fa-coins mr-0.5"></i> お小遣い
           </button>
           <button id="parentSubTabMissionsBtn" onclick="switchParentSubTab('missions')" class="py-2 rounded-lg font-bold text-[11px] opacity-70 hover:opacity-100 transition">
             <i class="fa-solid fa-list-check mr-0.5"></i> ミッション
@@ -933,35 +953,68 @@
           </button>
         </div>
 
+        <!-- お小遣いタブ：内容は次回以降に設定 -->
+        <div id="parentSubTabAllowance" class="hidden space-y-4">
+          <div class="space-y-3 text-xs inner-box p-4 rounded-2xl">
+            <h4 class="font-extrabold text-amber-500 mb-1">お小遣いの設定</h4>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="opacity-75 font-bold block mb-1">毎月のお小遣い額（円）</label>
+                <input type="number" id="cfgAllowance" class="w-full inner-box rounded-xl px-3 py-2 font-bold">
+              </div>
+              <div>
+                <label class="opacity-75 font-bold block mb-1">残高への利子率（％）</label>
+                <input type="number" id="cfgRate" class="w-full inner-box rounded-xl px-3 py-2 text-emerald-500 font-bold">
+              </div>
+            </div>
+          </div>
+          <!-- 固定のお小遣いチェック：ミッション一覧から移動（設定と保存キーは維持） -->
+          <div class="space-y-2">
+            <h4 class="font-extrabold text-xs opacity-80">お小遣いチェックの連続ボーナス</h4>
+            <div id="parentAllowanceCheckBonus" class="space-y-1.5"></div>
+          </div>
+        </div>
+
         <!-- サブタブA：天童ミッション(ToDo)設定 -->
         <div id="parentSubTabMissions" class="space-y-4">
           <div class="inner-box rounded-2xl p-4 space-y-3">
             <h4 class="font-extrabold text-xs text-amber-500 flex items-center justify-between">
-              <span><i class="fa-solid fa-plus-circle mr-1"></i> 新しいミッションを追加</span>
+              <span><i class="fa-solid fa-plus-circle mr-1"></i> 子供に毎日コツコツやってもらいたいミッションを追加</span>
             </h4>
             <div class="space-y-2 text-xs">
               <div>
                 <label class="opacity-75 font-bold block mb-1">ミッション名</label>
                 <input type="text" id="newMissionTitle" placeholder="例: 算数の宿題、お風呂掃除、靴ならべ" class="w-full inner-box rounded-xl px-3 py-2">
               </div>
-              <div class="grid grid-cols-2 gap-2">
-                <div>
-                  <label class="opacity-75 font-bold block mb-1">獲得小銭ポイント</label>
-                  <input type="number" id="newMissionPts" value="10" class="w-full inner-box rounded-xl px-3 py-2 font-bold text-amber-400">
+              <div>
+                <label class="opacity-75 font-bold block mb-1">子供がスタンプを押すことでもらえる1日あたりの獲得小銭ポイント</label>
+                <input type="number" id="newMissionPts" min="0" value="10" class="w-full inner-box rounded-xl px-3 py-2 font-bold text-amber-400">
+              </div>
+              <div class="space-y-2">
+                <label class="opacity-75 font-bold block">連続したことによってあげる特別連続ボーナス小銭ポイント</label>
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="opacity-75 font-bold block mb-1">ボーナス小銭ポイント</label>
+                    <input type="number" id="newMissionBonusPts" min="0" value="50" class="w-full inner-box rounded-xl px-3 py-2 font-bold text-amber-400">
+                  </div>
+                  <div>
+                    <label class="opacity-75 font-bold block mb-1">連続日数（日）</label>
+                    <input type="number" id="newMissionBonusInterval" min="1" max="365" value="7" class="w-full inner-box rounded-xl px-3 py-2">
+                  </div>
                 </div>
-                <div>
-                  <label class="opacity-75 font-bold block mb-1">バッジ色</label>
-                  <select id="newMissionColor" class="w-full inner-box rounded-xl px-2 py-2 text-xs">
-                    <option value="#58cc02">🦉 デュオ・グリーン（黄緑）</option>
-                    <option value="#f59e0b">🟡 アンバー（金）</option>
-                    <option value="#ef4444">🔴 レッド（赤）</option>
-                    <option value="#3b82f6">🔵 ブルー（青）</option>
-                    <option value="#10b981">🟢 エメラルド（緑）</option>
-                    <option value="#a855f7">🟣 パープル（紫）</option>
-                    <option value="#ec4899">🌸 ピンク（桃）</option>
-                    <option value="#06b6d4">🌊 シアン（水色）</option>
-                  </select>
-                </div>
+              </div>
+              <div>
+                <label class="opacity-75 font-bold block mb-1">バッジ色</label>
+                <select id="newMissionColor" class="w-full inner-box rounded-xl px-2 py-2 text-xs">
+                  <option value="#58cc02">🦉 デュオ・グリーン（黄緑）</option>
+                  <option value="#f59e0b">🟡 アンバー（金）</option>
+                  <option value="#ef4444">🔴 レッド（赤）</option>
+                  <option value="#3b82f6">🔵 ブルー（青）</option>
+                  <option value="#10b981">🟢 エメラルド（緑）</option>
+                  <option value="#a855f7">🟣 パープル（紫）</option>
+                  <option value="#ec4899">🌸 ピンク（桃）</option>
+                  <option value="#06b6d4">🌊 シアン（水色）</option>
+                </select>
               </div>
               <div>
                 <label class="opacity-75 font-bold block mb-1">アイコンを選択（🦉緑の鳥＝デュオリンゴ等）</label>
@@ -1037,10 +1090,61 @@
 
         <!-- サブタブB：基本設定＆カラーパレット＆換金 -->
         <div id="parentSubTabGeneral" class="hidden space-y-4">
+          <!-- 基本設定フォーム -->
+          <div class="space-y-3 text-xs inner-box p-4 rounded-2xl">
+            <h4 class="font-extrabold text-amber-500 mb-1">小銭ポイントの設定</h4>
+            <div class="space-y-1.5">
+              <label for="parentRedeemPreference" class="font-bold block">小銭ポイントでお小遣いをあげる</label>
+              <select id="parentRedeemPreference" onchange="saveParentRedeemPreference(this.value)" class="w-full inner-box rounded-xl px-3 py-2 font-bold">
+                <option value="yes">あげる</option>
+                <option value="no">あげない</option>
+              </select>
+            </div>
+            <div id="parentRedeemSettings" class="space-y-3">
+            <p class="text-[11px] opacity-85">🪙 小銭ポイントの換金は、ホーム上部「あなたの小銭」の右側で長押しして行います。<span id="parentModalPoints" class="hidden"></span><span id="parentModalPointsYen" class="hidden"></span></p>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="opacity-75 font-bold block mb-1">1ポイント＝何円？</label>
+                <input type="number" step="0.1" id="cfgPointRate" class="w-full inner-box rounded-xl px-3 py-2 text-amber-500 font-bold">
+              </div>
+            </div>
+
+            </div>
+
+            <!-- ご家庭別スタンプ＆継続ボーナスルール設定 -->
+            <div class="pt-3 border-t border-slate-700/50 space-y-2.5">
+              <h5 class="font-extrabold text-emerald-400 text-[11px] flex items-center gap-1">
+                <i class="fa-solid fa-sliders"></i> メダル減額＆継続ボーナスのルール設定
+              </h5>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="opacity-75 font-bold block mb-1">🥈銀メダル期間（何日前まで？）</label>
+                  <input type="number" min="0" max="30" id="cfgSilverDays" class="w-full inner-box rounded-xl px-3 py-2 font-bold">
+                </div>
+                <div>
+                  <label class="opacity-75 font-bold block mb-1">🥈銀メダルの付与率（％）</label>
+                  <input type="number" min="0" max="100" id="cfgSilverRate" class="w-full inner-box rounded-xl px-3 py-2 font-bold">
+                </div>
+              </div>
+              <p class="text-[10px] opacity-65">※銀メダル期間を過ぎた過去日は「🥉銅メダル（0pt・連続記録のみ維持）」になります。</p>
+
+              <div class="grid grid-cols-2 gap-3 pt-1">
+                <div>
+                  <label class="opacity-75 font-bold block mb-1">🔥共通の初期ボーナス間隔（新規ミッション用）</label>
+                  <input type="number" min="1" max="365" id="cfgStreakInterval" class="w-full inner-box rounded-xl px-3 py-2 text-emerald-400 font-bold">
+                </div>
+                <div>
+                  <label class="opacity-75 font-bold block mb-1">🎁共通の初期ボーナス（新規用）</label>
+                  <input type="number" min="0" id="cfgStreakBonusPts" class="w-full inner-box rounded-xl px-3 py-2 text-amber-400 font-bold">
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- カラーパレット（全8色） -->
           <div class="inner-box rounded-2xl p-4 space-y-2.5">
             <h4 class="font-extrabold text-xs text-amber-500 flex items-center gap-1.5">
-              <i class="fa-solid fa-palette"></i> 画面のテーマカラー（全8色・着せ替え）
+              <i class="fa-solid fa-palette"></i> 画面のテーマカラー（子供の設定が優先されます）
             </h4>
             <div class="grid grid-cols-2 gap-2 pt-1" id="themeButtons">
               <button type="button" onclick="setAppTheme('theme-classic')" class="p-2 rounded-xl border text-left flex items-center gap-2 transition" id="btn-theme-classic">
@@ -1078,65 +1182,11 @@
             </div>
           </div>
 
-          <!-- ポイントのお金変換 -->
-          <div class="inner-box rounded-2xl p-4 text-[11px] opacity-85">🪙 小銭ポイントの換金は、ホーム上部「あなたの小銭」の右側で長押しして行います。<span id="parentModalPoints" class="hidden"></span><span id="parentModalPointsYen" class="hidden"></span></div>
 
-          <!-- 基本設定フォーム -->
-          <div class="space-y-3 text-xs inner-box p-4 rounded-2xl">
-            <h4 class="font-extrabold text-amber-500 mb-1">基本設定</h4>
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="opacity-75 font-bold block mb-1">毎月のお小遣い額（円）</label>
-                <input type="number" id="cfgAllowance" class="w-full inner-box rounded-xl px-3 py-2 font-bold">
-              </div>
-              <div>
-                <label class="opacity-75 font-bold block mb-1">残高への利子率（％）</label>
-                <input type="number" id="cfgRate" class="w-full inner-box rounded-xl px-3 py-2 text-emerald-500 font-bold">
-              </div>
-            </div>
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="opacity-75 font-bold block mb-1">1ポイント＝何円？</label>
-                <input type="number" step="0.1" id="cfgPointRate" class="w-full inner-box rounded-xl px-3 py-2 text-amber-500 font-bold">
-              </div>
-            </div>
-
-            <!-- ご家庭別スタンプ＆継続ボーナスルール設定 -->
-            <div class="pt-3 border-t border-slate-700/50 space-y-2.5">
-              <h5 class="font-extrabold text-emerald-400 text-[11px] flex items-center gap-1">
-                <i class="fa-solid fa-sliders"></i> メダル減額＆継続ボーナスのルール設定
-              </h5>
-              <div class="grid grid-cols-2 gap-3">
-                <div>
-                  <label class="opacity-75 font-bold block mb-1">🥈銀メダル期間（何日前まで？）</label>
-                  <input type="number" min="0" max="30" id="cfgSilverDays" class="w-full inner-box rounded-xl px-3 py-2 font-bold">
-                </div>
-                <div>
-                  <label class="opacity-75 font-bold block mb-1">🥈銀メダルの付与率（％）</label>
-                  <input type="number" min="0" max="100" id="cfgSilverRate" class="w-full inner-box rounded-xl px-3 py-2 font-bold">
-                </div>
-              </div>
-              <p class="text-[10px] opacity-65">※銀メダル期間を過ぎた過去日は「🥉銅メダル（0pt・連続記録のみ維持）」になります。</p>
-
-              <div class="grid grid-cols-2 gap-3 pt-1">
-                <div>
-                  <label class="opacity-75 font-bold block mb-1">🔥共通の初期ボーナス間隔（新規ミッション用）</label>
-                  <input type="number" min="1" max="365" id="cfgStreakInterval" class="w-full inner-box rounded-xl px-3 py-2 text-emerald-400 font-bold">
-                </div>
-                <div>
-                  <label class="opacity-75 font-bold block mb-1">🎁共通の初期ボーナス（新規用）</label>
-                  <input type="number" min="0" id="cfgStreakBonusPts" class="w-full inner-box rounded-xl px-3 py-2 text-amber-400 font-bold">
-                </div>
-              </div>
-            </div>
-
-            <div>
+            <div class="inner-box rounded-2xl p-4 text-xs">
               <label class="opacity-75 font-bold block mb-1">親の合言葉（暗証番号）</label>
               <input type="text" id="cfgPin" class="w-full inner-box rounded-xl px-3 py-2 font-bold">
             </div>
-
-
-          </div>
 
           <!-- 復元同期コード -->
           <div class="pt-2 border-t border-slate-700/50 space-y-2">
@@ -1420,6 +1470,8 @@
       baseSavings: 3000,
       pointRate: 1,
       points: 0,
+      totalEarnedPoints: 0, // 累計獲得ポイント（換金しても減らない）
+      todayBonusAwards: {}, // {日付: {ミッションID: 当日付与したボーナス}}
       dailyCompleteVoiceDates: {}, // 日別の達成ボイス再生済み記録
       habitBestStreak: 0, // 歴代最高連続日数。ミッション削除後も維持
       redeemedPoints: 0, // STEP4以降の換金済み累計（旧換金履歴は復元不可）
@@ -1545,6 +1597,8 @@
       fresh.missionLogs = {};
       fresh.stamps = {};
       fresh.points = 0;
+      fresh.totalEarnedPoints = 0;
+      fresh.todayBonusAwards = {};
       fresh.redeemedPoints = 0;
       fresh.__firstSetupComplete = true;
       fresh.__bootstrapPlaceholder = false;
@@ -1617,6 +1671,8 @@
         streakBonusPts: parsed.streakBonusPts !== undefined ? Number(parsed.streakBonusPts) : 50,
         missions: parsed.missions && parsed.missions.length ? parsed.missions : structuredClone(defaultMissions),
         missionLogs: parsed.missionLogs || {},
+        totalEarnedPoints: Number(parsed.totalEarnedPoints ?? ((Number(parsed.points)||0)+(Number(parsed.redeemedPoints)||0))),
+        todayBonusAwards: parsed.todayBonusAwards || {},
         theme: parsed.theme || 'theme-classic',
         stamps: parsed.stamps || {},
         transactions: parsed.transactions || [],
@@ -1803,6 +1859,79 @@
     function persistFamilyIndex() {
       localStorage.setItem(FAMILY_INDEX_KEY, JSON.stringify(familyIndex));
     }
+    // 親メニューのタブ表示設定だけを子供別に保持する。お小遣い計算やミッション記録には触れない。
+    const PARENT_TAB_PREFS_KEY = 'kozen_parent_tab_preferences_v1';
+    function readParentTabPreferences() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(PARENT_TAB_PREFS_KEY) || '{}');
+        return saved && typeof saved === 'object' && !Array.isArray(saved) ? saved : {};
+      } catch (_) { return {}; }
+    }
+    function currentParentTabPreferences() {
+      const saved = readParentTabPreferences()[activeChildId] || {};
+      return { allowance: saved.allowance !== false, missions: true };
+    }
+    function refreshParentTabPreferences() {
+      const prefs = currentParentTabPreferences();
+      document.getElementById('parentUseAllowance').value = prefs.allowance ? 'yes' : 'no';
+      const visible = 2 + Number(prefs.allowance) + Number(prefs.missions);
+      const bar = document.getElementById('parentSubTabBar');
+      bar.classList.remove('grid-cols-2', 'grid-cols-3', 'grid-cols-4');
+      bar.classList.add('grid-cols-' + visible);
+      document.getElementById('parentSubTabAllowanceBtn').classList.toggle('hidden', !prefs.allowance);
+      document.getElementById('parentSubTabMissionsBtn').classList.toggle('hidden', !prefs.missions);
+    }
+    function saveParentTabPreference(which, value) {
+      if (which !== 'allowance' && which !== 'missions') return;
+      const all = readParentTabPreferences();
+      const previous = all[activeChildId] || {};
+      all[activeChildId] = { ...previous, [which]: value === 'yes' };
+      try {
+        localStorage.setItem(PARENT_TAB_PREFS_KEY, JSON.stringify(all));
+      } catch (e) {
+        showToast('表示設定を保存できませんでした');
+        refreshParentTabPreferences();
+        return;
+      }
+      refreshParentTabPreferences();
+      renderAll();
+      const selected = ['general', 'allowance', 'missions', 'rescue'].find(t =>
+        !document.getElementById('parentSubTab' + t[0].toUpperCase() + t.slice(1)).classList.contains('hidden')) || 'general';
+      switchParentSubTab(selected);
+    }
+    // 子供ごとの換金表示設定。既存のポイントや換金履歴は変更しない。
+    const PARENT_REDEEM_PREFS_KEY = 'kozen_parent_redeem_preferences_v1';
+    function readParentRedeemPreferences() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(PARENT_REDEEM_PREFS_KEY) || '{}');
+        return saved && typeof saved === 'object' && !Array.isArray(saved) ? saved : {};
+      } catch (_) { return {}; }
+    }
+    function isPointsRedemptionEnabled() {
+      return readParentRedeemPreferences()[activeChildId] !== false;
+    }
+    function refreshPointsRedemptionPreference() {
+      const enabled = isPointsRedemptionEnabled();
+      const selector = document.getElementById('parentRedeemPreference');
+      if (selector) selector.value = enabled ? 'yes' : 'no';
+      document.getElementById('parentRedeemSettings')?.classList.toggle('hidden', !enabled);
+      document.getElementById('redeemPointsBtn')?.classList.toggle('hidden', !enabled);
+      document.getElementById('pointsYenValueRow')?.classList.toggle('hidden', !enabled);
+      document.getElementById('availablePointsSummary')?.classList.toggle('hidden', !enabled);
+      document.getElementById('pointsSummaryGrid')?.classList.toggle('grid-cols-2', enabled);
+      document.getElementById('pointsSummaryGrid')?.classList.toggle('grid-cols-1', !enabled);
+    }
+    function saveParentRedeemPreference(value) {
+      const all = readParentRedeemPreferences();
+      all[activeChildId] = value === 'yes';
+      try {
+        localStorage.setItem(PARENT_REDEEM_PREFS_KEY, JSON.stringify(all));
+      } catch (_) {
+        showToast('換金設定を保存できませんでした');
+      }
+      refreshPointsRedemptionPreference();
+      renderAll();
+    }
     function renderChildSelector() {
       const selector = document.getElementById('parentChildSelector');
       if (!selector) return;
@@ -1810,6 +1939,8 @@
       selector.value = activeChildId;
       const label = familyIndex.children.find(c => c.id === activeChildId)?.label || '子供';
       document.getElementById('parentCurrentChildName').textContent = label;
+      refreshParentTabPreferences();
+      refreshPointsRedemptionPreference();
       const wealthInput = document.getElementById('publicInitialWealth');
       if (wealthInput) wealthInput.value = Number(familyIndex.children.find(c => c.id === activeChildId)?.initialWealth ?? 0);
     }
@@ -1830,7 +1961,8 @@
       };
       Object.entries(fields).forEach(([id, value]) => { const el = document.getElementById(id); if (el) el.value = value ?? ''; });
       updateThemeButtonsUI();
-      const activeTab = ['general','missions','rescue'].find(t => !document.getElementById('parentSubTab' + t[0].toUpperCase() + t.slice(1))?.classList.contains('hidden')) || 'general';
+      refreshPointsRedemptionPreference();
+      const activeTab = ['general','allowance','missions','rescue'].find(t => !document.getElementById('parentSubTab' + t[0].toUpperCase() + t.slice(1))?.classList.contains('hidden')) || 'general';
       switchParentSubTab(activeTab);
     }
     function switchManagedChild(id) {
@@ -2077,6 +2209,10 @@
 
     function renderAll() {
       refreshTreasureDate();
+      const allowanceVisible = currentParentTabPreferences().allowance;
+      for (const id of ["allowanceOverviewCard", "allowanceQuickReport", "allowanceAnalysisSection", "allowanceHistorySection"]) {
+        document.getElementById(id)?.classList.toggle("hidden", !allowanceVisible);
+      }
       const fin = calculateFinancials();
 
       document.getElementById('headerUserName').textContent = (state.userName && state.userName !== 'キッズ' ? state.userName : null) || familyIndex.children.find(c => c.id === activeChildId)?.label || 'キッズ';
@@ -2140,7 +2276,7 @@
 
       // 小銭ポイント描画
       document.getElementById('totalPointsDisplay').textContent = state.points.toLocaleString();
-      document.getElementById('lifetimePointsDisplay').textContent = (state.points + (Number(state.redeemedPoints) || 0)).toLocaleString();
+      document.getElementById('lifetimePointsDisplay').textContent = (Number(state.totalEarnedPoints) || 0).toLocaleString();
       const nextMonth = shiftAllowanceMonth(state.allowanceMonth, 1);
       document.getElementById('nextAllowanceMonthLabel').textContent = allowanceMonthWithYear(nextMonth);
       document.getElementById('thisAllowanceMonthLabel').textContent = allowanceMonthWithYear(state.allowanceMonth);
@@ -2149,7 +2285,8 @@
       document.getElementById('nextAllowanceTotalDisplay').textContent = (state.monthlyAllowance + fin.expectedBonus).toLocaleString();
       const yenVal = Math.floor(state.points * state.pointRate);
       document.getElementById('pointsYenValueDisplay').textContent = yenVal.toLocaleString();
-      document.getElementById('redeemPointsBtn').disabled = !(state.points > 0);
+      document.getElementById('redeemPointsBtn').disabled = !(state.points > 0) || !isPointsRedemptionEnabled();
+      refreshPointsRedemptionPreference();
 
       if (currentMainTab === 'calendar') {
         renderCalendar();
@@ -2328,25 +2465,36 @@
                pts: Math.max(0, Number(cfg.bonusPts ?? state.streakBonusPts ?? 50)) };
     }
 
-    // 日付順で計算し直す。遡り登録・取り消しでもボーナスの二重払いを防ぐ。
-    function recalcBonuses(missionId) {
+    // 残高と総獲得ポイントを同じ操作で更新する。換金時は呼ばない。
+    function adjustEarnedPoints(delta) {
+      state.points = (Number(state.points) || 0) + delta;
+      state.totalEarnedPoints = (Number(state.totalEarnedPoints) || 0) + delta;
+    }
+
+    // ボーナスは今日の新規達成にだけ付与。過去のスタンプ変更では再計算しない。
+    function awardTodayBonus(missionId, dateStr) {
+      if (dateStr !== getTodayStr()) return 0;
       const rule = bonusRule(missionId);
-      const dates = (missionId === CHECK_ID ? Object.keys(state.stamps || {}) : Object.keys(state.missionLogs || {})).sort();
-      let count = 0, delta = 0, previous = '';
-      for (const date of dates) {
-        const entry = missionId === CHECK_ID ? state.stamps[date] : getMissionEntry(date, missionId);
-        if (!entry) continue;
-        const [y,m,d] = date.split('-').map(Number);
-        const yesterday = new Date(y,m-1,d); yesterday.setDate(yesterday.getDate()-1);
-        count = previous === dateStrForStreak(yesterday) ? count + 1 : 1;
-        previous = date;
-        const oldBonus = Number(entry.bonusPts) || 0;
-        const nextBonus = rule.pts > 0 && count % rule.interval === 0 ? rule.pts : 0;
-        entry.bonusPts = nextBonus;
-        delta += nextBonus - oldBonus;
+      const streak = calculateStreak(missionId, dateStr);
+      if (rule.pts <= 0 || streak === 0 || streak % rule.interval !== 0) return 0;
+      const awards = (state.todayBonusAwards ||= {});
+      const todayAwards = (awards[dateStr] ||= {});
+      if (todayAwards[missionId]) return 0;
+      todayAwards[missionId] = rule.pts;
+      adjustEarnedPoints(rule.pts);
+      return rule.pts;
+    }
+
+    // 今日の達成を取り消す場合だけ、今日のボーナスも取り消せる。
+    function revokeTodayBonus(missionId, dateStr) {
+      if (dateStr !== getTodayStr()) return 0;
+      const todayAwards = state.todayBonusAwards?.[dateStr];
+      const amount = Number(todayAwards?.[missionId]) || 0;
+      if (amount) {
+        delete todayAwards[missionId];
+        adjustEarnedPoints(-amount);
       }
-      state.points += delta;
-      return delta;
+      return amount;
     }
 
     function setMissionBonus(missionId, key, value) {
@@ -2355,7 +2503,8 @@
       if (!cfg) return;
       cfg[key] = num;
       saveParentRulesForCurrent();
-      renderParentMissionsList();
+      if (missionId === CHECK_ID) renderParentAllowanceCheckBonus();
+      else renderParentMissionsList();
       showToast('連続ボーナスの設定を自動保存しました（過去の獲得分は維持）');
     }
 
@@ -2367,9 +2516,9 @@
       }
       const wasComplete = isAllTodayMissionsDone(dateStr);
       const pts = dateStr === getTodayStr() ? 5 : 1;
-      state.stamps[dateStr] = { type: 'green', pts, bonusPts: 0 };
-      state.points += pts;
-      const bonus = recalcBonuses(CHECK_ID);
+      state.stamps[dateStr] = { type: 'green', pts };
+      adjustEarnedPoints(pts);
+      const bonus = awardTodayBonus(CHECK_ID, dateStr);
       const celebrate = markDailyCompletionIfNew(dateStr, wasComplete);
       saveState();
       renderModalStampStatus();
@@ -2418,7 +2567,7 @@
       });
       html += `<th class="matrix-fixed-right pb-2 text-center font-bold px-1 text-amber-500">連続記録</th></tr></thead><tbody>`;
 
-      html += renderCheckMatrixRow(dates);
+      if (currentParentTabPreferences().allowance) html += renderCheckMatrixRow(dates);
       missions.forEach(m => {
         const streak = calculateStreak(m.id);
         html += `<tr class="border-b border-slate-800/60 hover:bg-slate-800/30">
@@ -2545,13 +2694,14 @@
     function renderModalDayEarnedPoints() {
       const dateStr = currentDetailDate;
       const stamp = state.stamps?.[dateStr];
-      let total = stamp ? (Number(stamp.pts) || 0) + (Number(stamp.bonusPts) || 0) : 0;
+      let total = stamp ? (Number(stamp.pts) || 0) : 0;
       const entries = state.missionLogs?.[dateStr] || {};
       Object.values(entries).forEach(entry => {
         if (entry && entry.done) {
-          total += (Number(entry.pts) || 0) + (Number(entry.bonusPts) || 0);
+          total += (Number(entry.pts) || 0);
         }
       });
+      if (dateStr === getTodayStr()) total += Object.values(state.todayBonusAwards?.[dateStr] || {}).reduce((sum, value) => sum + (Number(value) || 0), 0);
       document.getElementById('modalDayEarnedPoints').textContent = `+${total}pt`;
     }
 
@@ -2618,7 +2768,8 @@
         if (done) {
           if (entry.type === 'silver') badgeEmoji = '🥈';
           else if (entry.type === 'bronze') badgeEmoji = '🥉';
-          const bonusTxt = entry.bonusPts ? ` (＋継続ボーナス${entry.bonusPts}pt!)` : '';
+          const todayBonus = dateStr === getTodayStr() ? (Number(state.todayBonusAwards?.[dateStr]?.[m.id]) || 0) : 0;
+          const bonusTxt = todayBonus ? ` (＋継続ボーナス${todayBonus}pt!)` : '';
           previewPtsText = `${badgeEmoji} 獲得済: +${entry.pts}pt${bonusTxt}`;
         }
 
@@ -2676,13 +2827,12 @@
         state.missionLogs[dateStr][missionId] = {
           done: true,
           type: stampType,
-          pts: earnedPts,
-          bonusPts: 0
+          pts: earnedPts
         };
 
         const newStreak = calculateStreak(missionId, dateStr);
-        state.points += earnedPts;
-        const streakBonus = recalcBonuses(missionId);
+        adjustEarnedPoints(earnedPts);
+        const streakBonus = awardTodayBonus(missionId, dateStr);
 
         if (streakBonus > 0) {
           playSE('fanfare');
@@ -2703,10 +2853,10 @@
       } else {
         // 取り消し時は付与したポイント＋継続ボーナス分も正確に戻す
         playSE('cancel');
-        const revokePts = (Number(existing.pts) || 0) + (Number(existing.bonusPts) || 0);
+        const revokePts = Number(existing.pts) || 0;
         delete state.missionLogs[dateStr][missionId];
-        state.points -= revokePts;
-        recalcBonuses(missionId);
+        adjustEarnedPoints(-revokePts);
+        revokeTodayBonus(missionId, dateStr);
         showToast('ミッションの達成を取り消しました');
       }
 
@@ -2794,18 +2944,17 @@
       const wasComplete = isAllTodayMissionsDone(currentDetailDate);
       const existing = state.stamps[currentDetailDate];
       if (!existing) {
-        state.stamps[currentDetailDate] = { type: targetStampType, pts: targetPts, bonusPts: 0 };
-        state.points += targetPts;
-        recalcBonuses(CHECK_ID);
+        state.stamps[currentDetailDate] = { type: targetStampType, pts: targetPts };
+        adjustEarnedPoints(targetPts);
+        awardTodayBonus(CHECK_ID, currentDetailDate);
         earnedPts = targetPts;
       } else if (existing.type === 'green') {
         // 無出費スタンプの後で記帳した場合は、点数が下がる場合も必ず置き換える。
         // 収入の記帳は「無出費」と矛盾しないため、報酬が上がる場合だけ切り替える。
         if (currentModalTxType === 'expense' || targetPts > existing.pts) {
           const diffPts = targetPts - existing.pts;
-          state.stamps[currentDetailDate] = { type: targetStampType, pts: targetPts, bonusPts: Number(existing.bonusPts) || 0 };
-          state.points += diffPts;
-          recalcBonuses(CHECK_ID);
+          state.stamps[currentDetailDate] = { type: targetStampType, pts: targetPts };
+          adjustEarnedPoints(diffPts);
           earnedPts = Math.max(0, diffPts);
         }
       }
@@ -3215,9 +3364,13 @@ ${backupCode}`;
 
     function switchParentSubTab(subTab) {
       if (!document.getElementById('parentConfigBox').classList.contains('hidden') && document.activeElement?.id in PARENT_FIELD_SPECS && !commitParentInputs()) return;
+      const prefs = currentParentTabPreferences();
+      if ((subTab === 'allowance' && !prefs.allowance) || (subTab === 'missions' && !prefs.missions)) subTab = 'general';
+      const bAllow = document.getElementById('parentSubTabAllowanceBtn');
       const bMis = document.getElementById('parentSubTabMissionsBtn');
       const bRes = document.getElementById('parentSubTabRescueBtn');
       const bGen = document.getElementById('parentSubTabGeneralBtn');
+      const sAllow = document.getElementById('parentSubTabAllowance');
       const sMis = document.getElementById('parentSubTabMissions');
       const sRes = document.getElementById('parentSubTabRescue');
       const sGen = document.getElementById('parentSubTabGeneral');
@@ -3225,14 +3378,18 @@ ${backupCode}`;
       const activeClass = 'py-2 rounded-lg font-bold text-[11px] bg-amber-500 text-slate-950 transition';
       const inactiveClass = 'py-2 rounded-lg font-bold text-[11px] opacity-70 hover:opacity-100 transition';
 
+      bAllow.className = subTab === 'allowance' ? activeClass : inactiveClass;
       bMis.className = subTab === 'missions' ? activeClass : inactiveClass;
       bRes.className = subTab === 'rescue' ? activeClass : inactiveClass;
       bGen.className = subTab === 'general' ? activeClass : inactiveClass;
+      refreshParentTabPreferences();
 
+      sAllow.classList.toggle('hidden', subTab !== 'allowance');
       sMis.classList.toggle('hidden', subTab !== 'missions');
       sRes.classList.toggle('hidden', subTab !== 'rescue');
       sGen.classList.toggle('hidden', subTab !== 'general');
 
+      if (subTab === 'allowance') renderParentAllowanceCheckBonus();
       if (subTab === 'missions') renderParentMissionsList();
       if (subTab === 'rescue') {
         const rescueInput = document.getElementById('rescueDateInput');
@@ -3298,9 +3455,8 @@ ${backupCode}`;
       const prevPts = existing ? Number(existing.pts) : 0;
       const diffPts = Math.max(0, 15 - prevPts);
 
-      state.stamps[dateStr] = { type: 'gold', pts: 15, bonusPts: Number(existing?.bonusPts) || 0 };
-      recalcBonuses(CHECK_ID);
-      state.points += diffPts;
+      state.stamps[dateStr] = { type: 'gold', pts: 15 };
+      adjustEarnedPoints(diffPts);
       saveState();
       renderRescueDayPanel();
       playSE('gold');
@@ -3321,11 +3477,9 @@ ${backupCode}`;
       state.missionLogs[dateStr][missionId] = {
         done: true,
         type: 'gold',
-        pts: fullPts,
-        bonusPts: Number(existing?.bonusPts) || 0
+        pts: fullPts
       };
-      recalcBonuses(missionId);
-      state.points += addPts;
+      adjustEarnedPoints(addPts);
       saveState();
       renderRescueDayPanel();
       playSE('gold');
@@ -3358,6 +3512,7 @@ ${backupCode}`;
         document.getElementById('cfgPin').value = state.pin;
 
         updateThemeButtonsUI();
+        refreshPointsRedemptionPreference();
         switchParentSubTab(window.pendingParentSubTab || 'general');
       } else {
         playSE('error');
@@ -3389,6 +3544,14 @@ ${backupCode}`;
       const title = document.getElementById('newMissionTitle').value.trim();
       const pts = Number(document.getElementById('newMissionPts').value) || 5;
       const color = document.getElementById('newMissionColor').value;
+      const intervalInput = document.getElementById('newMissionBonusInterval');
+      const bonusInput = document.getElementById('newMissionBonusPts');
+      const bonusInterval = Number(intervalInput.value);
+      const bonusPts = Number(bonusInput.value);
+      if (!Number.isInteger(bonusInterval) || bonusInterval < 1 || bonusInterval > 365 || !Number.isInteger(bonusPts) || bonusPts < 0) {
+        showToast('連続日数とボーナス小銭ポイントを正しく入力してね');
+        return;
+      }
 
       if (!title) {
         showToast('ミッション名を入力してね');
@@ -3402,8 +3565,8 @@ ${backupCode}`;
         pts,
         color,
         icon: selectedMissionIcon || 'fa-star',
-        bonusInterval: state.streakBonusInterval,
-        bonusPts: state.streakBonusPts
+        bonusInterval,
+        bonusPts
       });
 
       document.getElementById('newMissionTitle').value = '';
@@ -3421,23 +3584,95 @@ ${backupCode}`;
       });
     }
 
-    function renderParentMissionsList() {
-      const list = document.getElementById('parentMissionsList');
-      const missions = [{ id: CHECK_ID, title: "お小遣いチェック", pts: 0, icon: "fa-wallet", color: "#d97706", fixed: true }, ...(state.missions || [])];
-      list.innerHTML = missions.map(m => `
+    function renderParentAllowanceCheckBonus() {
+      const list = document.getElementById('parentAllowanceCheckBonus');
+      const rule = bonusRule(CHECK_ID);
+      list.innerHTML = `
         <div class="inner-box rounded-xl p-2.5 flex items-center justify-between text-xs">
           <div class="flex items-center gap-2">
-            <span class="w-6 h-6 rounded flex items-center justify-center text-white" style="background-color:${m.color}"><i class="fa-solid ${m.icon}"></i></span>
-            <span class="font-bold">${escapeHtml(m.title)}</span>
-            ${m.fixed ? '<span class="text-[10px] text-amber-400">必須</span>' : `<span class="text-amber-400">+${m.pts}pt</span>`}
+            <span class="w-6 h-6 rounded flex items-center justify-center text-white" style="background-color:#d97706"><i class="fa-solid fa-wallet"></i></span>
+            <span class="font-bold">お小遣いチェック</span>
+            <span class="text-[10px] text-amber-400">必須</span>
           </div>
-          ${m.fixed ? '<span class="text-[10px] opacity-60">固定</span>' : `<button onclick="deleteMission('${m.id}')" class="text-rose-400 p-1"><i class="fa-solid fa-trash-can"></i></button>`}
+          <span class="text-[10px] opacity-60">固定</span>
         </div>
         <div class="grid grid-cols-2 gap-2 text-[10px] mb-3 px-2">
-          <label>連続日数<input type="number" min="1" max="365" value="${bonusRule(m.id).interval}" onchange="setMissionBonus('${m.id}', 'bonusInterval', this.value)" class="w-full inner-box rounded p-1.5 mt-1"></label>
-          <label>ボーナス小銭<input type="number" min="0" value="${bonusRule(m.id).pts}" onchange="setMissionBonus('${m.id}', 'bonusPts', this.value)" class="w-full inner-box rounded p-1.5 mt-1"></label>
-        </div>
-      `).join('');
+          <label>連続日数<input type="number" min="1" max="365" value="${rule.interval}" onchange="setMissionBonus('${CHECK_ID}', 'bonusInterval', this.value)" class="w-full inner-box rounded p-1.5 mt-1"></label>
+          <label>ボーナス小銭<input type="number" min="0" value="${rule.pts}" onchange="setMissionBonus('${CHECK_ID}', 'bonusPts', this.value)" class="w-full inner-box rounded p-1.5 mt-1"></label>
+        </div>`;
+    }
+
+    // 追加フォームと既存ミッション編集で共通のカラー候補を使用する。
+    const missionColorChoices = [
+      ['#58cc02', '🦉 デュオ・グリーン（黄緑）'], ['#f59e0b', '🟡 アンバー（金）'],
+      ['#ef4444', '🔴 レッド（赤）'], ['#3b82f6', '🔵 ブルー（青）'],
+      ['#10b981', '🟢 エメラルド（緑）'], ['#a855f7', '🟣 パープル（紫）'],
+      ['#ec4899', '🌸 ピンク（桃）'], ['#06b6d4', '🌊 シアン（水色）']
+    ];
+
+    function updateMissionSetting(id, field, value) {
+      const m = (state.missions || []).find(item => item.id === id);
+      if (!m || m.fixed) return;
+      if (field === 'title') {
+        value = value.trim();
+        if (!value) { showToast('ミッション名を入力してね'); renderParentMissionsList(); return; }
+      } else if (field === 'pts') {
+        if (value.trim() === '' || !Number.isInteger(Number(value)) || Number(value) < 0) {
+          showToast('獲得小銭ポイントは0以上の整数にしてね'); renderParentMissionsList(); return;
+        }
+        value = Number(value);
+      } else if (field === 'icon') {
+        if (!availableMissionIcons.includes(value)) return;
+      } else if (field === 'color') {
+        if (!missionColorChoices.some(([hex]) => hex === value)) return;
+      } else return;
+      m[field] = value;
+      saveParentRulesForCurrent();
+      renderParentMissionsList();
+      showToast('ミッションの設定を自動保存しました（過去の獲得分は維持）');
+    }
+
+    function renderParentMissionsList() {
+      const list = document.getElementById('parentMissionsList');
+      const missions = state.missions || [];
+      list.innerHTML = missions.map(m => {
+        const id = m.id;
+        const rule = bonusRule(id);
+        const iconButtons = availableMissionIcons.map(icon => `
+          <button type="button" onclick="updateMissionSetting('${id}', 'icon', '${icon}')"
+            aria-label="アイコン ${icon}" aria-pressed="${m.icon === icon}"
+            class="h-8 rounded-lg flex items-center justify-center text-sm transition ${m.icon === icon ? 'bg-amber-400 text-slate-950 font-bold shadow' : 'inner-box hover:opacity-80'}">
+            <i class="fa-solid ${icon}"></i>
+          </button>`).join('');
+        const colors = missionColorChoices.map(([hex, label]) => `<option value="${hex}" ${m.color === hex ? 'selected' : ''}>${label}</option>`).join('');
+        return `
+          <div class="inner-box rounded-2xl p-4 space-y-3 text-xs">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="w-8 h-8 shrink-0 rounded-lg flex items-center justify-center text-white" style="background-color:${m.color}"><i class="fa-solid ${m.icon}"></i></span>
+                <span class="font-extrabold truncate">${escapeHtml(m.title)}</span>
+              </div>
+              ${m.fixed ? '<span class="opacity-60">固定</span>' : `<button type="button" onclick="deleteMission('${id}')" class="text-rose-400 p-2 shrink-0" aria-label="ミッションを削除"><i class="fa-solid fa-trash-can"></i></button>`}
+            </div>
+            <div>
+              <label class="opacity-75 font-bold block mb-1">ミッション名</label>
+              <input type="text" value="${escapeHtml(m.title).replace(/&quot;/g, '&quot;')}" onchange="updateMissionSetting('${id}', 'title', this.value)" class="w-full inner-box rounded-xl px-3 py-2">
+            </div>
+            <div>
+              <label class="opacity-75 font-bold block mb-1">子供がスタンプを押すことでもらえる1日あたりの獲得小銭ポイント</label>
+              <input type="number" min="0" step="1" value="${m.pts}" onchange="updateMissionSetting('${id}', 'pts', this.value)" class="w-full inner-box rounded-xl px-3 py-2 font-bold text-amber-400">
+            </div>
+            <div class="space-y-2">
+              <label class="opacity-75 font-bold block">連続したことによってあげる特別連続ボーナス小銭ポイント</label>
+              <div class="grid grid-cols-2 gap-2">
+                <div><label class="opacity-75 font-bold block mb-1">ボーナス小銭ポイント</label><input type="number" min="0" value="${rule.pts}" onchange="setMissionBonus('${id}', 'bonusPts', this.value)" class="w-full inner-box rounded-xl px-3 py-2 font-bold text-amber-400"></div>
+                <div><label class="opacity-75 font-bold block mb-1">連続日数（日）</label><input type="number" min="1" max="365" value="${rule.interval}" onchange="setMissionBonus('${id}', 'bonusInterval', this.value)" class="w-full inner-box rounded-xl px-3 py-2"></div>
+              </div>
+            </div>
+            <div><label class="opacity-75 font-bold block mb-1">バッジ色</label><select onchange="updateMissionSetting('${id}', 'color', this.value)" class="w-full inner-box rounded-xl px-2 py-2 text-xs">${colors}</select></div>
+            <div><label class="opacity-75 font-bold block mb-1">アイコンを選択</label><div class="grid grid-cols-6 gap-1.5 p-1 inner-box rounded-xl max-h-28 overflow-y-auto">${iconButtons}</div></div>
+          </div>`;
+      }).join('');
     }
 
     const PARENT_FIELD_SPECS = {
@@ -3736,7 +3971,7 @@ ${backupCode}`;
     let redeemPressTimer = null;
     function startRedeemPress(event) {
       if (event.button !== undefined && event.button !== 0) return;
-      if (redeemPressTimer !== null || state.points <= 0) return;
+      if (redeemPressTimer !== null || state.points <= 0 || !isPointsRedemptionEnabled()) return;
       const btn = document.getElementById('redeemPointsBtn');
       if (btn.disabled) return;
       if (!state.soundMuted) getAudioCtx();
@@ -3762,11 +3997,13 @@ ${backupCode}`;
       document.getElementById('redeemPointsBtn')?.classList.remove('is-holding');
     }
     function convertPointsToSavings() {
+      if (!isPointsRedemptionEnabled()) return;
       const points = state.points;
       const yen = Math.floor(points * state.pointRate);
       if (points <= 0) { playSE('error'); showToast('まだポイントが貯まっていません'); return; }
       openConfirmModal(`小銭ポイント ${points.toLocaleString()} pt を ${yen.toLocaleString()}円に換金しますか？\n換金可能ポイントは0になり、総資産に加算されます。`, () => {
         // 確認中に残高が変わった場合の二重換金防止
+        if (!isPointsRedemptionEnabled()) return;
         if (state.points !== points) { showToast('ポイントが変わりました。もう一度確認してください'); return; }
         // 子供別ローカルデータに、直前1件分だけ復元情報を保持する。
         // 2回目の換金では前回の取り消し情報を置き換える。
