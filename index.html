@@ -490,11 +490,26 @@
       </div>
       <div id="pointsYenValueRow" class="text-[10px] text-amber-100/80">交換できる金額：<span id="pointsYenValueDisplay">0</span>円相当</div>
     </section>
-    <section id="allowanceOverviewCard" class="glass-card rounded-2xl px-3 py-2.5 border border-emerald-500/30 space-y-1.5">
-      <div class="flex items-center justify-between gap-2"><div class="min-w-0"><div class="text-xs font-extrabold">💴 <span id="nextAllowanceMonthLabel">来月</span>のお小遣い予定</div><div class="font-black text-xl text-emerald-500 whitespace-nowrap"><span id="nextAllowanceTotalDisplay">0</span>円</div></div><button id="receiveAllowanceBtn" type="button" title="約1.5秒長押しで受取確認" class="shrink-0 px-2 py-1.5 text-[10px] font-extrabold rounded-xl border border-emerald-600 bg-white text-emerald-800 shadow-[0_3px_0_#047857] active:translate-y-[2px] active:shadow-none touch-none select-none"><span id="receiveAllowanceBtnLabel">次月分を受取</span><br><span class="text-[9px] opacity-75">長押し</span></button></div>
-      <div class="text-[11px] opacity-85">基本 <span id="nextAllowanceBaseDisplay">0</span>円 ＋ 利子 <span id="expectedBonusDisplay">0</span>円</div>
-      <div class="flex justify-between gap-2 text-[11px]"><span><span id="thisAllowanceMonthLabel">今月</span>のお小遣い残り：<b id="allowanceRemBig">0</b>円</span><span class="opacity-75 inline-flex items-center gap-1">総資産：<span id="totalWealthDisplay">0</span>円 <button type="button" onclick="openWealthCorrectionModal()" title="総資産を修正" aria-label="総資産を修正" class="rounded-md border border-current px-1.5 py-0.5 text-[10px] font-bold opacity-90">✎ 修正</button></span></div>
+    <section id="allowanceOverviewCard" class="glass-card rounded-2xl px-3 py-2.5 border border-emerald-500/30 space-y-2">
+      <!-- 今月：日々確認する情報を先に表示 -->
+      <div class="text-xs font-extrabold">📒 <span id="thisAllowanceMonthLabel">今月</span>のお小遣い</div>
+      <div class="flex flex-wrap gap-x-5 gap-y-1 text-[12px]">
+        <div>お小遣い残り：<b id="allowanceRemBig">0</b>円</div>
+        <div>今月の出費：<b id="allowanceSpentDisplay">0</b>円</div>
+      </div>
+      <div id="allowanceSavingsUsedRow" class="text-[11px] text-amber-600 hidden">🐷 今月は貯金から<b id="allowanceSavingsUsedDisplay">0</b>円使ったよ</div>
+      <div class="text-[11px] opacity-80 flex flex-wrap items-center gap-1">いま持っているお金：<b><span id="totalWealthDisplay">0</span>円</b> <button type="button" onclick="openWealthCorrectionModal()" title="いま持っているお金を修正" aria-label="いま持っているお金を修正" class="rounded-md border border-current px-1.5 py-0.5 text-[10px] font-bold opacity-90">✎ 修正</button></div>
       <div class="hidden" aria-hidden="true"><span id="baseSavingsDisplay"></span><span id="currentMonthRemDisplay"></span><span id="allowanceTotalSmall"></span><span id="interestRateBadge"></span><div id="allowanceBar"></div></div>
+      <!-- 次月：予定と長押しボタンをひとまとまりにする -->
+      <div class="border-t border-emerald-500/20 pt-2 flex flex-wrap items-center justify-between gap-2">
+        <div class="min-w-0 space-y-0.5">
+          <div class="text-xs font-extrabold" id="nextAllowanceHeading">💴 <span id="nextAllowanceMonthLabel">来月</span>のお小遣い予定</div>
+          <div id="nextAllowanceTotalRow" class="font-black text-xl text-emerald-500 whitespace-nowrap"><span id="nextAllowanceTotalDisplay">0</span>円</div>
+          <div id="allowanceBreakdown" class="text-[11px] opacity-85">毎月のお小遣い <span id="nextAllowanceBaseDisplay">0</span>円 <span id="bonusBreakdown">＋ ボーナス <span id="expectedBonusDisplay">0</span>円</span></div>
+          <div id="noMonthlyAllowanceHeading" class="text-xs font-extrabold hidden">📒 今月の記録を終えて次の月へ</div>
+        </div>
+        <button id="receiveAllowanceBtn" type="button" title="約1.5秒長押しで受取確認" class="shrink-0 px-2 py-1.5 text-[10px] font-extrabold rounded-xl border border-emerald-600 bg-white text-emerald-800 shadow-[0_3px_0_#047857] active:translate-y-[2px] active:shadow-none touch-none select-none"><span id="receiveAllowanceBtnLabel">次月分を受取</span><br><span class="text-[9px] opacity-75">長押し</span></button>
+      </div>
     </section>
 
     <!-- ==========================================
@@ -957,20 +972,21 @@
         <div id="parentSubTabAllowance" class="hidden space-y-4">
           <div class="space-y-3 text-xs inner-box p-4 rounded-2xl">
             <h4 class="font-extrabold text-amber-500 mb-1">お小遣いの設定</h4>
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="opacity-75 font-bold block mb-1">毎月のお小遣い額（円）</label>
-                <input type="number" id="cfgAllowance" class="w-full inner-box rounded-xl px-3 py-2 font-bold">
-              </div>
-              <div>
-                <label class="opacity-75 font-bold block mb-1">残高への利子率（％）</label>
-                <input type="number" id="cfgRate" class="w-full inner-box rounded-xl px-3 py-2 text-emerald-500 font-bold">
-              </div>
+            <div class="space-y-2">
+              <label class="opacity-75 font-bold block mb-1" for="cfgAllowance">毎月のお小遣い額（円）</label>
+              <input type="number" id="cfgAllowance" class="w-full inner-box rounded-xl px-3 py-2 font-bold">
+              <p class="text-[11px] opacity-75 leading-relaxed">都度支給の場合は0円</p>
+              <p class="text-[11px] opacity-75 leading-relaxed">毎週・不定期のお小遣いや追加のお小遣いは、子供画面の「収入」から記録できます。</p>
+            </div>
+            <div class="space-y-2">
+              <label class="opacity-75 font-bold block mb-1" for="cfgRate">残ったお小遣いへのボーナス（利子率％）</label>
+              <input type="number" id="cfgRate" min="0" class="w-full inner-box rounded-xl px-3 py-2 text-emerald-500 font-bold">
+              <p class="text-[11px] opacity-75 leading-relaxed">通常は0%のままでOKです。設定すると、その月のお小遣いの使わなかった分にボーナスがつきます。</p>
             </div>
           </div>
           <!-- 固定のお小遣いチェック：ミッション一覧から移動（設定と保存キーは維持） -->
           <div class="space-y-2">
-            <h4 class="font-extrabold text-xs opacity-80">お小遣いチェックの連続ボーナス</h4>
+            <h4 class="font-extrabold text-xs opacity-80">お小遣いチェックのポイント設定</h4>
             <div id="parentAllowanceCheckBonus" class="space-y-1.5"></div>
           </div>
         </div>
@@ -1114,7 +1130,7 @@
             <!-- ご家庭別スタンプ＆継続ボーナスルール設定 -->
             <div class="pt-3 border-t border-slate-700/50 space-y-2.5">
               <h5 class="font-extrabold text-emerald-400 text-[11px] flex items-center gap-1">
-                <i class="fa-solid fa-sliders"></i> メダル減額＆継続ボーナスのルール設定
+                <i class="fa-solid fa-sliders"></i> メダルの共通ルール設定
               </h5>
               <div class="grid grid-cols-2 gap-3">
                 <div>
@@ -1126,18 +1142,11 @@
                   <input type="number" min="0" max="100" id="cfgSilverRate" class="w-full inner-box rounded-xl px-3 py-2 font-bold">
                 </div>
               </div>
-              <p class="text-[10px] opacity-65">※銀メダル期間を過ぎた過去日は「🥉銅メダル（0pt・連続記録のみ維持）」になります。</p>
-
-              <div class="grid grid-cols-2 gap-3 pt-1">
-                <div>
-                  <label class="opacity-75 font-bold block mb-1">🔥共通の初期ボーナス間隔（新規ミッション用）</label>
-                  <input type="number" min="1" max="365" id="cfgStreakInterval" class="w-full inner-box rounded-xl px-3 py-2 text-emerald-400 font-bold">
-                </div>
-                <div>
-                  <label class="opacity-75 font-bold block mb-1">🎁共通の初期ボーナス（新規用）</label>
-                  <input type="number" min="0" id="cfgStreakBonusPts" class="w-full inner-box rounded-xl px-3 py-2 text-amber-400 font-bold">
-                </div>
+              <div class="pt-1">
+                <label class="opacity-75 font-bold block mb-1">🥉銅メダルの付与率（％）</label>
+                <input type="number" min="0" max="100" id="cfgBronzeRate" class="w-full inner-box rounded-xl px-3 py-2 font-bold">
               </div>
+              <p class="text-[10px] opacity-65">当日は100%。銀メダル期間を過ぎた過去日は銅メダルの付与率を適用します。端数は切り捨て。0Pでも記録は残り、連続記録に含まれます。</p>
             </div>
           </div>
 
@@ -1466,7 +1475,7 @@
       allowanceReceipts: [],
       allowanceUndo: null,
       archivedTransactions: [],
-      interestRate: 30,
+      interestRate: 0,
       baseSavings: 3000,
       pointRate: 1,
       points: 0,
@@ -1481,10 +1490,11 @@
       soundMuted: false,      // 効果音ON/OFF
       silverMaxDays: 5,       // 遡り銀メダルがもらえる最大日数（デフォルト5日前まで）
       silverRate: 50,         // 銀メダルのポイント付与率（デフォルト50%）
+      bronzeRate: 0,         // 銅メダルのポイント付与率（デフォルト0%）
       streakBonusInterval: 7, // 何日連続ごとにボーナスを出すか（デフォルト7日ごと）
       streakBonusPts: 50,     // 継続ボーナスポイント（デフォルト50pt）
       missions: defaultMissions,
-      checkBonus: { bonusInterval: 7, bonusPts: 50 },
+      checkBonus: { bonusInterval: 7, bonusPts: 50, entryPts: 15, noSpendPts: 5 },
       missionLogs: {}, // { "YYYY-MM-DD": { "m1": { done: true, type: 'gold', pts: 10, bonusPts: 0 } } }
       stamps: {},
       transactions: [],
@@ -1499,7 +1509,7 @@
     const CHILD_DATA_PREFIX = 'ko_zenitendo_child_v1_';
     const PUBLIC_CONFIG_CACHE_KEY = 'ko_zenitendo_public_config_cache_v1';
     const PARENT_RULES_KEY = 'ko_zenitendo_parent_rules_v2';
-    const PUBLIC_RULE_KEYS = ['monthlyAllowance','interestRate','pointRate','silverMaxDays','silverRate','streakBonusInterval','streakBonusPts'];
+    const PUBLIC_RULE_KEYS = ['monthlyAllowance','interestRate','pointRate','silverMaxDays','silverRate','bronzeRate','streakBonusInterval','streakBonusPts'];
     const VALID_THEMES = ['theme-classic','theme-sakura','theme-matcha','theme-sky','theme-cyber','theme-sunset','theme-mint','theme-obsidian'];
     let familyIndex = initializeFamilyIndex();
     let activeChildId = familyIndex.activeId;
@@ -1667,8 +1677,10 @@
         allowanceMonth: /^\d{4}-(0[1-9]|1[0-2])$/.test(String(parsed.allowanceMonth || '')) ? parsed.allowanceMonth : getTodayStr().slice(0,7),
         silverMaxDays: parsed.silverMaxDays !== undefined ? Number(parsed.silverMaxDays) : 5,
         silverRate: parsed.silverRate !== undefined ? Number(parsed.silverRate) : 50,
+        bronzeRate: parsed.bronzeRate !== undefined ? Number(parsed.bronzeRate) : 0,
         streakBonusInterval: parsed.streakBonusInterval !== undefined ? Number(parsed.streakBonusInterval) : 7,
         streakBonusPts: parsed.streakBonusPts !== undefined ? Number(parsed.streakBonusPts) : 50,
+        checkBonus: { ...defaultState.checkBonus, ...(parsed.checkBonus || {}) },
         missions: parsed.missions && parsed.missions.length ? parsed.missions : structuredClone(defaultMissions),
         missionLogs: parsed.missionLogs || {},
         totalEarnedPoints: Number(parsed.totalEarnedPoints ?? ((Number(parsed.points)||0)+(Number(parsed.redeemedPoints)||0))),
@@ -1683,7 +1695,7 @@
     function rulesFromState(source) {
       const r = {};
       for (const key of PUBLIC_RULE_KEYS) r[key] = Number(source[key] ?? defaultState[key]);
-      r.checkBonus = structuredClone(source.checkBonus || defaultState.checkBonus);
+      r.checkBonus = { ...defaultState.checkBonus, ...(source.checkBonus || {}) };
       r.missions = structuredClone(source.missions || defaultMissions);
       r.theme = VALID_THEMES.includes(source.theme) ? source.theme : 'theme-classic';
       return r;
@@ -1710,7 +1722,7 @@
       const child = publicFamilyConfig?.children.find(c => c.id === activeChildId);
       if (!child?.rules) return target;
       for (const key of PUBLIC_RULE_KEYS) target[key] = child.rules[key];
-      target.checkBonus = structuredClone(child.rules.checkBonus);
+      target.checkBonus = { ...defaultState.checkBonus, ...child.rules.checkBonus };
       target.missions = structuredClone(child.rules.missions);
       return target;
     }
@@ -1735,7 +1747,7 @@
         if (!raw || typeof raw !== 'object') throw Error('子供別ルールがありません');
         const rules = {};
         for (const key of PUBLIC_RULE_KEYS) {
-          const n = raw[key];
+          const n = key === 'bronzeRate' && raw[key] === undefined ? 0 : raw[key];
           if (typeof n !== 'number' || !Number.isFinite(n) || n < 0) throw Error('ルール数値が不正です: '+key);
           rules[key] = n;
         }
@@ -1747,6 +1759,11 @@
         const b = raw.checkBonus;
         if (!Number.isFinite(b.bonusInterval) || !Number.isFinite(b.bonusPts) || b.bonusInterval < 1 || b.bonusPts < 0) throw Error('ボーナス形式が不正です');
         rules.checkBonus = {bonusInterval:b.bonusInterval,bonusPts:b.bonusPts};
+        for (const key of ['entryPts', 'noSpendPts']) {
+          const n = b[key] ?? defaultState.checkBonus[key];
+          if (!Number.isSafeInteger(n) || n < 0) throw Error('お小遣いチェックのポイント形式が不正です');
+          rules.checkBonus[key] = n;
+        }
         rules.theme = VALID_THEMES.includes(raw.theme) ? raw.theme : 'theme-classic';
         return rules;
       }
@@ -1955,7 +1972,7 @@
       const fields = {
         cfgAllowance: state.monthlyAllowance, cfgRate: state.interestRate,
         cfgPointRate: state.pointRate,
-        cfgSilverDays: state.silverMaxDays, cfgSilverRate: state.silverRate,
+        cfgSilverDays: state.silverMaxDays, cfgSilverRate: state.silverRate, cfgBronzeRate: state.bronzeRate,
         cfgStreakInterval: state.streakBonusInterval, cfgStreakBonusPts: state.streakBonusPts,
         cfgPin: state.pin
       };
@@ -2238,32 +2255,34 @@
       // 親設定に応じたルール表示ガイドの更新
       const sDays = state.silverMaxDays;
       const sRate = state.silverRate;
-      const sCalPts = Math.floor(15 * (sRate / 100));
+      const sCalPts = Math.floor(checkBasePts('entry') * (sRate / 100));
       const guideSilver = document.getElementById('guideSilverText');
       const guideBronze = document.getElementById('guideBronzeText');
       if (guideSilver) {
         guideSilver.textContent = sDays > 0 ? `🥈${sDays}日内 +${sCalPts}pt` : `🥈過去 なし`;
       }
       if (guideBronze) {
-        guideBronze.textContent = `🥉${sDays + 1}日〜 +0pt`;
+        guideBronze.textContent = `🥉${sDays + 1}日〜 +${Math.floor(checkBasePts('entry') * state.bronzeRate / 100)}pt`;
       }
 
       const legendEl = document.getElementById('matrixRuleLegend');
       if (legendEl) {
-        legendEl.innerHTML = `<strong class="text-amber-400">🌟 今日できたら、ポイントぜんぶ！</strong> / <strong class="text-slate-300">🥈 ${sDays > 0 ? `あとから${sDays}日以内なら、ポイント${sRate}%！` : "あとからの記録はポイントなし"}</strong> / <strong class="text-orange-400">🥉 ${sDays + 1}日以上前でも、記録は残せるよ！</strong>`;
+        legendEl.innerHTML = `<strong class="text-amber-400">🌟 今日できたら、ポイントぜんぶ！</strong> / <strong class="text-slate-300">🥈 ${sDays > 0 ? `あとから${sDays}日以内なら、ポイント${sRate}%！` : "あとからの記録は銅メダル"}</strong> / <strong class="text-orange-400">🥉 ${sDays + 1}日以上前はポイント${state.bronzeRate}%（記録も残るよ）！</strong>`;
       }
       const bonusInfoEl = document.getElementById('matrixStreakBonusInfo');
       if (bonusInfoEl) {
-        bonusInfoEl.innerHTML = state.streakBonusPts > 0
-          ? `🎁 ${state.streakBonusInterval}日つづけたら、ボーナスがもらえるよ！（ミッション別設定）`
-          : `🔥 どのメダルでも、連続記録はつづくよ！`;
+        bonusInfoEl.textContent = '🎁 連続ボーナスはミッションごとの設定だよ！';
       }
 
       document.getElementById('totalWealthDisplay').textContent = fin.totalWealth.toLocaleString();
       document.getElementById('baseSavingsDisplay').textContent = state.baseSavings.toLocaleString();
       document.getElementById('currentMonthRemDisplay').textContent = fin.currentMonthRemaining.toLocaleString();
 
-      document.getElementById('allowanceRemBig').textContent = fin.currentMonthRemaining.toLocaleString();
+      document.getElementById('allowanceRemBig').textContent = Math.max(0, fin.currentMonthRemaining).toLocaleString();
+      document.getElementById('allowanceSpentDisplay').textContent = fin.spentThisMonth.toLocaleString();
+      const savingsUsedRow = document.getElementById('allowanceSavingsUsedRow');
+      savingsUsedRow.classList.toggle('hidden', fin.currentMonthRemaining >= 0);
+      document.getElementById('allowanceSavingsUsedDisplay').textContent = Math.max(0, -fin.currentMonthRemaining).toLocaleString();
       document.getElementById('allowanceTotalSmall').textContent = fin.availableThisMonth.toLocaleString();
       document.getElementById('interestRateBadge').textContent = state.interestRate;
       document.getElementById('expectedBonusDisplay').textContent = fin.expectedBonus.toLocaleString();
@@ -2280,7 +2299,18 @@
       const nextMonth = shiftAllowanceMonth(state.allowanceMonth, 1);
       document.getElementById('nextAllowanceMonthLabel').textContent = allowanceMonthWithYear(nextMonth);
       document.getElementById('thisAllowanceMonthLabel').textContent = allowanceMonthWithYear(state.allowanceMonth);
-      document.getElementById('receiveAllowanceBtnLabel').textContent = `${allowanceMonthWithYear(nextMonth)}分を受取`;
+      const noMonthlyAllowance = Number(state.monthlyAllowance) === 0;
+      document.getElementById('receiveAllowanceBtnLabel').textContent = noMonthlyAllowance
+        ? `${allowanceMonthWithYear(state.allowanceMonth)}のお小遣いチェック完了！`
+        : `${allowanceMonthWithYear(nextMonth)}分のお小遣いを受け取った！`;
+      document.getElementById('receiveAllowanceBtn').title = noMonthlyAllowance
+        ? '約1.5秒長押しで今月の記録を確定して次の月へ'
+        : '約1.5秒長押しで次月のお小遣い受取を確認';
+      document.getElementById('nextAllowanceHeading').classList.toggle('hidden', noMonthlyAllowance);
+      document.getElementById('noMonthlyAllowanceHeading').classList.toggle('hidden', !noMonthlyAllowance);
+      document.getElementById('nextAllowanceTotalRow').classList.toggle('hidden', noMonthlyAllowance);
+      document.getElementById('allowanceBreakdown').classList.toggle('hidden', noMonthlyAllowance);
+      document.getElementById('bonusBreakdown').classList.toggle('hidden', state.interestRate <= 0 || fin.expectedBonus <= 0);
       document.getElementById('nextAllowanceBaseDisplay').textContent = state.monthlyAllowance.toLocaleString();
       document.getElementById('nextAllowanceTotalDisplay').textContent = (state.monthlyAllowance + fin.expectedBonus).toLocaleString();
       const yenVal = Math.floor(state.points * state.pointRate);
@@ -2508,6 +2538,20 @@
       showToast('連続ボーナスの設定を自動保存しました（過去の獲得分は維持）');
     }
 
+    // お小遣いチェックも通常ミッションと同じ遡り倍率を使用。
+    function checkBasePts(kind) {
+      const key = kind === 'entry' ? 'entryPts' : 'noSpendPts';
+      const fallback = kind === 'entry' ? 15 : 5;
+      const n = Number(state.checkBonus?.[key] ?? fallback);
+      return Number.isFinite(n) ? Math.max(0, Math.floor(n)) : fallback;
+    }
+    function checkEarnedPts(kind, dateStr) {
+      const diff = getDaysDiffFromToday(dateStr);
+      if (diff === 0) return checkBasePts(kind);
+      if (diff > 0 && diff <= state.silverMaxDays) return Math.floor(checkBasePts(kind) * state.silverRate / 100);
+      if (diff > state.silverMaxDays) return Math.floor(checkBasePts(kind) * state.bronzeRate / 100);
+      return 0;
+    }
     function claimNoSpend(dateStr) {
       if (dateStr > getTodayStr()) return;
       if (state.stamps[dateStr]) { showToast('この日はすでにお小遣いチェック済みだよ！'); return; }
@@ -2515,7 +2559,7 @@
         playSE('error'); showToast('この日は支出があるので無出費スタンプは押せないよ！'); return;
       }
       const wasComplete = isAllTodayMissionsDone(dateStr);
-      const pts = dateStr === getTodayStr() ? 5 : 1;
+      const pts = checkEarnedPts('noSpend', dateStr);
       state.stamps[dateStr] = { type: 'green', pts };
       adjustEarnedPoints(pts);
       const bonus = awardTodayBonus(CHECK_ID, dateStr);
@@ -2587,7 +2631,7 @@
           if (entry && entry.done) {
             if (entry.type === 'gold') cellContent = `<span class="text-sm drop-shadow" title="当日達成 (満額)">🌟</span>`;
             else if (entry.type === 'silver') cellContent = `<span class="text-sm drop-shadow" title="5日以内リカバリー (半分)">🥈</span>`;
-            else if (entry.type === 'bronze') cellContent = `<span class="text-sm drop-shadow" title="6日以上前 (0pt・継続維持)">🥉</span>`;
+            else if (entry.type === 'bronze') cellContent = `<span class="text-sm drop-shadow" title="銅メダル・連続記録維持">🥉</span>`;
           }
 
           html += `<td class="text-center px-1 ${d.isToday ? 'today-column' : ''}">
@@ -2711,27 +2755,27 @@
       const box = document.getElementById('modalDayStampStatus');
       const noSpendAction = document.getElementById('modalNoSpendAction');
       const hasExpense = state.transactions.some(t => t.dateStr === currentDetailDate && t.type === 'expense');
-      const noSpendPts = currentDetailDate === getTodayStr() ? 5 : 1;
+      const noSpendPts = checkEarnedPts('noSpend', currentDetailDate);
       noSpendAction.innerHTML = !stamp && !hasExpense ? `<button onclick="claimNoSpend(currentDetailDate)" class="w-full py-3 rounded-xl bg-emerald-500 text-slate-950 font-extrabold text-xs raised-action">🌱 ${currentDetailDate === getTodayStr() ? "今日は" : "この日は"}お金をつかってない (+${noSpendPts}小銭)</button>` : 
         `<p class="text-[10px] opacity-60 text-center">${hasExpense ? '支出を記録済み：無出費スタンプは押せません' : 'お小遣いチェック達成済み'}</p>`;
       const diff = getDaysDiffFromToday(currentDetailDate);
       const sDays = state.silverMaxDays;
       const sRate = state.silverRate;
-      const silverPts = Math.floor(15 * (sRate / 100));
+      const silverPts = Math.floor(checkBasePts('entry') * (sRate / 100));
 
       if (stamp) {
         const map = {
           gold: { label: `🌟 当日記帳スタンプ (+${stamp.pts}pt) 獲得済`, col: 'text-amber-400' },
           silver: { label: `🥈 ${sDays}日内リカバリー記帳 (+${stamp.pts}pt) 獲得済`, col: 'text-slate-300' },
-          bronze: { label: `🥉 過去記帳メダル (0pt・記録済)`, col: 'text-orange-400' },
+          bronze: { label: `🥉 過去記帳メダル (+${stamp.pts}pt・記録済)`, col: 'text-orange-400' },
           green: { label: `🌱 無出費スタンプ (+${stamp.pts}pt) 獲得済`, col: 'text-emerald-400' }
         };
         const info = map[stamp.type] || { label: 'スタンプ獲得済', col: 'text-amber-400' };
         box.innerHTML = `<span class="font-bold ${info.col}">${info.label}</span><span class="opacity-60 text-[10px]">達成</span>`;
       } else {
-        let canEarn = '🌟 当日記録で +15pt';
+        let canEarn = `🌟 当日記録で +${checkBasePts('entry')}pt`;
         if (diff >= 1 && diff <= sDays) canEarn = `🥈 ${diff}日前の記録で ${sRate}% (+${silverPts}pt)`;
-        else if (diff > sDays) canEarn = `🥉 ${sDays + 1}日以上前のため 0pt (記録のみ)`;
+        else if (diff > sDays) canEarn = `🥉 ${sDays + 1}日以上前は${state.bronzeRate}% (+${checkEarnedPts('entry', currentDetailDate)}pt)`;
         box.innerHTML = `<span class="text-amber-400 font-bold">まだスタンプがありません</span><span class="inner-box px-2 py-0.5 rounded text-[10px] font-bold">${canEarn}</span>`;
       }
     }
@@ -2820,7 +2864,7 @@
           earnedPts = Math.floor(basePts * (sRate / 100));
         } else {
           stampType = 'bronze';
-          earnedPts = 0;
+          earnedPts = Math.floor(basePts * state.bronzeRate / 100);
         }
 
         // 仮記録してストリークを計算
@@ -2848,7 +2892,7 @@
           showToast(`🥈 ${diff}日前のリカバリー！+${earnedPts}pt(${sRate}%)＆連続維持！`);
         } else {
           playSE('bronze');
-          showToast(`🥉 ${sDays + 1}日以上前のため0ptですが、銅メダルで連続記録が繋がったよ！`);
+          showToast(`🥉 銅メダル +${earnedPts}pt！連続記録も繋がったよ！`);
         }
       } else {
         // 取り消し時は付与したポイント＋継続ボーナス分も正確に戻す
@@ -2928,17 +2972,17 @@
       // スタンプ付与ルール（親設定の銀メダル日数・付与率に連動）
       let earnedPts = 0;
       let targetStampType = 'gold';
-      let targetPts = 15;
+      let targetPts = checkBasePts('entry');
 
       if (diff === 0) {
         targetStampType = 'gold';
-        targetPts = 15;
+        targetPts = checkBasePts('entry');
       } else if (diff >= 1 && diff <= sDays) {
         targetStampType = 'silver';
-        targetPts = Math.floor(15 * (sRate / 100));
+        targetPts = checkEarnedPts('entry', currentDetailDate);
       } else {
         targetStampType = 'bronze';
-        targetPts = 0;
+        targetPts = checkEarnedPts('entry', currentDetailDate);
       }
 
       const wasComplete = isAllTodayMissionsDone(currentDetailDate);
@@ -2979,7 +3023,7 @@
         showToast(`🥈 過去${sDays}日内の記帳で +${earnedPts}pt(${sRate}%)ゲット！`);
       } else if (targetStampType === 'bronze') {
         playSE('bronze');
-        showToast(`🥉 ${sDays + 1}日以上前の記帳なので0ptですが、銅メダルを記録したよ！`);
+        showToast(`🥉 銅メダルで +${earnedPts}pt！記帳したよ！`);
       } else {
         playSE('tap');
         showToast('帳面に記録したよ！');
@@ -3028,7 +3072,7 @@
       const noSpendBtn = document.getElementById('noSpendTodayBtn');
 
       if (stamp) {
-        const labelMap = { gold: '🌟 当日記帳 (+15pt) 獲得済', silver: '🥈 記帳 (+8pt) 獲得済', green: `🌱 無出費 (+${stamp.pts}pt) 獲得済` };
+        const labelMap = { gold: `🌟 当日記帳 (+${stamp.pts}pt) 獲得済`, silver: `🥈 記帳 (+${stamp.pts}pt) 獲得済`, green: `🌱 無出費 (+${stamp.pts}pt) 獲得済` };
         badge.textContent = labelMap[stamp.type] || '本日スタンプ獲得済';
         badge.className = 'text-[11px] text-emerald-500 font-bold';
         noSpendBtn.classList.add('opacity-50');
@@ -3453,9 +3497,9 @@ ${backupCode}`;
     function parentRescueCalendarStamp(dateStr) {
       const existing = state.stamps[dateStr];
       const prevPts = existing ? Number(existing.pts) : 0;
-      const diffPts = Math.max(0, 15 - prevPts);
+      const diffPts = Math.max(0, checkBasePts('entry') - prevPts);
 
-      state.stamps[dateStr] = { type: 'gold', pts: 15 };
+      state.stamps[dateStr] = { type: 'gold', pts: checkBasePts('entry') };
       adjustEarnedPoints(diffPts);
       saveState();
       renderRescueDayPanel();
@@ -3503,12 +3547,12 @@ ${backupCode}`;
 
         renderChildSelector();
         document.getElementById('cfgAllowance').value = state.monthlyAllowance;
-        document.getElementById('cfgRate').value = state.interestRate;
+        document.getElementById('cfgRate').value = state.monthlyAllowance === 0 ? 0 : state.interestRate;
+        syncAllowanceRateInput();
         document.getElementById('cfgPointRate').value = state.pointRate;
         document.getElementById('cfgSilverDays').value = state.silverMaxDays;
         document.getElementById('cfgSilverRate').value = state.silverRate;
-        document.getElementById('cfgStreakInterval').value = state.streakBonusInterval;
-        document.getElementById('cfgStreakBonusPts').value = state.streakBonusPts;
+        document.getElementById('cfgBronzeRate').value = state.bronzeRate;
         document.getElementById('cfgPin').value = state.pin;
 
         updateThemeButtonsUI();
@@ -3584,21 +3628,43 @@ ${backupCode}`;
       });
     }
 
+    function updateCheckPointSetting(key, value) {
+      if (!['entryPts', 'noSpendPts'].includes(key)) return;
+      if (String(value).trim() === '' || !Number.isSafeInteger(Number(value)) || Number(value) < 0) {
+        showToast('獲得小銭ポイントは0以上の整数にしてね');
+        renderParentAllowanceCheckBonus();
+        return;
+      }
+      (state.checkBonus ||= {})[key] = Number(value);
+      saveParentRulesForCurrent();
+      renderParentAllowanceCheckBonus();
+      showToast('お小遣いチェックの設定を自動保存しました（過去の獲得分は維持）');
+    }
+
     function renderParentAllowanceCheckBonus() {
       const list = document.getElementById('parentAllowanceCheckBonus');
       const rule = bonusRule(CHECK_ID);
       list.innerHTML = `
-        <div class="inner-box rounded-xl p-2.5 flex items-center justify-between text-xs">
-          <div class="flex items-center gap-2">
-            <span class="w-6 h-6 rounded flex items-center justify-center text-white" style="background-color:#d97706"><i class="fa-solid fa-wallet"></i></span>
-            <span class="font-bold">お小遣いチェック</span>
-            <span class="text-[10px] text-amber-400">必須</span>
+        <div class="inner-box rounded-2xl p-4 space-y-3 text-xs">
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span class="w-8 h-8 rounded-lg flex items-center justify-center text-white" style="background-color:#d97706"><i class="fa-solid fa-wallet"></i></span>
+              <span class="font-extrabold">お小遣いチェック <span class="text-amber-500 text-[10px]">必須</span></span>
+            </div>
+            <span class="opacity-60">固定</span>
           </div>
-          <span class="text-[10px] opacity-60">固定</span>
-        </div>
-        <div class="grid grid-cols-2 gap-2 text-[10px] mb-3 px-2">
-          <label>連続日数<input type="number" min="1" max="365" value="${rule.interval}" onchange="setMissionBonus('${CHECK_ID}', 'bonusInterval', this.value)" class="w-full inner-box rounded p-1.5 mt-1"></label>
-          <label>ボーナス小銭<input type="number" min="0" value="${rule.pts}" onchange="setMissionBonus('${CHECK_ID}', 'bonusPts', this.value)" class="w-full inner-box rounded p-1.5 mt-1"></label>
+          <div class="grid grid-cols-2 gap-2">
+            <div><label class="opacity-75 font-bold block mb-1">記帳した場合（1日あたり）</label><input type="number" min="0" step="1" value="${checkBasePts('entry')}" onchange="updateCheckPointSetting('entryPts', this.value)" class="w-full inner-box rounded-xl px-3 py-2 font-bold text-amber-400"></div>
+            <div><label class="opacity-75 font-bold block mb-1">出費なしの場合（1日あたり）</label><input type="number" min="0" step="1" value="${checkBasePts('noSpend')}" onchange="updateCheckPointSetting('noSpendPts', this.value)" class="w-full inner-box rounded-xl px-3 py-2 font-bold text-amber-400"></div>
+          </div>
+          <p class="text-[11px] opacity-70">当日100%・銀と銅のメダルは「基本設定」の共通付与率を使います。0Pでも記録は残ります。</p>
+          <div class="space-y-2">
+            <label class="opacity-75 font-bold block">連続したことによってあげる特別連続ボーナス小銭ポイント</label>
+            <div class="grid grid-cols-2 gap-2">
+              <div><label class="opacity-75 font-bold block mb-1">ボーナス小銭ポイント</label><input type="number" min="0" value="${rule.pts}" onchange="setMissionBonus('${CHECK_ID}', 'bonusPts', this.value)" class="w-full inner-box rounded-xl px-3 py-2 font-bold text-amber-400"></div>
+              <div><label class="opacity-75 font-bold block mb-1">連続日数（日）</label><input type="number" min="1" max="365" value="${rule.interval}" onchange="setMissionBonus('${CHECK_ID}', 'bonusInterval', this.value)" class="w-full inner-box rounded-xl px-3 py-2"></div>
+            </div>
+          </div>
         </div>`;
     }
 
@@ -3681,9 +3747,18 @@ ${backupCode}`;
       cfgPointRate:['pointRate',0,100000,false],
       cfgSilverDays:['silverMaxDays',0,30,true],
       cfgSilverRate:['silverRate',0,100,false],
-      cfgStreakInterval:['streakBonusInterval',1,365,true],
-      cfgStreakBonusPts:['streakBonusPts',0,1000000,true]
+      cfgBronzeRate:['bronzeRate',0,100,false]
     };
+    function syncAllowanceRateInput() {
+      const allowance = document.getElementById('cfgAllowance');
+      const rate = document.getElementById('cfgRate');
+      if (!allowance || !rate) return;
+      const noMonthlyAllowance = allowance.value.trim() !== '' && Number(allowance.value) === 0;
+      if (noMonthlyAllowance) rate.value = '0';
+      rate.disabled = noMonthlyAllowance;
+      rate.classList.toggle('opacity-50', noMonthlyAllowance);
+      rate.title = noMonthlyAllowance ? '毎月のお小遣いが0円の場合、ボーナス（利子率）は0%になります' : '';
+    }
     function commitParentInputs() {
       if (document.getElementById('parentConfigBox').classList.contains('hidden')) return true;
       const changes = {};
@@ -3699,6 +3774,7 @@ ${backupCode}`;
         el.setCustomValidity('');
         changes[key] = n;
       }
+      if (changes.monthlyAllowance === 0) changes.interestRate = 0;
       const pinEl = document.getElementById('cfgPin');
       const pin = pinEl.value.trim();
       if (!pin) { pinEl.setCustomValidity('合言葉を入力してください'); pinEl.reportValidity(); pinEl.focus(); return false; }
@@ -3720,6 +3796,9 @@ ${backupCode}`;
     function saveParentConfig() { if (commitParentInputs()) showToast('設定を自動保存しました'); }
     function setupParentAutoSave() {
       const box = document.getElementById('parentConfigBox');
+      box.addEventListener('input', e => {
+        if (e.target.id === 'cfgAllowance') syncAllowanceRateInput();
+      });
       box.addEventListener('change', e => {
         if (e.target.id in PARENT_FIELD_SPECS || e.target.id==='cfgPin' || e.target.id==='publicInitialWealth') commitParentInputs();
       });
@@ -3844,7 +3923,13 @@ ${backupCode}`;
       }
       const fin = calculateFinancials();
       const amount = state.monthlyAllowance + fin.expectedBonus;
-      const message = `${allowanceMonthWithYear(nextMonth)}分のお小遣い ${amount.toLocaleString()}円を受け取りましたか？\n現在の残り ${fin.currentMonthRemaining.toLocaleString()}円を貯金へ移し、利子 ${fin.expectedBonus.toLocaleString()}円は新しい月のお小遣いに加算します。`;
+      const noMonthlyAllowance = Number(state.monthlyAllowance) === 0;
+      const movement = fin.currentMonthRemaining >= 0
+        ? `今月の残り ${fin.currentMonthRemaining.toLocaleString()}円を貯金に移します。`
+        : `今月は貯金から ${Math.abs(fin.currentMonthRemaining).toLocaleString()}円使ったことを記録します。`;
+      const message = noMonthlyAllowance
+        ? `${allowanceMonthWithYear(state.allowanceMonth)}のお小遣いチェックを完了し、次の月に進みますか？\n${movement}`
+        : `${allowanceMonthWithYear(nextMonth)}分のお小遣い ${amount.toLocaleString()}円を受け取りますか？\n${movement}${fin.expectedBonus > 0 ? `\nボーナス ${fin.expectedBonus.toLocaleString()}円を新しい月のお小遣いに加算します。` : ''}`;
       openConfirmModal(message, () => {
         // 財務項目のみ退避。ミッション・スタンプ等は巻き戻さない。
         state.allowanceUndo = {
@@ -3867,7 +3952,7 @@ ${backupCode}`;
         getAudioCtx();
         playSE('allowance-coin');
         if (typeof confetti === 'function') confetti({ particleCount: 65, spread: 65, origin: { y: 0.38 }, colors: ['#fbbf24','#fde68a','#ffffff'] });
-        showToast(`${allowanceMonthWithYear(nextMonth)}分 ${amount.toLocaleString()}円を受け取ったよ！`);
+        showToast(noMonthlyAllowance ? `${allowanceMonthWithYear(state.allowanceMonth)}のお小遣いチェック完了！` : `${allowanceMonthWithYear(nextMonth)}分 ${amount.toLocaleString()}円を受け取ったよ！`);
       });
     }
     function undoLastAllowanceReceipt() {
