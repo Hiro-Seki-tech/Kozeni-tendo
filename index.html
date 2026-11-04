@@ -542,7 +542,7 @@
         </div>
 
         <!-- スタンプ配点ガイド -->
-        <div class="grid grid-cols-4 gap-1 text-center text-[10px] inner-box p-2 rounded-xl">
+        <div class="grid grid-cols-4 gap-1 text-center text-[10px] inner-box p-2 rounded-xl hidden">
           <div class="text-amber-500 font-bold">🌟当日 +15pt</div>
           <div class="text-slate-300 font-bold" id="guideSilverText">🥈5日内 +7pt</div>
           <div class="text-orange-400 font-bold" id="guideBronzeText">🥉6日〜 +0pt</div>
@@ -593,10 +593,10 @@
         </div>
         <div class="grid grid-cols-2 gap-2.5">
           <button id="noSpendTodayBtn" onclick="claimNoSpendToday()" class="tendo-raised tendo-raised-nospend py-3 px-3 rounded-2xl bg-emerald-600/25 hover:bg-emerald-600/40 border border-emerald-500/50 text-emerald-600 dark:text-emerald-200 font-extrabold text-xs flex items-center justify-center gap-1.5 shadow active:scale-95 transition">
-            <span>🌱 今日は使わなかった (+5pt)</span>
+            <span id="quickNoSpendLabel">🌱 今日は使わなかった (+5pt)</span>
           </button>
           <button onclick="openDayDetailModal(getTodayStr())" class="tendo-raised tendo-raised-mission py-3 px-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-lg active:scale-95 transition">
-            <span>🌟 今日は使った（記帳で＋15ポイント）</span>
+            <span id="quickEntryLabel">🌟 今日は使った（記帳で＋15ポイント）</span>
           </button>
         </div>
       </div>
@@ -702,7 +702,7 @@
           <ul>
             <li>小銭ポイント・お小遣いカードの表示を整理し、総資産の貯金と当月残高の内訳を表示。</li>
             <li>分析絵巻を暦基準に変更。支出の過去30日／全期間切替、暦3か月の出費・資産推移、過去30日間の記録に対応。</li>
-            <li>月末概算の記録方式を追加し、お小遣い管理ON／OFF時の判定・表示を整理。「使い方？」と過去救済・親設定を見直し、子供別の公開設定JSON出力とミッション選択表示を改善。</li>
+            <li>月末概算の記録方式を追加し、お小遣い管理ON／OFF時の判定・表示を整理。「使い方？」と過去救済・親設定を見直し、子供別の公開設定JSON出力とミッション選択表示を改善し、初回登録時の子供別ミッション・アイコンの混在を防止。</li>
           </ul>
         </article>
         <article>
@@ -955,7 +955,7 @@
         </div>
 
         <!-- My用：公開設定JSONの操作と読み込み状況 -->
-        <div id="publicConfigTools" class="space-y-3">
+        <div id="publicConfigTools" class="space-y-3 hidden">
         <!-- STEP14.1: 親がGitHubへ配置する公開ルールだけを書き出す。個人記録・PINは含めない -->
         <div id="publicConfigExportBox" class="inner-box rounded-xl p-3 space-y-2 border border-sky-500/30">
           <div class="text-xs font-extrabold text-sky-400">🌐 公開設定ファイル</div>
@@ -1627,6 +1627,8 @@
       fresh.__firstSetupComplete = true;
       fresh.__bootstrapPlaceholder = false;
       const rules = publicFamilyConfig?.children.find(c => c.id === id)?.rules || parentRulesFor(id);
+      // 初回登録時は、対象の子供専用ミッション（アイコンを含む）を使用する。
+      fresh.missions = structuredClone(rules.missions || defaultMissions);
       // 月のお小遣いをまだ受け取っていない初回状態に合わせて資産を設定。
       // 表示上の合計は貯金と今月残高の和なので、初回時点の残高を差し引く。
       const monthlyAllowance = Number(rules.monthlyAllowance || 0);
@@ -3141,6 +3143,9 @@
       const stamp = state.stamps[todayStr];
       const badge = document.getElementById('todayStampStatusBadge');
       const noSpendBtn = document.getElementById('noSpendTodayBtn');
+      // ボタンの予告ポイントは、現在の子供に適用されている親設定を表示する。
+      document.getElementById('quickNoSpendLabel').textContent = `🌱 今日は使わなかった (+${checkEarnedPts('noSpend', todayStr)}pt)`;
+      document.getElementById('quickEntryLabel').textContent = `🌟 今日は使った（記帳で＋${checkEarnedPts('entry', todayStr)}ポイント）`;
 
       if (stamp) {
         const labelMap = { gold: `🌟 当日記帳 (+${stamp.pts}pt) 獲得済`, silver: `🥈 記帳 (+${stamp.pts}pt) 獲得済`, green: `🌱 無出費 (+${stamp.pts}pt) 獲得済` };
@@ -3754,6 +3759,7 @@ ${backupCode}`;
       (state.checkBonus ||= {})[key] = Number(value);
       saveParentRulesForCurrent();
       renderParentAllowanceCheckBonus();
+      updateTodayStampStatusUI();
       showToast('お小遣いチェックの設定を自動保存しました（過去の獲得分は維持）');
     }
 
