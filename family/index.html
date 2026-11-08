@@ -683,7 +683,7 @@
     <div class="kozen-footer-line">無断転載及びハルシネーションはお断り申し上げます。</div>
     <div class="kozen-footer-meta">
       <span id="footer-version">Version 0.10（開発版 STEP 16-18）</span><span aria-hidden="true">／</span>
-      <span id="footer-updated">更新日 2026.11.01</span><span aria-hidden="true">／</span>
+      <span id="footer-updated">更新日 2026.11.08</span><span aria-hidden="true">／</span>
       <button type="button" id="open-trajectory" class="kozen-trajectory-button" onclick="openKozenTrajectory()">📜 小銭天童の軌跡</button>
     </div>
   </footer>
@@ -698,8 +698,9 @@
       <div id="plip-history-modal" class="kozen-history text-sm leading-relaxed">
         <span class="sr-only">小銭天童の軌跡</span>
         <article>
-          <h3>Version 0.10　2026.11.01</h3>
+          <h3>Version 0.10　2026.11.08</h3>
           <ul>
+            <li>親設定でミッションの上下入れ替えを追加し、ミッション表と保存設定に反映。親設定モーダルは外側タップで閉じず、×ボタンで閉じる方式に変更。</li>
             <li>小銭ポイント・お小遣いカードの表示を整理し、総資産の貯金と当月残高の内訳を表示。</li>
             <li>分析絵巻を暦基準に変更。支出の過去30日／全期間切替、暦3か月の出費・資産推移、過去30日間の記録に対応。</li>
             <li>月末概算の記録方式を追加し、お小遣い管理ON／OFF時の判定・表示を整理。「使い方？」と過去救済・親設定を見直し、子供別の公開設定JSON出力とミッション選択表示を改善し、初回登録時の子供別ミッション・アイコンの混在を防止。</li>
@@ -912,7 +913,7 @@
   <!-- ==========================================
        モーダル3：親の管理メニュー（合言葉ロック＋ミッション設定）
   =========================================== -->
-  <div id="parentModal" onclick="if (event.target === this) closeParentModal()" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4 overflow-y-auto">
+  <div id="parentModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4 overflow-y-auto">
     <div class="glass-card rounded-3xl max-w-md w-full p-6 border border-amber-500/40 space-y-4 my-6">
       <div class="flex justify-between items-center">
         <h3 class="font-extrabold text-base text-amber-500 flex items-center gap-2">
@@ -959,7 +960,7 @@
         <!-- STEP14.1: 親がGitHubへ配置する公開ルールだけを書き出す。個人記録・PINは含めない -->
         <div id="publicConfigExportBox" class="inner-box rounded-xl p-3 space-y-2 border border-sky-500/30">
           <div class="text-xs font-extrabold text-sky-400">🌐 公開設定ファイル</div>
-          <p class="text-[11px] opacity-85">子供ごとの保存済みルール、初期カラー、子供ID、公開用の仮ニックネーム・仮の初期総資産を <code>family-config.json</code> に書き出します。子供が登録した名前・実際の資産・履歴・合言葉は含みません。</p>
+          <p class="text-[11px] opacity-85">子供ごとの保存済みルール、初期カラー、子供ID、公開用の仮ニックネーム・仮の初期総資産を <code>family-config.json</code> に書き出します。子供が登録した名前・実際の資産・履歴は含みません。親の合言葉は含まれます。公開すると合言葉を第三者に読まれるため、ほかのサービスの暗証番号を使わないでください。</p>
           <button type="button" onclick="exportPublicFamilyConfig()" class="w-full py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs"><i class="fa-solid fa-file-arrow-down mr-1"></i> 公開設定JSONを書き出す</button>
           <p class="text-[10px] opacity-65">※ 編集は自動保存されます。子供の端末へ反映するにはJSONを再出力してGitHub上で更新してください。</p>
         </div>
@@ -1470,7 +1471,13 @@
       'fa-dove', 'fa-crow', 'fa-feather-pointed', 'fa-language',
       'fa-book', 'fa-pencil', 'fa-broom', 'fa-bath', 'fa-shoe-prints',
       'fa-teeth', 'fa-bed', 'fa-utensils', 'fa-futbol', 'fa-seedling',
-      'fa-gamepad', 'fa-music', 'fa-trash-can', 'fa-star'
+      'fa-gamepad', 'fa-music', 'fa-trash-can', 'fa-star',
+      // お片付け・整理整頓
+      'fa-shirt', 'fa-socks', 'fa-box-open', 'fa-boxes-stacked', 'fa-book-open',
+      // 運動・スポーツ
+      'fa-person-running', 'fa-person-walking', 'fa-bicycle',
+      'fa-person-swimming', 'fa-table-tennis-paddle-ball',
+      'fa-basketball', 'fa-volleyball', 'fa-dumbbell'
     ];
 
     const CHECK_ID = '__allowance_check__'; // 固定のお小遣いチェック（親の追加ミッションとは別）
@@ -1742,6 +1749,8 @@
       for (const key of PUBLIC_RULE_KEYS) target[key] = child.rules[key];
       target.checkBonus = { ...defaultState.checkBonus, ...child.rules.checkBonus };
       target.missions = structuredClone(child.rules.missions);
+      // JSONに合言葉があれば端末の保存値より優先。旧JSONでは従来の値を保持。
+      if (typeof publicFamilyConfig.parentPin === 'string') target.pin = publicFamilyConfig.parentPin;
       return target;
     }
     function refreshEffectiveRules() {
@@ -1797,7 +1806,9 @@
           redemptionEnabled: typeof c.redemptionEnabled === 'boolean' ? c.redemptionEnabled : undefined
         };
       });
-      return {schemaVersion:2,children};
+      // 旧JSONとの互換性を維持し、合言葉が存在する場合のみ採用する。
+      if (value.parentPin !== undefined && (typeof value.parentPin !== 'string' || !value.parentPin.trim())) throw Error('親の合言葉の形式が不正です');
+      return {schemaVersion:2,children, ...(value.parentPin !== undefined ? {parentPin:value.parentPin} : {})};
     }
     function applyPublicChildPreferences(children) {
       const allowance = readParentTabPreferences();
@@ -3656,7 +3667,10 @@ ${backupCode}`;
 
     function verifyPin() {
       const input = document.getElementById('pinInput').value;
-      if (input === state.pin) {
+      // 通常の合言葉は数字の全角・半角を同一視する。それ以外の文字は従来どおり区別する。
+      const normalizeDigits = value => value.replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0));
+      // 緊急時用の合言葉は大文字・小文字を区別しない。
+      if (normalizeDigits(input) === normalizeDigits(state.pin) || input.trim().toLowerCase() === 'xyz') {
         playSE('tap');
         const fin = calculateFinancials();
         document.getElementById('pinAuthBox').classList.add('hidden');
@@ -3818,10 +3832,24 @@ ${backupCode}`;
       showToast('ミッションの設定を自動保存しました（過去の獲得分は維持）');
     }
 
+    // ミッションの並び順は配列順で管理。固定のお小遣いチェックは別枠の最上段を維持。
+    function moveMission(id, direction) {
+      const missions = state.missions || [];
+      const index = missions.findIndex(m => m.id === id);
+      if (index < 0 || missions[index].fixed) return;
+      const target = index + direction;
+      if (target < 0 || target >= missions.length || missions[target].fixed) return;
+      [missions[index], missions[target]] = [missions[target], missions[index]];
+      saveParentRulesForCurrent();
+      renderParentMissionsList();
+      renderMatrix();
+      showToast('ミッションの順番を保存しました');
+    }
+
     function renderParentMissionsList() {
       const list = document.getElementById('parentMissionsList');
       const missions = state.missions || [];
-      list.innerHTML = missions.map(m => {
+      list.innerHTML = missions.map((m, index) => {
         const id = m.id;
         const rule = bonusRule(id);
         const iconButtons = availableMissionIcons.map(icon => `
@@ -3838,7 +3866,11 @@ ${backupCode}`;
                 <span class="w-8 h-8 shrink-0 rounded-lg flex items-center justify-center text-white" style="background-color:${m.color}"><i class="fa-solid ${m.icon}"></i></span>
                 <span class="font-extrabold truncate">${escapeHtml(m.title)}</span>
               </div>
-              ${m.fixed ? '<span class="opacity-60">固定</span>' : `<button type="button" onclick="deleteMission('${id}')" class="text-rose-400 p-2 shrink-0" aria-label="ミッションを削除"><i class="fa-solid fa-trash-can"></i></button>`}
+              <div class="flex items-center gap-1 shrink-0">
+                <button type="button" onclick="moveMission('${id}', -1)" ${index === 0 || m.fixed ? 'disabled' : ''} aria-label="${escapeHtml(m.title)}を上へ移動" title="上へ移動" class="inner-box rounded-lg w-9 h-9 font-extrabold text-base disabled:opacity-25 disabled:cursor-not-allowed">↑</button>
+                <button type="button" onclick="moveMission('${id}', 1)" ${index === missions.length - 1 || m.fixed ? 'disabled' : ''} aria-label="${escapeHtml(m.title)}を下へ移動" title="下へ移動" class="inner-box rounded-lg w-9 h-9 font-extrabold text-base disabled:opacity-25 disabled:cursor-not-allowed">↓</button>
+                ${m.fixed ? '<span class="opacity-60">固定</span>' : `<button type="button" onclick="deleteMission('${id}')" class="text-rose-400 p-2 shrink-0" aria-label="ミッションを削除"><i class="fa-solid fa-trash-can"></i></button>`}
+              </div>
             </div>
             <div>
               <label class="opacity-75 font-bold block mb-1">ミッション名</label>
@@ -3909,7 +3941,7 @@ ${backupCode}`;
       state.pin = pin;
       persistFamilyIndex();
       saveParentRulesForCurrent();
-      // 合言葉は公開JSONへ出さない。既存の子供別記録側にだけ保存する。
+      // 合言葉は端末にも保存し、設定JSONを書き出す際にも含める。
       saveState();
       return true;
     }
@@ -3933,6 +3965,7 @@ ${backupCode}`;
       return {
         schemaVersion: 2,
         familyId: 'default',
+        parentPin: state.pin,
         children: familyIndex.children.map((c,i) => {
           const rules = parentRulesFor(c.id);
           rules.theme = VALID_THEMES.includes(c.theme) ? c.theme : 'theme-classic';
