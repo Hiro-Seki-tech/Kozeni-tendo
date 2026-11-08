@@ -700,6 +700,7 @@
         <article>
           <h3>Version 0.10　2026.11.08</h3>
           <ul>
+            <li>公開版の初回登録を「今月のお小遣いの残り」1項目に変更。登録時点の残額を当月に反映し、翌月から通常計算へ移行。</li>
             <li>公開版では外部設定JSONの自動取得を停止し、親設定のJSON書き出し欄と関連説明を非表示に。端末内の保存設定と緊急用合言葉を維持。</li>
             <li>親設定でミッションの上下入れ替えを追加し、ミッション表と保存設定に反映。親設定モーダルは外側タップで閉じず、×ボタンで閉じる方式に変更。</li>
             <li>小銭ポイント・お小遣いカードの表示を整理し、総資産の貯金と当月残高の内訳を表示。</li>
@@ -902,9 +903,9 @@
         <input id="firstSetupName" type="text" maxlength="40" class="w-full inner-box rounded-xl p-3" placeholder="名前を入力">
         <p class="text-[11px] opacity-75 mt-1">名前はこの端末と、報告を受け取った親の端末にだけ保存されます。公開設定ファイルには載らないので、本名でもOK。ただし報告コードや端末を他人に見せると名前も見えます。</p>
       </div>
-      <div><label for="firstSetupWealth" class="text-xs font-bold block mb-1">今持っているお金の合計（円）</label>
+      <div><label for="firstSetupWealth" class="text-xs font-bold block mb-1"><span id="firstSetupAllowanceMonth"></span>のお小遣いの残り（円）</label>
         <input id="firstSetupWealth" type="number" min="0" step="1" inputmode="numeric" class="w-full inner-box rounded-xl p-3 font-bold">
-        <p class="text-[11px] opacity-75 mt-1">現金と貯金を合わせた金額。0円でもOK。最初は親が用意した仮の金額を表示しています。</p>
+        <p class="text-[11px] opacity-75 mt-1">まだ今月のお小遣いをもらっていない人は、お父さん・お母さんに確認して入力してね。0円でもOK。</p>
       </div>
       <p id="firstSetupError" role="alert" class="text-xs text-red-400 hidden"></p>
       <button type="button" onclick="completeFirstSetup()" class="w-full py-3 rounded-xl bg-amber-500 text-slate-950 font-extrabold">登録してはじめる！</button>
@@ -1591,7 +1592,9 @@
       const child = familyIndex.children.find(c => c.id === id);
       if (!child) return;
       document.getElementById('firstSetupName').value = child.label || '';
-      document.getElementById('firstSetupWealth').value = Number(child.initialWealth ?? 0);
+      const now = new Date();
+      document.getElementById('firstSetupAllowanceMonth').textContent = `${now.getFullYear()}年${now.getMonth() + 1}月`;
+      document.getElementById('firstSetupWealth').value = '';
       document.getElementById('firstSetupError').classList.add('hidden');
     }
     // STEP15.1: 入力中は記録を一切保存しない。登録データ保存と画面更新の失敗を分ける。
@@ -1603,7 +1606,7 @@
       const error = document.getElementById('firstSetupError');
       const fail = message => { error.textContent = message; error.classList.remove('hidden'); };
       if (!familyIndex.children.some(c => c.id === id) || !name || !wealthText || !Number.isSafeInteger(wealth) || wealth < 0) {
-        fail('名前と、0円以上の正しい金額を入力してください。'); return;
+        fail('名前と、今月のお小遣いの残り（0円以上）を入力してください。'); return;
       }
       if (hasRegisteredChild(id)) {
         fail('この子の記録はすでにあります。上書きせず、別の子を選んでください。'); return;
@@ -1624,10 +1627,11 @@
       const rules = publicFamilyConfig?.children.find(c => c.id === id)?.rules || parentRulesFor(id);
       // 初回登録時は、対象の子供専用ミッション（アイコンを含む）を使用する。
       fresh.missions = structuredClone(rules.missions || defaultMissions);
-      // 月のお小遣いをまだ受け取っていない初回状態に合わせて資産を設定。
-      // 表示上の合計は貯金と今月残高の和なので、初回時点の残高を差し引く。
+      // 初回登録時点の「今月のお小遣いの残り」をそのまま当月残高にする。
+      // 翌月の受け取り時には通常の月額＋ボーナス計算に戻る。
       const monthlyAllowance = Number(rules.monthlyAllowance || 0);
-      fresh.baseSavings = wealth - monthlyAllowance;
+      fresh.baseSavings = 0;
+      fresh.allowanceCarryBonus = wealth - monthlyAllowance;
       const dataKey = childStorageKey(id);
       const oldData = localStorage.getItem(dataKey); // 旧版の仮データを戻せるよう保持
       const oldIndex = JSON.stringify(familyIndex);
