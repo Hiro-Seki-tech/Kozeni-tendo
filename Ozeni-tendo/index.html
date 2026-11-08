@@ -234,11 +234,18 @@
     #matrixContainer .habit-matrix thead .matrix-fixed-right { z-index:7; }
     #matrixContainer .habit-matrix .matrix-fixed-left .matrix-name { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     #matrixContainer .habit-matrix .matrix-fixed-right { text-align:center; }
+    /* 大銭天道：広いPC画面では表をカード幅に広げ、ミッション名を読みやすくする。スマホは従来どおり。 */
+    @media (min-width:1024px) {
+      #matrixContainer .habit-matrix { width:100%; min-width:930px; }
+      #matrixContainer .habit-matrix col:first-child { width:240px !important; }
+      #matrixContainer .habit-matrix col:last-child { width:112px !important; }
+      #matrixContainer .habit-matrix .matrix-name { font-size:12px; }
+    }
     /* STEP 16-5: スマホのみ、左右の固定列を縮めて日付・スタンプ列を広げる */
     @media (max-width:767px) {
       #matrixContainer .habit-matrix col:first-child { width:96px !important; }
       #matrixContainer .habit-matrix col:not(:first-child):not(:last-child) { width:53px !important; }
-      #matrixContainer .habit-matrix col:last-child { width:64px !important; }
+      #matrixContainer .habit-matrix col:last-child { width:96px !important; }
     }
     .today-pressable { background:linear-gradient(160deg,#ffffff,#f0f4f4) !important; color:#334155 !important; border:2px solid #d7e0e5 !important; box-shadow:0 4px 0 #94a3b8,0 0 0 2px rgba(255,255,255,.22) !important; transform:scale(1.12); position:relative; z-index:2; font-weight:900; cursor:pointer; transition:transform .12s,box-shadow .12s; }
     .today-pressable:active { transform:scale(1.03) translateY(3px) !important; box-shadow:0 1px 0 #94a3b8 !important; }
@@ -479,7 +486,7 @@
     </div>
   </header>
 
-  <main class="max-w-xl mx-auto px-3 pt-2 space-y-2">
+  <main class="max-w-xl lg:max-w-6xl mx-auto px-3 pt-2 space-y-2">
 
     <!-- STEP4: コンパクトな宝物庫・お小遣い情報 -->
     <section id="pointsOverviewCard" class="bg-gradient-to-r from-amber-950 via-yellow-950 to-slate-950 text-white rounded-2xl px-3 py-2.5 border border-amber-400/60 shadow-lg space-y-1">
@@ -524,9 +531,10 @@
     <section class="glass-card rounded-2xl p-3 border border-indigo-500/30 space-y-2">
 
       <!-- タブボタン：継続ミッション表を先頭に -->
-      <div class="grid grid-cols-2 gap-2 inner-box p-1.5 rounded-2xl">
+      <div class="grid grid-cols-3 gap-1.5 inner-box p-1.5 rounded-2xl">
         <button id="tabMatrixBtn" onclick="switchMainTab('matrix')" class="py-2.5 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 bg-amber-500 text-slate-950 shadow-md transition"><span>⚡ ミッション表</span></button>
         <button id="tabCalendarBtn" onclick="switchMainTab('calendar')" class="py-2.5 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 opacity-70 hover:opacity-100 transition"><span>📅 月間カレンダー</span></button>
+        <button id="tabPlatesBtn" onclick="switchMainTab('plates')" class="py-2.5 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 opacity-70 hover:opacity-100 transition"><span>🏆 達成プレート</span></button>
       </div>
 
       <!-- ① 月間カレンダー コンテンツ -->
@@ -585,6 +593,16 @@
         <div class="hidden flex-wrap items-center justify-between text-[10px] opacity-85 inner-box px-3 py-2 rounded-xl gap-1">
           <span id="matrixRuleLegend"><strong class="text-amber-400">🌟 今日できたら、ポイントぜんぶ！</strong> / <strong class="text-slate-300">🥈 あとから5日以内なら、ポイント半分！</strong> / <strong class="text-orange-400">🥉 6日以上前でも、記録は残せるよ！</strong></span>
           <span class="font-bold text-emerald-500" id="matrixStreakBonusInfo">🎁 7日つづけたら、ボーナスがもらえるよ！</span>
+        </div>
+      </div>
+
+      <!-- 大銭天道：達成プレートの表示場所（機能は今後実装） -->
+      <div id="platesViewSection" class="hidden space-y-3">
+        <h3 class="font-extrabold text-sm text-amber-500"><i class="fa-solid fa-award mr-1"></i>達成プレート</h3>
+        <div class="inner-box rounded-2xl p-8 text-center space-y-3">
+          <i class="fa-solid fa-trophy text-4xl text-amber-400/70" aria-hidden="true"></i>
+          <p class="font-extrabold text-sm">ここに達成したミッションの記念プレートが並びます</p>
+          <p class="text-xs opacity-70">プレートの発行・保存機能は今後追加予定です。</p>
         </div>
       </div>
 
@@ -685,8 +703,8 @@
     <div id="footer-now-playing" class="kozen-footer-line kozen-now-playing" aria-live="polite">Now Playing：—</div>
     <div class="kozen-footer-line">無断転載及びハルシネーションはお断り申し上げます。</div>
     <div class="kozen-footer-meta">
-      <span id="footer-version">Version 0.10（開発版 STEP 16-18）</span><span aria-hidden="true">／</span>
-      <span id="footer-updated">更新日 2026.11.07</span><span aria-hidden="true">／</span>
+      <span id="footer-version">Version 0.15（開発版 STEP 16-18）</span><span aria-hidden="true">／</span>
+      <span id="footer-updated">更新日 2026.11.08</span><span aria-hidden="true">／</span>
       <button type="button" id="open-trajectory" class="kozen-trajectory-button" onclick="openKozenTrajectory()">📜 大銭天道の軌跡</button>
     </div>
   </footer>
@@ -700,6 +718,19 @@
       </div>
       <div id="plip-history-modal" class="kozen-history text-sm leading-relaxed">
         <span class="sr-only">大銭天道の軌跡</span>
+        <article>
+          <h3>2026年11月8日 — ミッション設定を大人向けに改善</h3>
+          <ul>
+            <li>ミッション登録の案内と入力例を大人向けに変更。</li>
+            <li>ミッションの小銭ポイント・連続ボーナス設定を非表示に。</li>
+            <li>仕事・運動・お金・旅行・家事などのアイコンを27種類追加。</li>
+            <li>設定変更時の通知と名前の保存ボタンを整理。設定画面は×ボタンで閉じる方式に。</li>
+            <li>新規利用時の初期ミッションを大人向けに変更（既存データは維持）。</li>
+            <li>PCのミッション表・カレンダーを横に広げ、ミッション名を読みやすく改善。</li>
+            <li>ミッション完了ボタンと達成プレートの第3タブを追加（操作画面のみ、完了・発行機能は未実装）。</li>
+            <li>ミッション設定に↑↓の並べ替えを追加。順番は自動保存され、ミッション表にも反映。</li>
+          </ul>
+        </article>
         <article>
           <h3>2026年11月7日 — 大人用の設定画面を整理</h3>
           <ul>
@@ -869,7 +900,7 @@
   <!-- ==========================================
        モーダル3：親の管理メニュー（合言葉ロック＋ミッション設定）
   =========================================== -->
-  <div id="parentModal" onclick="if (event.target === this) closeParentModal()" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4 overflow-y-auto">
+  <div id="parentModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4 overflow-y-auto">
     <div class="glass-card rounded-3xl max-w-md w-full p-6 border border-amber-500/40 space-y-4 my-6">
       <div class="flex justify-between items-center">
         <h3 class="font-extrabold text-base text-amber-500 flex items-center gap-2">
@@ -893,8 +924,7 @@
           <div class="flex items-center gap-2">
             <label for="myNicknameInput" class="text-xs font-bold shrink-0">自分の名前・ニックネーム</label>
             <select id="parentChildSelector" onchange="switchManagedChild(this.value)" class="hidden" aria-hidden="true" tabindex="-1"></select>
-            <input id="myNicknameInput" type="text" maxlength="30" class="inner-box flex-1 min-w-0 rounded-xl px-3 py-2 text-sm font-bold" placeholder="名前・ニックネームを入力">
-            <button type="button" onclick="renameManagedChild()" title="名前を保存" class="flex-shrink-0 rounded-xl border border-sky-500/50 bg-sky-500/15 text-sky-400 px-3 py-2 text-xs font-bold"><i class="fa-solid fa-check"></i> 保存</button>
+            <input id="myNicknameInput" type="text" maxlength="30" onchange="renameManagedChild()" class="inner-box flex-1 min-w-0 rounded-xl px-3 py-2 text-sm font-bold" placeholder="名前・ニックネームを入力">
           </div>
           <div class="hidden flex items-center gap-2 text-xs"><label for="publicInitialWealth" class="shrink-0">親が入力する子供の仮の総資産額</label><input id="publicInitialWealth" type="number" min="0" step="1" class="inner-box rounded-lg px-2 py-1 w-28" onchange="savePublicInitialWealth(this.value)"><span>円</span></div>
           <p class="text-[10px] opacity-70">ここで設定した名前・ニックネームは、この端末の表示にも使われます。</p>
@@ -967,18 +997,18 @@
         <div id="parentSubTabMissions" class="space-y-4">
           <div class="inner-box rounded-2xl p-4 space-y-3">
             <h4 class="font-extrabold text-xs text-amber-500 flex items-center justify-between">
-              <span><i class="fa-solid fa-plus-circle mr-1"></i> 子供に毎日コツコツやってもらいたいミッションを追加</span>
+              <span><i class="fa-solid fa-plus-circle mr-1"></i> 毎日コツコツやるミッションを登録</span>
             </h4>
             <div class="space-y-2 text-xs">
               <div>
                 <label class="opacity-75 font-bold block mb-1">ミッション名</label>
-                <input type="text" id="newMissionTitle" placeholder="例: 算数の宿題、お風呂掃除、靴ならべ" class="w-full inner-box rounded-xl px-3 py-2">
+                <input type="text" id="newMissionTitle" placeholder="例: 運動、読書、家計簿、仕事の進捗" class="w-full inner-box rounded-xl px-3 py-2">
               </div>
-              <div>
+              <div class="hidden">
                 <label class="opacity-75 font-bold block mb-1">子供がスタンプを押すことでもらえる1日あたりの獲得小銭ポイント</label>
                 <input type="number" id="newMissionPts" min="0" value="10" class="w-full inner-box rounded-xl px-3 py-2 font-bold text-amber-400">
               </div>
-              <div class="space-y-2">
+              <div class="space-y-2 hidden">
                 <label class="opacity-75 font-bold block">連続したことによってあげる特別連続ボーナス小銭ポイント</label>
                 <div class="grid grid-cols-2 gap-2">
                   <div>
@@ -1469,16 +1499,27 @@
       'fa-dove', 'fa-crow', 'fa-feather-pointed', 'fa-language',
       'fa-book', 'fa-pencil', 'fa-broom', 'fa-bath', 'fa-shoe-prints',
       'fa-teeth', 'fa-bed', 'fa-utensils', 'fa-futbol', 'fa-seedling',
-      'fa-gamepad', 'fa-music', 'fa-trash-can', 'fa-star'
+      'fa-gamepad', 'fa-music', 'fa-trash-can', 'fa-star',
+      // 仕事・勉強
+      'fa-briefcase', 'fa-laptop', 'fa-calendar-check', 'fa-chart-line', 'fa-graduation-cap',
+      // スポーツ・健康
+      'fa-dumbbell', 'fa-person-walking', 'fa-bicycle', 'fa-person-swimming', 'fa-heart-pulse',
+      // お金
+      'fa-wallet', 'fa-coins', 'fa-piggy-bank', 'fa-chart-simple', 'fa-receipt',
+      // 移動・旅行
+      'fa-car', 'fa-plane',
+      // 家事・暮らし
+      'fa-kitchen-set', 'fa-shirt', 'fa-jug-detergent', 'fa-spray-can-sparkles', 'fa-basket-shopping',
+      'fa-house', 'fa-leaf', 'fa-droplet', 'fa-screwdriver-wrench', 'fa-dog'
     ];
 
     const CHECK_ID = '__allowance_check__'; // 固定の金銭の記録（親の追加ミッションとは別）
     const defaultMissions = [
-      { id: 'm0', title: 'デュオリンゴ (英語・語学)', pts: 10, icon: 'fa-dove', color: '#58cc02' },
-      { id: 'm1', title: '算数・漢字の宿題', pts: 10, icon: 'fa-book', color: '#3b82f6' },
-      { id: 'm2', title: 'お風呂そうじ', pts: 10, icon: 'fa-bath', color: '#06b6d4' },
-      { id: 'm3', title: 'げんかんの靴ならべ', pts: 5, icon: 'fa-shoe-prints', color: '#10b981' },
-      { id: 'm4', title: '夜の歯みがき・仕上げ', pts: 5, icon: 'fa-teeth', color: '#f59e0b' }
+      { id: 'm0', title: '運動・ウォーキング', pts: 10, icon: 'fa-person-walking', color: '#10b981' },
+      { id: 'm1', title: '読書・学習', pts: 10, icon: 'fa-book', color: '#3b82f6' },
+      { id: 'm2', title: '仕事・創作を進める', pts: 10, icon: 'fa-laptop', color: '#a855f7' },
+      { id: 'm3', title: '掃除・片付け', pts: 5, icon: 'fa-house', color: '#06b6d4' },
+      { id: 'm4', title: '健康管理', pts: 5, icon: 'fa-heart-pulse', color: '#f59e0b' }
     ];
 
     const defaultState = {
@@ -2154,26 +2195,31 @@
     // タブ切り替え (カレンダー vs 継続マトリクス)
     // ==========================================
     function switchMainTab(tab) {
+      if (!['matrix', 'calendar', 'plates'].includes(tab)) return;
       playSE('tap');
       currentMainTab = tab;
-      const calBtn = document.getElementById('tabCalendarBtn');
-      const matBtn = document.getElementById('tabMatrixBtn');
-      const calSec = document.getElementById('calendarViewSection');
-      const matSec = document.getElementById('matrixViewSection');
+      const sections = {
+        matrix: document.getElementById('matrixViewSection'),
+        calendar: document.getElementById('calendarViewSection'),
+        plates: document.getElementById('platesViewSection')
+      };
+      const buttons = {
+        matrix: document.getElementById('tabMatrixBtn'),
+        calendar: document.getElementById('tabCalendarBtn'),
+        plates: document.getElementById('tabPlatesBtn')
+      };
+      Object.keys(sections).forEach(key => {
+        sections[key].classList.toggle('hidden', key !== tab);
+        buttons[key].className = 'py-2.5 rounded-xl font-extrabold text-xs flex items-center justify-center gap-1 bg-transparent transition ' +
+          (key === tab ? 'bg-amber-500 text-slate-950 shadow-md' : 'opacity-70 hover:opacity-100');
+      });
+      if (tab === 'calendar') renderCalendar();
+      if (tab === 'matrix') renderMatrix();
+    }
 
-      if (tab === 'calendar') {
-        calBtn.className = 'py-2.5 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 bg-amber-500 text-slate-950 shadow-md transition';
-        matBtn.className = 'py-2.5 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 opacity-70 hover:opacity-100 transition';
-        calSec.classList.remove('hidden');
-        matSec.classList.add('hidden');
-        renderCalendar();
-      } else {
-        matBtn.className = 'py-2.5 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 bg-amber-500 text-slate-950 shadow-md transition';
-        calBtn.className = 'py-2.5 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 opacity-70 hover:opacity-100 transition';
-        matSec.classList.remove('hidden');
-        calSec.classList.add('hidden');
-        renderMatrix();
-      }
+    // 達成ボタンはUI確認用。ミッション終了・データ保存は行わない。
+    function previewMissionComplete(missionId) {
+      showToast('ミッション完了機能は準備中です。記録は変更されません');
     }
 
     // ==========================================
@@ -2422,7 +2468,7 @@
 
       if (currentMainTab === 'calendar') {
         renderCalendar();
-      } else {
+      } else if (currentMainTab === 'matrix') {
         renderMatrix();
       }
 
@@ -2748,8 +2794,9 @@
         });
 
         html += `<td class="matrix-fixed-right text-center px-1">
-          <span class="font-extrabold text-[11px] ${streak > 0 ? 'text-amber-400' : 'opacity-50'}">
-            <i class="fa-solid fa-fire text-xs mr-0.5"></i>${streak}日
+          <span class="inline-flex items-center justify-center gap-1 whitespace-nowrap">
+            <span class="font-extrabold text-[11px] ${streak > 0 ? 'text-amber-400' : 'opacity-50'}"><i class="fa-solid fa-fire text-xs mr-0.5"></i>${streak}日</span>
+            <button type="button" title="ミッション完了（準備中）" aria-label="${escapeHtml(m.title)}の完了ボタン（準備中）" onclick="previewMissionComplete('${m.id}')" class="inline-flex items-center justify-center rounded-md border border-amber-500/40 text-amber-400 hover:bg-amber-500/10" style="width:23px;height:25px;touch-action:manipulation"><i class="fa-solid fa-award"></i></button>
           </span>
         </td></tr>`;
       });
@@ -3806,7 +3853,20 @@ ${backupCode}`;
       m[field] = value;
       saveParentRulesForCurrent();
       renderParentMissionsList();
-      showToast('ミッションの設定を自動保存しました（過去の獲得分は維持）');
+      // 設定の自動保存は維持。アイコン選択などのたびに通知は出さない。
+    }
+
+    // 大銭天道：ミッションの表示順を変更する。配列順を保存するため既存の保存形式は変えない。
+    function moveOzeniMission(id, direction) {
+      const missions = state.missions || [];
+      const index = missions.findIndex(m => m.id === id);
+      const target = index + direction;
+      if (index < 0 || target < 0 || target >= missions.length) return;
+      [missions[index], missions[target]] = [missions[target], missions[index]];
+      saveParentRulesForCurrent();
+      renderParentMissionsList();
+      if (currentMainTab === 'matrix') renderMatrix();
+      // 並べ替えに通知は出さず、設定画面を開いたままにする。
     }
 
     function renderParentMissionsList() {
@@ -3829,17 +3889,21 @@ ${backupCode}`;
                 <span class="w-8 h-8 shrink-0 rounded-lg flex items-center justify-center text-white" style="background-color:${m.color}"><i class="fa-solid ${m.icon}"></i></span>
                 <span class="font-extrabold truncate">${escapeHtml(m.title)}</span>
               </div>
-              ${m.fixed ? '<span class="opacity-60">固定</span>' : `<button type="button" onclick="deleteMission('${id}')" class="text-rose-400 p-2 shrink-0" aria-label="ミッションを削除"><i class="fa-solid fa-trash-can"></i></button>`}
+              <div class="flex items-center gap-1 shrink-0">
+                <button type="button" onclick="moveOzeniMission('${id}', -1)" ${missions.indexOf(m) === 0 ? 'disabled' : ''} title="一つ上へ" aria-label="${escapeHtml(m.title)}を一つ上へ" class="inner-box rounded-lg w-8 h-8 font-extrabold text-amber-400 disabled:opacity-25 disabled:cursor-not-allowed">↑</button>
+                <button type="button" onclick="moveOzeniMission('${id}', 1)" ${missions.indexOf(m) === missions.length - 1 ? 'disabled' : ''} title="一つ下へ" aria-label="${escapeHtml(m.title)}を一つ下へ" class="inner-box rounded-lg w-8 h-8 font-extrabold text-amber-400 disabled:opacity-25 disabled:cursor-not-allowed">↓</button>
+                ${m.fixed ? '<span class="opacity-60">固定</span>' : `<button type="button" onclick="deleteMission('${id}')" class="text-rose-400 p-2 shrink-0" aria-label="ミッションを削除"><i class="fa-solid fa-trash-can"></i></button>`}
+              </div>
             </div>
             <div>
               <label class="opacity-75 font-bold block mb-1">ミッション名</label>
               <input type="text" value="${escapeHtml(m.title).replace(/&quot;/g, '&quot;')}" onchange="updateMissionSetting('${id}', 'title', this.value)" class="w-full inner-box rounded-xl px-3 py-2">
             </div>
-            <div>
+            <div class="hidden">
               <label class="opacity-75 font-bold block mb-1">子供がスタンプを押すことでもらえる1日あたりの獲得小銭ポイント</label>
               <input type="number" min="0" step="1" value="${m.pts}" onchange="updateMissionSetting('${id}', 'pts', this.value)" class="w-full inner-box rounded-xl px-3 py-2 font-bold text-amber-400">
             </div>
-            <div class="space-y-2">
+            <div class="space-y-2 hidden">
               <label class="opacity-75 font-bold block">連続したことによってあげる特別連続ボーナス小銭ポイント</label>
               <div class="grid grid-cols-2 gap-2">
                 <div><label class="opacity-75 font-bold block mb-1">ボーナス小銭ポイント</label><input type="number" min="0" value="${rule.pts}" onchange="setMissionBonus('${id}', 'bonusPts', this.value)" class="w-full inner-box rounded-xl px-3 py-2 font-bold text-amber-400"></div>
