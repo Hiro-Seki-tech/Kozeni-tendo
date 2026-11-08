@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 2,
+  "familyId": "default",
+  "children": [
+    {
+      "id": "child_01",
+      "label": "レイタ",
+      "initialWealth": 100000,
+      "rules": {
+        "monthlyAllowance": 5000,
+        "interestRate": 30,
+        "pointRate": 1,
+        "silverMaxDays": 5,
+        "silverRate": 50,
+        "bronzeRate": 0,
+        "streakBonusInterval": 7,
+        "streakBonusPts": 50,
+        "checkBonus": {
+          "bonusInterval": 7,
+          "bonusPts": 50,
+          "entryPts": 15,
+          "noSpendPts": 10
+        },
+        "missions": [
+          {
+            "id": "m0",
+            "title": "英語アプリ",
+            "pts": 10,
+            "icon": "fa-dove",
+            "color": "#58cc02"
+          },
+          {
+            "id": "m1",
+            "title": "服を畳んで片づける",
+            "pts": 10,
+            "icon": "fa-futbol",
+            "color": "#3b82f6"
+          },
+          {
+            "id": "m2",
+            "title": "机の周りを整理する",
+            "pts": 10,
+            "icon": "fa-teeth",
+            "color": "#06b6d4"
+          },
+          {
+            "id": "m3",
+            "title": "２３時３０分前に寝る",
+            "pts": 15,
+            "icon": "fa-bed",
+            "color": "#ec4899"
+          }
+        ],
+        "theme": "theme-mint"
+      },
+      "allowanceEnabled": true,
+      "redemptionEnabled": true
+    },
+    {
+      "id": "child_02",
+      "label": "リンコ",
+      "initialWealth": 100000,
+      "rules": {
+        "monthlyAllowance": 2500,
+        "interestRate": 30,
+        "pointRate": 1,
+        "silverMaxDays": 5,
+        "silverRate": 50,
+        "bronzeRate": 0,
+        "streakBonusInterval": 7,
+        "streakBonusPts": 50,
+        "checkBonus": {
+          "bonusInterval": 7,
+          "bonusPts": 50,
+          "entryPts": 15,
+          "noSpendPts": 5
+        },
+        "missions": [
+          {
+            "id": "m0",
+            "title": "基礎トレ（算数）",
+            "pts": 10,
+            "icon": "fa-pencil",
+            "color": "#3b82f6"
+          },
+          {
+            "id": "m1",
+            "title": "コアプラ（理科・社会）",
+            "pts": 10,
+            "icon": "fa-book",
+            "color": "#f59e0b"
+          },
+          {
+            "id": "m2",
+            "title": "服をたたんでしまう",
+            "pts": 5,
+            "icon": "fa-futbol",
+            "color": "#ec4899",
+            "bonusPts": 30
+          },
+          {
+            "id": "m3",
+            "title": "いらないプリント捨てる",
+            "pts": 5,
+            "icon": "fa-trash-can",
+            "color": "#a855f7",
+            "bonusPts": 30
+          },
+          {
+            "id": "m4",
+            "title": "23時までに寝る",
+            "pts": 20,
+            "icon": "fa-bed",
+            "color": "#58cc02"
+          }
+        ],
+        "theme": "theme-classic"
+      },
+      "allowanceEnabled": true,
+      "redemptionEnabled": true
+    }
+  ]
+}
