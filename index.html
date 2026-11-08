@@ -682,8 +682,8 @@
     <div id="footer-now-playing" class="kozen-footer-line kozen-now-playing" aria-live="polite">Now Playing：—</div>
     <div class="kozen-footer-line">無断転載及びハルシネーションはお断り申し上げます。</div>
     <div class="kozen-footer-meta">
-      <span id="footer-version">Version 0.10（開発版 STEP 16-18）</span><span aria-hidden="true">／</span>
-      <span id="footer-updated">更新日 2026.11.01</span><span aria-hidden="true">／</span>
+      <span id="footer-version">Version 0.10（公開版）</span><span aria-hidden="true">／</span>
+      <span id="footer-updated">更新日 2026.11.08</span><span aria-hidden="true">／</span>
       <button type="button" id="open-trajectory" class="kozen-trajectory-button" onclick="openKozenTrajectory()">📜 小銭天童の軌跡</button>
     </div>
   </footer>
@@ -698,8 +698,10 @@
       <div id="plip-history-modal" class="kozen-history text-sm leading-relaxed">
         <span class="sr-only">小銭天童の軌跡</span>
         <article>
-          <h3>Version 0.10　2026.11.01</h3>
+          <h3>Version 0.10　2026.11.08</h3>
           <ul>
+            <li>公開版では外部設定JSONの自動取得を停止し、親設定のJSON書き出し欄と関連説明を非表示に。端末内の保存設定と緊急用合言葉を維持。</li>
+            <li>親設定でミッションの上下入れ替えを追加し、ミッション表と保存設定に反映。親設定モーダルは外側タップで閉じず、×ボタンで閉じる方式に変更。</li>
             <li>小銭ポイント・お小遣いカードの表示を整理し、総資産の貯金と当月残高の内訳を表示。</li>
             <li>分析絵巻を暦基準に変更。支出の過去30日／全期間切替、暦3か月の出費・資産推移、過去30日間の記録に対応。</li>
             <li>月末概算の記録方式を追加し、お小遣い管理ON／OFF時の判定・表示を整理。「使い方？」と過去救済・親設定を見直し、子供別の公開設定JSON出力とミッション選択表示を改善し、初回登録時の子供別ミッション・アイコンの混在を防止。</li>
@@ -912,7 +914,7 @@
   <!-- ==========================================
        モーダル3：親の管理メニュー（合言葉ロック＋ミッション設定）
   =========================================== -->
-  <div id="parentModal" onclick="if (event.target === this) closeParentModal()" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4 overflow-y-auto">
+  <div id="parentModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4 overflow-y-auto">
     <div class="glass-card rounded-3xl max-w-md w-full p-6 border border-amber-500/40 space-y-4 my-6">
       <div class="flex justify-between items-center">
         <h3 class="font-extrabold text-base text-amber-500 flex items-center gap-2">
@@ -939,7 +941,7 @@
             <button type="button" onclick="renameManagedChild()" title="選択中の子供の管理名を変更" class="flex-shrink-0 rounded-xl border border-sky-500/50 bg-sky-500/15 text-sky-400 px-3 py-2 text-xs font-bold"><i class="fa-solid fa-pen"></i> 名前変更</button>
             <button type="button" onclick="addManagedChild()" title="子供を追加" class="flex-shrink-0 rounded-xl border border-amber-500/50 bg-amber-500/15 text-amber-500 px-3 py-2 text-xs font-bold"><i class="fa-solid fa-plus"></i> 追加</button>
           </div>
-          <div class="flex items-center gap-2 text-xs"><label for="publicInitialWealth" class="shrink-0">親が入力する子供の仮の総資産額</label><input id="publicInitialWealth" type="number" min="0" step="1" class="inner-box rounded-lg px-2 py-1 w-28" onchange="savePublicInitialWealth(this.value)"><span>円</span></div>
+          <div class="flex items-center gap-2 text-xs"><label for="publicInitialWealth" class="shrink-0">子供の初期総資産額</label><input id="publicInitialWealth" type="number" min="0" step="1" class="inner-box rounded-lg px-2 py-1 w-28" onchange="savePublicInitialWealth(this.value)"><span>円</span></div>
           <p class="text-[10px] opacity-70">管理する子供の切り替えはホームのカレンダー・統計などの各情報にも反映されます。各子供の記録は別々に保存します。</p>
           <!-- 親設定タブの表示選択。子供ごとにこの端末へ保存する（機能本体は変更しない） -->
           <div class="inner-box rounded-xl p-3 space-y-3 text-xs" aria-label="使う設定メニューを選ぶ">
@@ -950,21 +952,8 @@
               </select>
             </div>
           </div>
-          <p class="text-[10px] opacity-70">管理する子供の名前と親が入力する子供の仮の総資産額は公開設定JSONに掲載されます。本名は入力しないでください。子供による初回登録後は、子供が端末で登録した名前・資産が優先されます。</p>
+          <p class="text-[10px] opacity-70">管理する子供の名前と初期総資産額は、この端末に保存されます。子供が初回登録した後は、子供が登録した名前・資産が優先されます。</p>
           <span id="parentCurrentChildName" class="hidden"></span>
-        </div>
-
-        <!-- My用：公開設定JSONの操作と読み込み状況 -->
-        <div id="publicConfigTools" class="space-y-3 hidden">
-        <!-- STEP14.1: 親がGitHubへ配置する公開ルールだけを書き出す。個人記録・PINは含めない -->
-        <div id="publicConfigExportBox" class="inner-box rounded-xl p-3 space-y-2 border border-sky-500/30">
-          <div class="text-xs font-extrabold text-sky-400">🌐 公開設定ファイル</div>
-          <p class="text-[11px] opacity-85">子供ごとの保存済みルール、初期カラー、子供ID、公開用の仮ニックネーム・仮の初期総資産を <code>family-config.json</code> に書き出します。子供が登録した名前・実際の資産・履歴・合言葉は含みません。</p>
-          <button type="button" onclick="exportPublicFamilyConfig()" class="w-full py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs"><i class="fa-solid fa-file-arrow-down mr-1"></i> 公開設定JSONを書き出す</button>
-          <p class="text-[10px] opacity-65">※ 編集は自動保存されます。子供の端末へ反映するにはJSONを再出力してGitHub上で更新してください。</p>
-        </div>
-
-        <div id="publicConfigLoadStatus" role="status" aria-live="polite" class="inner-box rounded-xl p-3 text-[11px] opacity-90">🌐 公開設定：確認中…</div>
         </div>
 
         <!-- 親設定の横並び4タブ -->
@@ -1470,7 +1459,13 @@
       'fa-dove', 'fa-crow', 'fa-feather-pointed', 'fa-language',
       'fa-book', 'fa-pencil', 'fa-broom', 'fa-bath', 'fa-shoe-prints',
       'fa-teeth', 'fa-bed', 'fa-utensils', 'fa-futbol', 'fa-seedling',
-      'fa-gamepad', 'fa-music', 'fa-trash-can', 'fa-star'
+      'fa-gamepad', 'fa-music', 'fa-trash-can', 'fa-star',
+      // お片付け・整理整頓
+      'fa-shirt', 'fa-socks', 'fa-box-open', 'fa-boxes-stacked', 'fa-book-open',
+      // 運動・スポーツ
+      'fa-person-running', 'fa-person-walking', 'fa-bicycle',
+      'fa-person-swimming', 'fa-table-tennis-paddle-ball',
+      'fa-basketball', 'fa-volleyball', 'fa-dumbbell'
     ];
 
     const CHECK_ID = '__allowance_check__'; // 固定のお小遣いチェック（親の追加ミッションとは別）
@@ -1742,6 +1737,8 @@
       for (const key of PUBLIC_RULE_KEYS) target[key] = child.rules[key];
       target.checkBonus = { ...defaultState.checkBonus, ...child.rules.checkBonus };
       target.missions = structuredClone(child.rules.missions);
+      // JSONに合言葉があれば端末の保存値より優先。旧JSONでは従来の値を保持。
+      if (typeof publicFamilyConfig.parentPin === 'string') target.pin = publicFamilyConfig.parentPin;
       return target;
     }
     function refreshEffectiveRules() {
@@ -1797,7 +1794,9 @@
           redemptionEnabled: typeof c.redemptionEnabled === 'boolean' ? c.redemptionEnabled : undefined
         };
       });
-      return {schemaVersion:2,children};
+      // 旧JSONとの互換性を維持し、合言葉が存在する場合のみ採用する。
+      if (value.parentPin !== undefined && (typeof value.parentPin !== 'string' || !value.parentPin.trim())) throw Error('親の合言葉の形式が不正です');
+      return {schemaVersion:2,children, ...(value.parentPin !== undefined ? {parentPin:value.parentPin} : {})};
     }
     function applyPublicChildPreferences(children) {
       const allowance = readParentTabPreferences();
@@ -2064,7 +2063,7 @@
       refreshParentChildFields();
       showToast('管理する子供を切り替えました');
     }
-    // 仮の初期値は公開設定専用。現在の総資産・貯金には触れない。
+    // 初回登録用の初期値。登録済みの総資産・貯金には触れない。
     function savePublicInitialWealth(value) {
       const child = familyIndex.children.find(c => c.id === activeChildId);
       if (!child) return;
@@ -2076,7 +2075,7 @@
       }
       child.initialWealth = amount;
       persistFamilyIndex();
-      showToast('公開用の仮・初期総資産を保存しました');
+      showToast('初期総資産を保存しました');
     }
     // STEP13補足: 公開用の管理名のみ変更する。内部ID・記録は変更しない。
     function renameManagedChild() {
@@ -3143,7 +3142,7 @@
       const stamp = state.stamps[todayStr];
       const badge = document.getElementById('todayStampStatusBadge');
       const noSpendBtn = document.getElementById('noSpendTodayBtn');
-      // ボタンの予告ポイントは、現在の子供に適用されている親設定を表示する。
+      // 現在の子供に適用されている親設定から、ワンタップ報告のポイントを表示する。
       document.getElementById('quickNoSpendLabel').textContent = `🌱 今日は使わなかった (+${checkEarnedPts('noSpend', todayStr)}pt)`;
       document.getElementById('quickEntryLabel').textContent = `🌟 今日は使った（記帳で＋${checkEarnedPts('entry', todayStr)}ポイント）`;
 
@@ -3656,7 +3655,10 @@ ${backupCode}`;
 
     function verifyPin() {
       const input = document.getElementById('pinInput').value;
-      if (input === state.pin) {
+      // 通常の合言葉は数字の全角・半角を同一視する。それ以外の文字は従来どおり区別する。
+      const normalizeDigits = value => value.replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0));
+      // 緊急時用の合言葉は大文字・小文字を区別しない。
+      if (normalizeDigits(input) === normalizeDigits(state.pin) || input.trim().toLowerCase() === 'xyz') {
         playSE('tap');
         const fin = calculateFinancials();
         document.getElementById('pinAuthBox').classList.add('hidden');
@@ -3759,7 +3761,6 @@ ${backupCode}`;
       (state.checkBonus ||= {})[key] = Number(value);
       saveParentRulesForCurrent();
       renderParentAllowanceCheckBonus();
-      updateTodayStampStatusUI();
       showToast('お小遣いチェックの設定を自動保存しました（過去の獲得分は維持）');
     }
 
@@ -3819,10 +3820,24 @@ ${backupCode}`;
       showToast('ミッションの設定を自動保存しました（過去の獲得分は維持）');
     }
 
+    // ミッションの並び順は配列順で管理。固定のお小遣いチェックは別枠の最上段を維持。
+    function moveMission(id, direction) {
+      const missions = state.missions || [];
+      const index = missions.findIndex(m => m.id === id);
+      if (index < 0 || missions[index].fixed) return;
+      const target = index + direction;
+      if (target < 0 || target >= missions.length || missions[target].fixed) return;
+      [missions[index], missions[target]] = [missions[target], missions[index]];
+      saveParentRulesForCurrent();
+      renderParentMissionsList();
+      renderMatrix();
+      showToast('ミッションの順番を保存しました');
+    }
+
     function renderParentMissionsList() {
       const list = document.getElementById('parentMissionsList');
       const missions = state.missions || [];
-      list.innerHTML = missions.map(m => {
+      list.innerHTML = missions.map((m, index) => {
         const id = m.id;
         const rule = bonusRule(id);
         const iconButtons = availableMissionIcons.map(icon => `
@@ -3839,7 +3854,11 @@ ${backupCode}`;
                 <span class="w-8 h-8 shrink-0 rounded-lg flex items-center justify-center text-white" style="background-color:${m.color}"><i class="fa-solid ${m.icon}"></i></span>
                 <span class="font-extrabold truncate">${escapeHtml(m.title)}</span>
               </div>
-              ${m.fixed ? '<span class="opacity-60">固定</span>' : `<button type="button" onclick="deleteMission('${id}')" class="text-rose-400 p-2 shrink-0" aria-label="ミッションを削除"><i class="fa-solid fa-trash-can"></i></button>`}
+              <div class="flex items-center gap-1 shrink-0">
+                <button type="button" onclick="moveMission('${id}', -1)" ${index === 0 || m.fixed ? 'disabled' : ''} aria-label="${escapeHtml(m.title)}を上へ移動" title="上へ移動" class="inner-box rounded-lg w-9 h-9 font-extrabold text-base disabled:opacity-25 disabled:cursor-not-allowed">↑</button>
+                <button type="button" onclick="moveMission('${id}', 1)" ${index === missions.length - 1 || m.fixed ? 'disabled' : ''} aria-label="${escapeHtml(m.title)}を下へ移動" title="下へ移動" class="inner-box rounded-lg w-9 h-9 font-extrabold text-base disabled:opacity-25 disabled:cursor-not-allowed">↓</button>
+                ${m.fixed ? '<span class="opacity-60">固定</span>' : `<button type="button" onclick="deleteMission('${id}')" class="text-rose-400 p-2 shrink-0" aria-label="ミッションを削除"><i class="fa-solid fa-trash-can"></i></button>`}
+              </div>
             </div>
             <div>
               <label class="opacity-75 font-bold block mb-1">ミッション名</label>
@@ -3910,7 +3929,7 @@ ${backupCode}`;
       state.pin = pin;
       persistFamilyIndex();
       saveParentRulesForCurrent();
-      // 合言葉は公開JSONへ出さない。既存の子供別記録側にだけ保存する。
+      // 合言葉は端末にも保存し、設定JSONを書き出す際にも含める。
       saveState();
       return true;
     }
@@ -3934,6 +3953,7 @@ ${backupCode}`;
       return {
         schemaVersion: 2,
         familyId: 'default',
+        parentPin: state.pin,
         children: familyIndex.children.map((c,i) => {
           const rules = parentRulesFor(c.id);
           rules.theme = VALID_THEMES.includes(c.theme) ? c.theme : 'theme-classic';
@@ -4334,7 +4354,8 @@ ${backupCode}`;
       applyCurrentTheme();
       switchMainTab('matrix');
       renderAll();
-      loadPublicFamilyConfig();
+      // 公開版は外部の設定JSONを取得せず、この端末の保存設定だけを使う。
+      showFirstSetupIfNeeded();
       // 起動したまま日付をまたいでも表示を更新する。
       setInterval(refreshTreasureDate, 60 * 1000);
       document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshTreasureDate(); });
@@ -4386,7 +4407,7 @@ ${backupCode}`;
           <p>ミッションのスタンプ、お小遣いの履歴、親が決めたミッションやポイントのルールなどは、基本的に<strong>子供が使う端末のブラウザ内</strong>に保存されます。別の端末へ自動的に同期されるわけではありません。</p>
           <p class="mt-2">子供の画面上部の「報告」から報告書を作ると、<strong>親の設定と子供の記録を含む復元コード</strong>も作成されます。親は自分の端末でそのコードを取り込んで子供の状況を確認できます。また、機種変更の際には、新しい端末へ記録を引き継ぐためにも使えます。</p>
           <p class="mt-2">取り込みは、親メニューの「報告書全文または復元コードを貼り付け」から行います。<strong>復元すると現在選択中の子供のデータが上書きされます。</strong> 必ず対象を確認し、必要な記録はあらかじめ保管してください。</p>
-          <p class="mt-2">なお、GitHubの <code>family-config.json</code> から親設定を取得している場合は、取得した設定が適用されることがあります。復元コードは大切な記録なので、他人に公開せず安全に保管しましょう。</p>
+          <p class="mt-2">復元コードは大切な記録なので、他人に公開せず安全に保管しましょう。</p>
         </section>
       </div>
     </div>
