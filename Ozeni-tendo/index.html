@@ -407,6 +407,56 @@
     #kozenTrajectoryModal .kozen-history h3 {font-size:14px;font-weight:800;margin:0 0 5px}
     #kozenTrajectoryModal .kozen-history ul {list-style:disc;padding-left:1.5em;margin:0}
     #kozenTrajectoryModal .kozen-history li {margin:3px 0}
+
+    /* 大銭天道 v0.23：ミッション完了とプレート消滅の演出（表示のみ） */
+    @keyframes ozeniMissionAwardFlash {
+      0% { filter:brightness(1); transform:scale(1); opacity:1; }
+      28% { filter:brightness(2.8) drop-shadow(0 0 13px #fff3b0); background:rgba(250,204,21,.32); }
+      55% { filter:brightness(1.9) drop-shadow(0 0 18px #facc15); transform:scale(1.012); }
+      100% { filter:brightness(2); opacity:0; transform:scale(.94); }
+    }
+    @keyframes ozeniPlateAppear {
+      0% { opacity:0; transform:translateY(-13px) scale(.86); filter:brightness(3); }
+      55% { opacity:1; filter:brightness(1.9) drop-shadow(0 0 12px #facc15); }
+      100% { opacity:1; transform:translateY(0) scale(1); filter:brightness(1); }
+    }
+    @keyframes ozeniPlateVanish {
+      0% { opacity:1; transform:scale(1); filter:brightness(1); }
+      45% { opacity:1; filter:brightness(2.4) drop-shadow(0 0 14px #facc15); }
+      100% { opacity:0; transform:scale(.78) translateY(-8px); filter:brightness(3); }
+    }
+    .ozeni-mission-awarding { animation:ozeniMissionAwardFlash .7s ease-in forwards; pointer-events:none; }
+    .ozeni-plate-appearing { animation:ozeniPlateAppear .75s ease-out both; }
+    .ozeni-plate-vanishing { animation:ozeniPlateVanish .46s ease-in forwards; pointer-events:none; }
+    @media (prefers-reduced-motion:reduce) {
+      .ozeni-mission-awarding,.ozeni-plate-appearing,.ozeni-plate-vanishing { animation:none; }
+    }
+
+    /* 大銭天道 v0.27：完了ボタンの長押し充填と発光 */
+    .ozeni-complete-btn { position:relative; isolation:isolate; overflow:hidden; font-weight:900; font-size:13px; line-height:1; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; }
+    .ozeni-complete-btn::before { content:''; position:absolute; inset:0; background:linear-gradient(0deg,rgba(251,191,36,.68),rgba(253,230,138,.30)); transform:scaleY(0); transform-origin:bottom; pointer-events:none; z-index:-1; }
+    .ozeni-complete-btn.is-holding::before { animation:ozeniCompleteFill .95s linear forwards; }
+    .ozeni-complete-btn.is-ready { animation:ozeniCompleteReady .48s ease-out; }
+    @keyframes ozeniCompleteFill { to { transform:scaleY(1); } }
+    @keyframes ozeniCompleteReady { 0% { background:#fff5b5; box-shadow:0 0 0 2px #fff7bd,0 0 16px 5px #facc15; color:#563500; } 100% { box-shadow:0 0 0 transparent; } }
+    @media (prefers-reduced-motion:reduce) { .ozeni-complete-btn.is-holding::before {animation:none;transform:scaleY(.65)} .ozeni-complete-btn.is-ready {animation:none;outline:2px solid #facc15;} }
+
+    /* 大銭天道 v0.26：4種類の金属製記念プレートと反射演出 */
+    .ozeni-metal-plate { position:relative; isolation:isolate; overflow:hidden; color:#222; border:2px solid rgba(255,255,255,.7); border-radius:14px; box-shadow:inset 0 2px 3px rgba(255,255,255,.9),inset 0 -3px 5px rgba(0,0,0,.22),0 5px 12px rgba(0,0,0,.25); background:linear-gradient(125deg,var(--metal-a),var(--metal-b) 25%,var(--metal-c) 45%,var(--metal-a) 65%,var(--metal-b) 85%,var(--metal-c)); }
+    .ozeni-metal-plate::before {content:'';position:absolute;inset:5px;border:1px solid rgba(65,65,65,.32);border-radius:9px;pointer-events:none;}
+    .ozeni-metal-plate::after {content:'';position:absolute;inset:-35% auto -35% 0;width:45%;background:linear-gradient(100deg,transparent 0%,rgba(255,255,255,.08) 26%,rgba(255,255,255,.72) 49%,rgba(255,255,255,.12) 72%,transparent 100%);pointer-events:none;z-index:2;transform:translateX(-180%) skewX(-16deg);animation:ozeniMetalGleam 10s ease-in-out infinite;}
+    @keyframes ozeniMetalGleam {0%,12%{transform:translateX(-180%) skewX(-16deg)}24%,100%{transform:translateX(420%) skewX(-16deg)}}
+    @media (prefers-reduced-motion:reduce) {.ozeni-metal-plate::after {animation:none;opacity:0;}}
+    .ozeni-metal-platinum {--metal-a:#a8b7c4;--metal-b:#f9fcff;--metal-c:#bac6d1;}
+    .ozeni-metal-gold {--metal-a:#a87313;--metal-b:#fff2a3;--metal-c:#dcae3d;}
+    .ozeni-metal-silver {--metal-a:#8d939d;--metal-b:#f3f5f8;--metal-c:#b4bac3;}
+    .ozeni-metal-bronze {--metal-a:#92512e;--metal-b:#f3be89;--metal-c:#b66c3d;}
+    .ozeni-metal-plate .ozeni-metal-engrave {color:#32343a;text-shadow:0 1px rgba(255,255,255,.65),0 -1px rgba(0,0,0,.17);}
+    .ozeni-metal-plate .ozeni-metal-icon {background:rgba(255,255,255,.3);border:1px solid rgba(50,50,50,.22);color:#3a3a3a;}
+    .ozeni-metal-selector {display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+    .ozeni-metal-selector button {font-size:11px;padding:4px 8px;border:1px solid rgba(100,100,100,.35);border-radius:7px;background:rgba(255,255,255,.36);color:#303030;font-weight:700;}
+    .ozeni-metal-selector button[aria-pressed="true"] {outline:2px solid #383838;outline-offset:1px;background:rgba(255,255,255,.72);}
+    .ozeni-metal-restore {color:#343434!important;border-color:rgba(50,50,50,.5)!important;background:rgba(255,255,255,.3);}
   </style>
 </head>
 <body class="theme-classic pb-24 select-none">
@@ -590,20 +640,21 @@
           <!-- JSでマトリクス表を生成 -->
         </div>
 
+        <div id="recentOzeniPlatesSection" class="hidden space-y-2">
+          <div class="flex items-center justify-between gap-2"><h4 class="text-xs font-extrabold text-amber-500">🏆 最近の達成プレート</h4><button type="button" onclick="switchMainTab('plates')" class="text-[11px] text-amber-400 hover:underline">すべて見る</button></div>
+          <div id="recentOzeniPlates" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+        </div>
+
         <div class="hidden flex-wrap items-center justify-between text-[10px] opacity-85 inner-box px-3 py-2 rounded-xl gap-1">
           <span id="matrixRuleLegend"><strong class="text-amber-400">🌟 今日できたら、ポイントぜんぶ！</strong> / <strong class="text-slate-300">🥈 あとから5日以内なら、ポイント半分！</strong> / <strong class="text-orange-400">🥉 6日以上前でも、記録は残せるよ！</strong></span>
           <span class="font-bold text-emerald-500" id="matrixStreakBonusInfo">🎁 7日つづけたら、ボーナスがもらえるよ！</span>
         </div>
       </div>
 
-      <!-- 大銭天道：達成プレートの表示場所（機能は今後実装） -->
+      <!-- 大銭天道：達成プレート -->
       <div id="platesViewSection" class="hidden space-y-3">
         <h3 class="font-extrabold text-sm text-amber-500"><i class="fa-solid fa-award mr-1"></i>達成プレート</h3>
-        <div class="inner-box rounded-2xl p-8 text-center space-y-3">
-          <i class="fa-solid fa-trophy text-4xl text-amber-400/70" aria-hidden="true"></i>
-          <p class="font-extrabold text-sm">ここに達成したミッションの記念プレートが並びます</p>
-          <p class="text-xs opacity-70">プレートの発行・保存機能は今後追加予定です。</p>
-        </div>
+        <div id="allOzeniPlates" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
       </div>
 
       <!-- 今日のワンタップアクション -->
@@ -644,14 +695,25 @@
         <h3 class="text-xs font-extrabold text-amber-500 mb-2 flex items-center gap-1.5">
           <i class="fa-solid fa-chart-pie"></i> 1. なにに一番つかった？
         </h3>
-        <div class="flex justify-center gap-2 mb-2" role="group" aria-label="出費の集計期間">
+        <!-- スマホでは期間を切替、PC（lg以上）では両期間を横並び表示 -->
+        <div class="flex justify-center gap-2 mb-2 lg:hidden" role="group" aria-label="出費の集計期間">
           <button type="button" id="piePeriod30" onclick="setPiePeriod('30')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500 text-slate-950">過去30日</button>
           <button type="button" id="piePeriodAll" onclick="setPiePeriod('all')" class="px-3 py-1.5 rounded-xl text-xs font-bold inner-box">これまで全部</button>
         </div>
-        <div class="relative h-52 flex items-center justify-center">
-          <canvas id="categoryPieChart"></canvas>
-          <div id="pieEmptyMsg" class="hidden absolute inset-0 flex items-center justify-center text-xs opacity-60">
-            この期間の出費データはありません
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div id="piePanel30">
+            <h4 class="hidden lg:block text-center text-xs font-bold mb-2">過去30日</h4>
+            <div class="relative h-52 flex items-center justify-center">
+              <canvas id="categoryPieChart"></canvas>
+              <div id="pieEmptyMsg" class="hidden absolute inset-0 flex items-center justify-center text-xs opacity-60">この期間の出費データはありません</div>
+            </div>
+          </div>
+          <div id="piePanelAll" class="hidden lg:block">
+            <h4 class="hidden lg:block text-center text-xs font-bold mb-2">これまで全部</h4>
+            <div class="relative h-52 flex items-center justify-center">
+              <canvas id="categoryPieChartAll"></canvas>
+              <div id="pieEmptyMsgAll" class="hidden absolute inset-0 flex items-center justify-center text-xs opacity-60">この期間の出費データはありません</div>
+            </div>
           </div>
         </div>
       </div>
@@ -659,7 +721,7 @@
       <!-- ② 月々の出費傾向（棒グラフ） -->
       <div class="inner-box rounded-2xl p-4">
         <h3 class="text-xs font-extrabold text-rose-500 mb-2 flex items-center gap-1.5">
-          <i class="fa-solid fa-chart-column"></i> 2. 月ごとの出費くらべ（使いすぎてないかな？）
+          <i class="fa-solid fa-chart-column"></i> 2. 月ごとの支出比較
         </h3>
         <div class="relative h-48">
           <canvas id="monthlySpendBarChart"></canvas>
@@ -667,7 +729,7 @@
       </div>
 
       <!-- ③ 総残高の推移（折れ線グラフ） -->
-      <div class="inner-box rounded-2xl p-4">
+      <div class="inner-box rounded-2xl p-4 hidden">
         <h3 class="text-xs font-extrabold text-emerald-500 mb-2 flex items-center gap-1.5">
           <i class="fa-solid fa-chart-line"></i> 3. お宝（総資産）の成長きろく
         </h3>
@@ -703,8 +765,8 @@
     <div id="footer-now-playing" class="kozen-footer-line kozen-now-playing" aria-live="polite">Now Playing：—</div>
     <div class="kozen-footer-line">無断転載及びハルシネーションはお断り申し上げます。</div>
     <div class="kozen-footer-meta">
-      <span id="footer-version">Version 0.15（開発版 STEP 16-18）</span><span aria-hidden="true">／</span>
-      <span id="footer-updated">更新日 2026.11.08</span><span aria-hidden="true">／</span>
+      <span id="footer-version">Version 0.30（開発版・使い方更新）</span><span aria-hidden="true">／</span>
+      <span id="footer-updated">更新日 2026.11.09</span><span aria-hidden="true">／</span>
       <button type="button" id="open-trajectory" class="kozen-trajectory-button" onclick="openKozenTrajectory()">📜 大銭天道の軌跡</button>
     </div>
   </footer>
@@ -718,6 +780,27 @@
       </div>
       <div id="plip-history-modal" class="kozen-history text-sm leading-relaxed">
         <span class="sr-only">大銭天道の軌跡</span>
+        <article>
+          <h3>2026年11月9日 — 金銭の記録画面とミッション終了の基盤を整備</h3>
+          <ul>
+            <li>日付詳細の帳面・記録の見出しを大人向けに変更。</li>
+            <li>ポイント・スタンプ表示と収支切替タブを非表示にし、支出入力を基本画面に。</li>
+            <li>無出費ボタンを記録ボタンの下に移動し、ポイント説明を非表示に。</li>
+            <li>日付詳細のミッション一覧を非表示にし、ミッション表に操作を集約。</li>
+            <li>支出カテゴリを大人向けの10種類に変更。基本設定から名称を編集・自動保存できるように。</li>
+            <li>金銭記録の内容欄の入力例を大人向けに変更。</li>
+            <li>支出分析の円グラフをPCでは過去30日・全期間の2列表示に。スマホは期間切替を維持。月別支出の見出しを整理し、総資産推移欄を非表示に。</li>
+            <li>ミッションの長押し・右クリックによる終了確認と終了記録の保存を追加。終了後は通常のミッション表・設定一覧から非表示にし、過去の達成記録は維持。</li>
+            <li>達成プレートを第3タブとミッション表の下に表示。復活時はプレートを消去し、過去の達成記録を維持してミッションを一覧の末尾に戻す。</li>
+            <li>ミッション完了時の発光・消失、達成プレート出現、完了取り消し時のプレート消滅演出を追加。</li>
+            <li>達成プレートにスタンプを押した日数を追加。完了時点の日数を保存し、既存プレートにも表示。</li>
+            <li>達成プレートをプラチナ・ゴールド・シルバー・ブロンズの4種類の金属調に変更。第3タブから金属を選択して保存できるようにし、時々光が横切る反射演出を追加。</li>
+            <li>ミッション完了ボタンを「完」に変更し、長押し中の充填表示・上昇音・完了時の発光を追加。</li>
+            <li>ミッション完了確定時に専用ファンファーレと金色の紙吹雪を追加。日々のスタンプ演出とは区別。</li>
+            <li>保存データのない初回訪問時に「使い方？」を自動表示。</li>
+            <li>「使い方？」を大銭天道専用の説明に更新。</li>
+          </ul>
+        </article>
         <article>
           <h3>2026年11月8日 — ミッション設定を大人向けに改善</h3>
           <ul>
@@ -756,10 +839,10 @@
     <div class="glass-card rounded-3xl max-w-md w-full p-6 border border-amber-500/40 space-y-4 my-6 max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center pb-2 border-b border-slate-700/60">
         <div>
-          <span class="text-xs font-bold text-amber-500" id="modalDaySubtitle">天童の日次帳面</span>
+          <span class="text-xs font-bold text-amber-500" id="modalDaySubtitle">本日の天道の帳面</span>
           <h3 class="font-extrabold text-lg text-white" id="modalDayTitle">2026年10月23日 (金)</h3>
         </div>
-        <div class="ml-auto text-right px-2" aria-live="polite">
+        <div class="hidden ml-auto text-right px-2" aria-live="polite">
           <div class="text-[10px] font-bold text-amber-400">この日の総獲得ポイント</div>
           <div id="modalDayEarnedPoints" class="text-lg font-extrabold text-amber-300 tabular-nums">+0pt</div>
         </div>
@@ -767,23 +850,23 @@
       </div>
 
       <!-- お小遣いの記帳：既存のスタンプ・入力・記録一覧を一つの枠にまとめる -->
-      <section class="rounded-2xl border border-amber-500/45 bg-amber-500/5 p-3 space-y-3" aria-label="お小遣いの記帳">
+      <section class="rounded-2xl border border-amber-500/45 bg-amber-500/5 p-3 space-y-3" aria-label="金銭の記録">
         <h4 class="font-extrabold text-sm text-amber-500 flex items-center gap-2">
-          <i class="fa-solid fa-wallet"></i> お小遣いの記帳
+          <i class="fa-solid fa-wallet"></i> 金銭の記録
         </h4>
       <!-- 達成状況は説明表示。操作ボタンとは別の見た目 -->
-      <div id="modalDayStampStatus" class="inner-box rounded-2xl p-3 flex items-center justify-between gap-2 text-xs">
+      <div id="modalDayStampStatus" class="hidden inner-box rounded-2xl p-3 flex items-center justify-between gap-2 text-xs">
         <!-- JSで描画 -->
       </div>
 
       <!-- 最優先：金銭の記録 -->
       <div class="space-y-3">
         <h4 class="font-extrabold text-xs text-amber-500 flex items-center gap-1.5">
-          <i class="fa-solid fa-pen-nib"></i> 今日のお小遣いをチェックする
+          <i class="fa-solid fa-pen-nib"></i> 今日の金銭の記録を行う
         </h4>
 
         <!-- 支出/収入タブ -->
-        <div class="grid grid-cols-2 gap-2 inner-box p-1 rounded-xl">
+        <div class="hidden grid-cols-2 gap-2 inner-box p-1 rounded-xl">
           <button id="modalTabExpense" onclick="switchModalTxType('expense')" class="py-2.5 rounded-lg font-bold text-xs bg-rose-500 text-white raised-action">
             <i class="fa-solid fa-cart-shopping mr-1"></i> つかった (支出)
           </button>
@@ -792,13 +875,11 @@
           </button>
         </div>
 
-        <div id="modalNoSpendAction" class="space-y-1"></div>
-
         <!-- カテゴリチップ -->
         <div id="modalCategoryChips" class="flex flex-wrap gap-1"></div>
 
         <div>
-          <input type="text" id="modalTxMemo" placeholder="内容 (例: お菓子、マンガなど)" class="w-full inner-box rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-400">
+          <input type="text" id="modalTxMemo" placeholder="内容（用途・購入品など）" class="w-full inner-box rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-400">
         </div>
 
         <div class="relative">
@@ -809,6 +890,7 @@
         <button onclick="addTransactionFromModal()" class="w-full py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-extrabold rounded-xl text-xs raised-action">
           この日に記録する！
         </button>
+        <div id="modalNoSpendAction" class="space-y-1"></div>
       </div>
 
       <!-- ③ その日の既存取引ログ -->
@@ -822,7 +904,7 @@
       </section>
 
       <!-- 天童ミッション：記帳とは別の枠で区別する -->
-      <section class="rounded-2xl border border-emerald-500/45 bg-emerald-500/5 p-3 space-y-2.5" aria-label="天童ミッション">
+      <section class="hidden rounded-2xl border border-emerald-500/45 bg-emerald-500/5 p-3 space-y-2.5" aria-label="天童ミッション">
       <!-- 自由ミッション：金銭の記録の下に表示 -->
       <div class="pt-3 border-t border-slate-700/60 space-y-2.5">
         <div class="flex items-center justify-between">
@@ -1108,6 +1190,12 @@
 
         <!-- サブタブB：基本設定＆カラーパレット＆換金 -->
         <div id="parentSubTabGeneral" class="hidden space-y-4">
+          <!-- 大銭天道：支出カテゴリの名称変更（追加・削除なし） -->
+          <div class="inner-box rounded-2xl p-4 space-y-3">
+            <h4 class="font-extrabold text-xs text-amber-500"><i class="fa-solid fa-tags mr-1"></i> 支出カテゴリの名称</h4>
+            <p class="text-[11px] opacity-75">10種類の名前を自由に変更できます。入力欄から離れると自動保存されます。</p>
+            <div id="expenseCategorySettings" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+          </div>
           <!-- 基本設定フォーム（大銭天道では非表示・内部要素は保持） -->
           <div class="hidden space-y-3 text-xs inner-box p-4 rounded-2xl">
             <h4 class="font-extrabold text-amber-500 mb-1">小銭ポイントの設定</h4>
@@ -1436,6 +1524,29 @@
         colors: ['#F6D98B', '#D5A548', '#FFF8E3', '#E9C46A'] });
     }
 
+    // 大銭天道：ミッションを卒業した瞬間だけの祝福。日々のシャンパン演出とは区別する。
+    function celebrateOzeniMissionGraduation() {
+      if (!state.soundMuted) {
+        // 少し長めの上昇ファンファーレ＋金属プレート誕生の余韻。
+        try {
+          [523.25,659.25,783.99,1046.50].forEach((freq,i) =>
+            playTone(freq, 'triangle', i === 3 ? 0.55 : 0.19, i * 0.16, 0.15));
+          playTone(1318.51, 'sine', 0.46, 0.62, 0.13);
+          playTone(1567.98, 'sine', 0.65, 0.76, 0.14);
+          playTone(2093.00, 'sine', 0.85, 0.88, 0.09);
+        } catch (e) {}
+      }
+      if (typeof confetti !== 'function' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      // 紙吹雪は一度だけ。既存のスタンプ演出や保存処理には影響させない。
+      confetti({ particleCount: 95, spread: 78, startVelocity: 37, gravity: 0.85,
+        origin: { x: 0.5, y: 0.56 }, colors: ['#fbbf24','#fde68a','#ffffff','#d6e8ff','#c58a43'] });
+      setTimeout(() => {
+        if (typeof confetti !== 'function') return;
+        confetti({ particleCount: 45, spread: 105, startVelocity: 25, gravity: 0.8,
+          scalar: 0.72, origin: { x: 0.5, y: 0.45 }, colors: ['#fff7ad','#fbbf24','#ffffff'] });
+      }, 260);
+    }
+
     function toggleSoundMute() {
       state.soundMuted = !state.soundMuted;
       updateSoundToggleUI();
@@ -1550,6 +1661,7 @@
       streakBonusPts: 50,     // 継続ボーナスポイント（デフォルト50pt）
       missions: defaultMissions,
       checkBonus: { bonusInterval: 7, bonusPts: 50, entryPts: 15, noSpendPts: 5 },
+      completedMissions: [], // 終了したミッションの記録。日々の達成履歴とは独立して保存
       missionLogs: {}, // { "YYYY-MM-DD": { "m1": { done: true, type: 'gold', pts: 10, bonusPts: 0 } } }
       stamps: {},
       transactions: [],
@@ -1565,6 +1677,16 @@
     const PARENT_RULES_KEY = 'ozeni_tendo_parent_rules_v2';
     const PUBLIC_RULE_KEYS = ['monthlyAllowance','interestRate','pointRate','silverMaxDays','silverRate','bronzeRate','streakBonusInterval','streakBonusPts'];
     const VALID_THEMES = ['theme-classic','theme-sakura','theme-matcha','theme-sky','theme-cyber','theme-sunset','theme-mint','theme-obsidian'];
+    // 初回判定は初期化が保存領域を作る前に行う。既存利用者のデータには触れない。
+    const ozeniFirstVisit = (() => {
+      try {
+        if (localStorage.getItem(FAMILY_INDEX_KEY) !== null) return false;
+        for (let i = 0; i < localStorage.length; i++) {
+          if (localStorage.key(i)?.startsWith(CHILD_DATA_PREFIX)) return false;
+        }
+        return true;
+      } catch (_) { return false; }
+    })();
     let familyIndex = initializeFamilyIndex();
     let activeChildId = familyIndex.activeId;
     // 公開ルールは子供の記録とは別の読み込み元として保持する。
@@ -1575,7 +1697,7 @@
     let allowancePressTimer = null;
     let currentMainTab = 'matrix'; // 'calendar' or 'matrix'
     let currentModalTxType = 'expense';
-    let modalSelectedCategory = 'お菓子・ジュース';
+    let modalSelectedCategory = '食費';
     let currentDetailDate = getTodayStr();
 
     let calYear = new Date().getFullYear();
@@ -1584,23 +1706,82 @@
     let selectedMissionIcon = 'fa-dove';
 
     let pieChartInstance = null;
+    let pieChartAllInstance = null;
     let barChartInstance = null;
     let lineChartInstance = null;
 
     const categories = {
       expense: [
-        { label: 'お菓子・ジュース', icon: 'fa-cookie-bite', color: '#f43f5e' },
-        { label: 'マンガ・本', icon: 'fa-book-open', color: '#fb923c' },
-        { label: 'ゲーム・ガチャ', icon: 'fa-gamepad', color: '#a855f7' },
-        { label: '文房具・雑貨', icon: 'fa-pencil', color: '#38bdf8' },
-        { label: 'お出かけ・遊び', icon: 'fa-ticket', color: '#4ade80' },
-        { label: 'その他', icon: 'fa-star', color: '#94a3b8' }
+        { id: 'food', label: '食費', icon: 'fa-utensils', color: '#f43f5e' },
+        { id: 'housing', label: '住居・光熱', icon: 'fa-house', color: '#fb923c' },
+        { id: 'daily', label: '日用品', icon: 'fa-bag-shopping', color: '#38bdf8' },
+        { id: 'transport', label: '交通・車', icon: 'fa-train', color: '#4ade80' },
+        { id: 'health', label: '医療・健康', icon: 'fa-heart-pulse', color: '#ec4899' },
+        { id: 'leisure', label: '趣味・娯楽', icon: 'fa-gamepad', color: '#a855f7' },
+        { id: 'learning', label: '学習・自己投資', icon: 'fa-book-open', color: '#facc15' },
+        { id: 'subscription', label: '通信・サブスク', icon: 'fa-mobile-screen', color: '#06b6d4' },
+        { id: 'family', label: '交際・家族', icon: 'fa-users', color: '#10b981' },
+        { id: 'other', label: 'その他', icon: 'fa-ellipsis', color: '#94a3b8' }
       ],
       income: [
         { label: 'お手伝いボーナス', icon: 'fa-hands-bubbles', color: '#10b981' },
         { label: 'ご褒美・臨時', icon: 'fa-gift', color: '#facc15' }
       ]
     };
+
+    // カテゴリは固定IDで識別し、名称だけをユーザー設定として保存する。
+    function applyExpenseCategoryNames() {
+      const names = state.expenseCategoryNames || {};
+      categories.expense.forEach(cat => {
+        cat.label = (typeof names[cat.id] === 'string' && names[cat.id].trim()) ? names[cat.id].trim() : cat.defaultLabel;
+      });
+    }
+    categories.expense.forEach(cat => { cat.defaultLabel = cat.label; });
+    applyExpenseCategoryNames();
+
+    function renderExpenseCategorySettings() {
+      const container = document.getElementById('expenseCategorySettings');
+      if (!container) return;
+      container.replaceChildren();
+      categories.expense.forEach((cat, index) => {
+        const row = document.createElement('label');
+        row.className = 'flex items-center gap-2 text-xs';
+        const icon = document.createElement('i');
+        icon.className = 'fa-solid ' + cat.icon + ' w-5 text-center text-amber-400';
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.maxLength = 24;
+        input.value = cat.label;
+        input.setAttribute('aria-label', '支出カテゴリ' + (index + 1) + 'の名前');
+        input.className = 'inner-box rounded-lg px-2 py-2 min-w-0 flex-1 font-bold';
+        input.addEventListener('change', () => {
+          const next = input.value.trim();
+          if (!next || categories.expense.some(other => other.id !== cat.id && other.label === next)) {
+            input.value = cat.label;
+            showToast('カテゴリ名は空欄や重複にできません');
+            return;
+          }
+          if (next === cat.label) return;
+          const previous = cat.label;
+          cat.label = next;
+          state.expenseCategoryNames = state.expenseCategoryNames || {};
+          state.expenseCategoryNames[cat.id] = next;
+          // 既に入力した記録も同じカテゴリとして集計できるよう名称を追従。
+          (state.transactions || []).forEach(tx => {
+            if (tx.type === 'expense' && (tx.categoryId === cat.id || (!tx.categoryId && tx.category === previous))) {
+              tx.category = next;
+              tx.categoryId = cat.id;
+            }
+          });
+          if (modalSelectedCategory === previous) modalSelectedCategory = next;
+          saveState();
+          renderModalCategoryChips();
+          showToast('カテゴリ名を保存しました');
+        });
+        row.append(icon, input);
+        container.appendChild(row);
+      });
+    }
 
     function childStorageKey(id) { return CHILD_DATA_PREFIX + id; }
     // STEP15: 既存の実データは登録済みとして扱い、空の端末だけ登録画面を出す。
@@ -1635,6 +1816,7 @@
         fresh.__bootstrapPlaceholder = false;
         localStorage.setItem(key, JSON.stringify(fresh));
         state = loadState();
+      applyExpenseCategoryNames();
         renderAll();
       } catch (e) {
         console.error('大銭天道の初期データ作成に失敗', e);
@@ -1705,6 +1887,7 @@
       familyIndex.activeId = id;
       try {
         state = loadState();
+      applyExpenseCategoryNames();
         applyCurrentTheme();
         renderAll();
         refreshParentChildFields();
@@ -1753,6 +1936,7 @@
         streakBonusPts: parsed.streakBonusPts !== undefined ? Number(parsed.streakBonusPts) : 50,
         checkBonus: { ...defaultState.checkBonus, ...(parsed.checkBonus || {}) },
         missions: parsed.missions && parsed.missions.length ? parsed.missions : structuredClone(defaultMissions),
+        completedMissions: Array.isArray(parsed.completedMissions) ? parsed.completedMissions : [],
         missionLogs: parsed.missionLogs || {},
         totalEarnedPoints: Number(parsed.totalEarnedPoints ?? ((Number(parsed.points)||0)+(Number(parsed.redeemedPoints)||0))),
         todayBonusAwards: parsed.todayBonusAwards || {},
@@ -1897,6 +2081,7 @@
         // 子供ごとの初回初期値を、未登録の領域にだけ作る。既存の実記録は触らない。
         for (const child of parsed.children) initializeChildFromPublicDefaults(child);
         state = loadState();
+      applyExpenseCategoryNames();
         if (!state.allowanceMonth) state.allowanceMonth = getTodayStr().slice(0,7);
         localStorage.setItem(PUBLIC_CONFIG_CACHE_KEY, JSON.stringify(parsed));
         applyCurrentTheme();
@@ -2115,6 +2300,7 @@
       familyIndex.activeId = id;
       persistFamilyIndex();
       state = loadState();
+      applyExpenseCategoryNames();
       if (!state.allowanceMonth) state.allowanceMonth = getTodayStr().slice(0,7);
       applyCurrentTheme();
       renderAll();
@@ -2215,11 +2401,226 @@
       });
       if (tab === 'calendar') renderCalendar();
       if (tab === 'matrix') renderMatrix();
+      if (tab === 'plates') renderOzeniPlates();
     }
 
-    // 達成ボタンはUI確認用。ミッション終了・データ保存は行わない。
-    function previewMissionComplete(missionId) {
-      showToast('ミッション完了機能は準備中です。記録は変更されません');
+    // 大銭天道：ミッション終了は日々の達成記録・設定から独立して保持する。
+    function isOzeniMissionCompleted(id) {
+      return (state.completedMissions || []).some(item => item.id === id && !item.restored);
+    }
+    function activeOzeniMissions() {
+      return (state.missions || []).filter(m => !isOzeniMissionCompleted(m.id));
+    }
+    function ozeniMissionStartDate(id) {
+      const dates = Object.keys(state.missionLogs || {}).filter(date => {
+        const entry = state.missionLogs[date]?.[id];
+        return entry && entry.done;
+      }).sort();
+      return dates[0] || null;
+    }
+    // 同じ日に複数回操作しても1日と数える。完了後の追加・変更では受賞時の数字を変えない。
+    function ozeniMissionStampedDays(id, throughDate) {
+      return Object.keys(state.missionLogs || {}).filter(date =>
+        /^\d{4}-\d{2}-\d{2}$/.test(date) && (!throughDate || date <= throughDate) &&
+        !!state.missionLogs[date]?.[id]?.done
+      ).length;
+    }
+    function completeOzeniMission(id) {
+      if (id === CHECK_ID || isOzeniMissionCompleted(id)) return;
+      const mission = (state.missions || []).find(m => m.id === id);
+      if (!mission) return;
+      if (!confirm(`「${mission.title}」を完了しますか？\n\nミッション表と通常の設定一覧から非表示になります。過去の達成記録は残ります。`)) return;
+      // 確認操作の直後に音声を準備（700ms後の演出でもブラウザが再生できるように）。
+      if (!state.soundMuted) getAudioCtx();
+      // 確認後、行を光らせてから完了を確定。アニメーション中は再操作を受け付けない。
+      if (ozeniAwardInProgress) return;
+      ozeniAwardInProgress = true;
+      const row = Array.from(document.querySelectorAll('#matrixContainer tr[data-ozeni-mission-id]'))
+        .find(el => el.dataset.ozeniMissionId === id);
+      if (row && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        row.classList.add('ozeni-mission-awarding');
+        setTimeout(() => finishOzeniMissionCompletion(mission, id), 700);
+      } else {
+        finishOzeniMissionCompletion(mission, id);
+      }
+    }
+    let ozeniAwardInProgress = false;
+    function finishOzeniMissionCompletion(mission, id) {
+      try {
+      state.completedMissions ||= [];
+      state.completedMissions.push({
+        id: mission.id, title: mission.title, icon: mission.icon, color: mission.color,
+        recordId: `plate_${Date.now()}_${Math.random().toString(36).slice(2,8)}`, restored: false,
+        startDate: ozeniMissionStartDate(id), endDate: getTodayStr(),
+        metal: 'platinum', stampedDays: ozeniMissionStampedDays(id, getTodayStr())
+      });
+      saveState();
+      renderParentMissionsList();
+      if (currentMainTab === 'matrix') renderMatrix();
+      renderOzeniPlates();
+      // 新しくできたプレートだけを光らせる。
+      const newPlate = document.querySelector('#recentOzeniPlates [data-ozeni-plate-id]');
+      if (newPlate && !window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+        newPlate.classList.add('ozeni-plate-appearing');
+      celebrateOzeniMissionGraduation();
+      showToast('ミッションを完了しました。達成プレートに記録しました');
+      } finally { ozeniAwardInProgress = false; }
+    }
+    // 達成プレートは現在完了しているミッションだけを描画する。復活時にはプレートを消去する。
+    function ozeniPlateDate(value) {
+      if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return '記録なし';
+      const [y, m, d] = value.split('-');
+      return `${Number(y)}年${Number(m)}月${Number(d)}日`;
+    }
+    function setOzeniPlateMetal(index, metal) {
+      if (!['platinum', 'gold', 'silver', 'bronze'].includes(metal)) return;
+      const record = (state.completedMissions || [])[index];
+      if (!record || record.restored || record.id === CHECK_ID) return;
+      record.metal = metal;
+      saveState();
+      renderOzeniPlates();
+    }
+    function ozeniPlateCard(item, index, compact = false) {
+      const mission = (state.missions || []).find(m => m.id === item.id);
+      const safeIcon = /^fa-[a-z0-9-]+$/.test(item.icon || '') ? item.icon : 'fa-award';
+      const stampedDays = Number.isInteger(item.stampedDays) && item.stampedDays >= 0
+        ? item.stampedDays : ozeniMissionStampedDays(item.id, item.endDate);
+      const metal = ['platinum', 'gold', 'silver', 'bronze'].includes(item.metal) ? item.metal : 'platinum';
+      const metalName = {platinum:'PLATINUM',gold:'GOLD',silver:'SILVER',bronze:'BRONZE'}[metal];
+      const selector = !compact ? `<div class="ozeni-metal-selector" role="group" aria-label="プレートの金属を選択">
+        <span class="text-[11px] font-bold ozeni-metal-engrave">金属：</span>
+        ${[['platinum','プラチナ'],['gold','ゴールド'],['silver','シルバー'],['bronze','ブロンズ']].map(([value,label]) => `<button type="button" aria-pressed="${metal===value}" onclick="setOzeniPlateMetal(${index},'${value}')">${label}</button>`).join('')}
+      </div>` : '';
+      return `<div data-ozeni-plate-id="${escapeHtml(item.recordId || String(index))}" class="ozeni-metal-plate ozeni-metal-${metal} ${compact ? 'p-3' : 'p-4'} space-y-2">
+        <div class="relative z-10 flex items-center gap-2"><span class="ozeni-metal-icon w-9 h-9 rounded-full flex items-center justify-center shrink-0"><i class="fa-solid ${safeIcon}"></i></span>
+          <div class="min-w-0 ozeni-metal-engrave"><div class="font-extrabold text-sm break-words">${escapeHtml(item.title || mission?.title || 'ミッション')}</div><div class="text-[10px] font-bold tracking-widest">✦ ${metalName} AWARD ✦</div></div></div>
+        <div class="relative z-10 ozeni-metal-engrave text-[11px]">開始：${ozeniPlateDate(item.startDate)}<span class="mx-1">／</span>完了：${ozeniPlateDate(item.endDate)}</div>
+        <div class="relative z-10 ozeni-metal-engrave text-[11px] font-extrabold">🏅 スタンプを押した日数：${stampedDays}日</div>
+        <div class="relative z-10">${selector}</div>
+        ${!compact && mission && item.id !== CHECK_ID ? `<button type="button" class="relative z-10 ozeni-metal-restore text-[11px] font-bold border rounded-lg px-3 py-1.5" onclick="restoreOzeniMission(${index})">このミッションを復活する</button>` : ''}
+      </div>`;
+    }
+    function renderOzeniPlates() {
+      const records = (state.completedMissions || []).map((item, index) => ({item,index})).filter(({item}) => !item.restored)
+        .sort((a,b) => (b.item.endDate || '').localeCompare(a.item.endDate || '') || b.index-a.index);
+      const all = document.getElementById('allOzeniPlates');
+      const recent = document.getElementById('recentOzeniPlates');
+      const recentSection = document.getElementById('recentOzeniPlatesSection');
+      if (all) all.innerHTML = records.length ? records.map(({item,index}) => ozeniPlateCard(item,index)).join('') : '<p class="text-xs opacity-70 inner-box rounded-xl p-5 text-center">ミッションを完了すると、ここに記念プレートが並びます。</p>';
+      if (recent) recent.innerHTML = records.slice(0,4).map(({item,index}) => ozeniPlateCard(item,index,true)).join('');
+      if (recentSection) recentSection.classList.toggle('hidden', records.length === 0);
+    }
+    function restoreOzeniMission(index) {
+      const record = (state.completedMissions || [])[index];
+      if (!record || record.restored || record.id === CHECK_ID || !(state.missions || []).some(m => m.id === record.id)) return;
+      if (!confirm(`「${record.title}」の完了を取り消して、ミッション表に戻しますか？\n\n表彰プレートは消滅します。過去の日々の達成記録は残ります。`)) return;
+      // プレートを光の中へ消してから、完了状態を取り消す。
+      if (ozeniRestoreInProgress) return;
+      ozeniRestoreInProgress = true;
+      const plateId = record.recordId || String(index);
+      const plates = Array.from(document.querySelectorAll('[data-ozeni-plate-id]'))
+        .filter(el => el.dataset.ozeniPlateId === plateId);
+      const finish = () => {
+        // 待機中に別の操作で配列が変わっても、対象の記録だけを削除する。
+        const currentIndex = state.completedMissions.indexOf(record);
+        if (currentIndex < 0) { ozeniRestoreInProgress = false; return; }
+        finishOzeniMissionRestore(currentIndex, record);
+      };
+      if (plates.length && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        plates.forEach(el => el.classList.add('ozeni-plate-vanishing'));
+        setTimeout(finish, 460);
+      } else finish();
+    }
+    let ozeniRestoreInProgress = false;
+    function finishOzeniMissionRestore(index, record) {
+      try {
+      // 完了記録（プレート）だけを取り消し、日別の達成履歴は残す。
+      state.completedMissions.splice(index, 1);
+      // ミッション表・設定一覧の両方で最後尾に復活させる。
+      const missionIndex = state.missions.findIndex(m => m.id === record.id);
+      if (missionIndex >= 0) {
+        const [mission] = state.missions.splice(missionIndex, 1);
+        state.missions.push(mission);
+      }
+      saveState();
+      renderParentMissionsList();
+      renderOzeniPlates();
+      if (currentMainTab === 'matrix') renderMatrix();
+      showToast('完了を取り消しました。プレートは消滅し、ミッションが復活しました');
+      } finally { ozeniRestoreInProgress = false; }
+    }
+    // 長押し（タッチ・マウス）またはPCの右クリックで終了確認を開く。
+    let ozeniCompleteHoldTimer = null;
+    let ozeniCompleteHoldTriggered = false;
+    let ozeniCompleteHoldButton = null;
+    let ozeniCompleteChargeSound = null;
+    function stopOzeniCompleteChargeSound() {
+      const sound = ozeniCompleteChargeSound;
+      ozeniCompleteChargeSound = null;
+      if (!sound) return;
+      try {
+        const now = sound.ctx.currentTime;
+        sound.gain.gain.cancelScheduledValues(now);
+        sound.gain.gain.setValueAtTime(Math.max(.0001, sound.gain.gain.value), now);
+        sound.gain.gain.exponentialRampToValueAtTime(.0001, now + .04);
+        sound.osc.stop(now + .05);
+      } catch (e) {}
+    }
+    function startOzeniCompleteChargeSound() {
+      if (state.soundMuted) return;
+      try {
+        const ctx = getAudioCtx();
+        if (!ctx) return;
+        const osc = ctx.createOscillator(), gain = ctx.createGain();
+        const now = ctx.currentTime;
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(260, now);
+        osc.frequency.exponentialRampToValueAtTime(960, now + .95);
+        gain.gain.setValueAtTime(.0001, now);
+        gain.gain.linearRampToValueAtTime(.045, now + .1);
+        gain.gain.linearRampToValueAtTime(.095, now + .9);
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.start(now);
+        ozeniCompleteChargeSound = {osc,gain,ctx};
+      } catch (e) { ozeniCompleteChargeSound = null; }
+    }
+    function startOzeniCompleteHold(id, button) {
+      cancelOzeniCompleteHold();
+      ozeniCompleteHoldTriggered = false;
+      if (!button || ozeniAwardInProgress) return;
+      ozeniCompleteHoldButton = button;
+      button.classList.remove('is-ready');
+      void button.offsetWidth;
+      button.classList.add('is-holding');
+      startOzeniCompleteChargeSound();
+      ozeniCompleteHoldTimer = setTimeout(() => {
+        ozeniCompleteHoldTimer = null;
+        ozeniCompleteHoldTriggered = true;
+        stopOzeniCompleteChargeSound();
+        button.classList.remove('is-holding');
+        button.classList.add('is-ready');
+        ozeniCompleteHoldButton = null;
+        setTimeout(() => button.classList.remove('is-ready'), 500);
+        completeOzeniMission(id);
+      }, 950);
+    }
+    function cancelOzeniCompleteHold() {
+      clearTimeout(ozeniCompleteHoldTimer);
+      ozeniCompleteHoldTimer = null;
+      stopOzeniCompleteChargeSound();
+      if (ozeniCompleteHoldButton) ozeniCompleteHoldButton.classList.remove('is-holding');
+      ozeniCompleteHoldButton = null;
+    }
+    function ozeniCompleteContextMenu(event, id) {
+      event.preventDefault();
+      cancelOzeniCompleteHold();
+      ozeniCompleteHoldTriggered = true;
+      completeOzeniMission(id);
+      return false;
+    }
+    function previewMissionComplete() {
+      if (ozeniCompleteHoldTriggered) { ozeniCompleteHoldTriggered = false; return; }
+      showToast('完了するには「完」を長押ししてください（PCは右クリックも可）');
     }
 
     // ==========================================
@@ -2471,6 +2872,7 @@
       } else if (currentMainTab === 'matrix') {
         renderMatrix();
       }
+      renderOzeniPlates();
 
       updateTodayStampStatusUI();
       updateSoundToggleUI();
@@ -2739,7 +3141,7 @@
 
     function renderMatrix() {
       const container = document.getElementById('matrixContainer');
-      const missions = state.missions || [];
+      const missions = activeOzeniMissions();
       // 金銭の記録は親が削除できない固定の最上段ミッション。
 
       // 直近9日間 + 今日の日付リスト（10日分）
@@ -2769,7 +3171,7 @@
       if (currentParentTabPreferences().allowance) html += renderCheckMatrixRow(dates);
       missions.forEach(m => {
         const streak = calculateStreak(m.id);
-        html += `<tr class="border-b border-slate-800/60 hover:bg-slate-800/30">
+        html += `<tr data-ozeni-mission-id="${escapeHtml(m.id)}" class="border-b border-slate-800/60 hover:bg-slate-800/30">
           <td class="matrix-fixed-left py-2.5 pr-1">
             <div class="flex items-center gap-1 min-w-0">
               <span class="w-5 h-5 rounded-md flex items-center justify-center text-[10px] text-white shadow-sm flex-shrink-0" style="background-color: ${m.color}">
@@ -2796,7 +3198,7 @@
         html += `<td class="matrix-fixed-right text-center px-1">
           <span class="inline-flex items-center justify-center gap-1 whitespace-nowrap">
             <span class="font-extrabold text-[11px] ${streak > 0 ? 'text-amber-400' : 'opacity-50'}"><i class="fa-solid fa-fire text-xs mr-0.5"></i>${streak}日</span>
-            <button type="button" title="ミッション完了（準備中）" aria-label="${escapeHtml(m.title)}の完了ボタン（準備中）" onclick="previewMissionComplete('${m.id}')" class="inline-flex items-center justify-center rounded-md border border-amber-500/40 text-amber-400 hover:bg-amber-500/10" style="width:23px;height:25px;touch-action:manipulation"><i class="fa-solid fa-award"></i></button>
+            <button type="button" title="長押しでミッション完了（PCは右クリックも可）" aria-label="${escapeHtml(m.title)}を長押しで完了" onpointerdown="if(event.button===0) startOzeniCompleteHold('${m.id}', this)" onpointerup="cancelOzeniCompleteHold()" onpointerleave="cancelOzeniCompleteHold()" onpointercancel="cancelOzeniCompleteHold()" oncontextmenu="return ozeniCompleteContextMenu(event, '${m.id}')" onclick="previewMissionComplete()" class="ozeni-complete-btn inline-flex items-center justify-center rounded-md border border-amber-500/40 text-amber-400 hover:bg-amber-500/10" style="width:23px;height:25px;touch-action:manipulation">完</button>
           </span>
         </td></tr>`;
       });
@@ -2840,8 +3242,11 @@
       const days = ['日', '月', '火', '水', '木', '金', '土'];
       const dayName = days[dObj.getDay()];
       document.getElementById('modalDayTitle').textContent = `${parts[0]}年${Number(parts[1])}月${Number(parts[2])}日 (${dayName})`;
-      document.getElementById('modalDaySubtitle').textContent = (dateStr === todayStr) ? '本日・天童の帳面' : '過去日・天童の帳面';
+      document.getElementById('modalDaySubtitle').textContent = (dateStr === todayStr) ? '本日の天道の帳面' : '過去日の天道の帳面';
 
+      // タブは非表示。開くたび支出入力を初期状態にする（収入の保存済み記録は維持）。
+      currentModalTxType = 'expense';
+      modalSelectedCategory = categories.expense[0].label;
       renderModalMissions();
       renderModalStampStatus();
       renderModalTransactions();
@@ -2907,8 +3312,7 @@
       const box = document.getElementById('modalDayStampStatus');
       const noSpendAction = document.getElementById('modalNoSpendAction');
       const hasExpense = state.transactions.some(t => t.dateStr === currentDetailDate && t.type === 'expense');
-      const noSpendPts = checkEarnedPts('noSpend', currentDetailDate);
-      noSpendAction.innerHTML = !stamp && !hasExpense ? `<button onclick="claimNoSpend(currentDetailDate)" class="w-full py-3 rounded-xl bg-emerald-500 text-slate-950 font-extrabold text-xs raised-action">🌱 ${currentDetailDate === getTodayStr() ? "今日は" : "この日は"}お金をつかってない (+${noSpendPts}小銭)</button>` : 
+      noSpendAction.innerHTML = !stamp && !hasExpense ? `<button onclick="claimNoSpend(currentDetailDate)" class="w-full py-3 rounded-xl bg-emerald-500 text-slate-950 font-extrabold text-xs raised-action">${currentDetailDate === getTodayStr() ? "今日は" : "この日は"}お金を使ってない</button>` : 
         `<p class="text-[10px] opacity-60 text-center">${hasExpense ? '支出を記録済み：無出費スタンプは押せません' : '金銭の記録達成済み'}</p>`;
       const diff = getDaysDiffFromToday(currentDetailDate);
       const sDays = state.silverMaxDays;
@@ -3052,16 +3456,20 @@
 
     function renderModalCategoryChips() {
       const c = document.getElementById('modalCategoryChips');
-      c.innerHTML = categories[currentModalTxType].map(cat => {
+      c.replaceChildren();
+      categories[currentModalTxType].forEach(cat => {
         const active = cat.label === modalSelectedCategory;
-        return `
-          <button type="button" onclick="selectModalCategory('${cat.label}')"
-            class="px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 transition ${active ? 'bg-amber-500 text-slate-950 font-extrabold shadow' : 'inner-box opacity-75'}">
-            <i class="fa-solid ${cat.icon}"></i>
-            <span>${cat.label}</span>
-          </button>
-        `;
-      }).join('');
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = `px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 transition ${active ? 'bg-amber-500 text-slate-950 font-extrabold shadow' : 'inner-box opacity-75'}`;
+        const icon = document.createElement('i');
+        icon.className = 'fa-solid ' + cat.icon;
+        const label = document.createElement('span');
+        label.textContent = cat.label;
+        button.append(icon, label);
+        button.addEventListener('click', () => selectModalCategory(cat.label));
+        c.appendChild(button);
+      });
     }
 
     function selectModalCategory(lbl) {
@@ -3086,6 +3494,7 @@
         dateStr: currentDetailDate,
         type: currentModalTxType,
         category: modalSelectedCategory,
+        categoryId: currentModalTxType === 'expense' ? categories.expense.find(cat => cat.label === modalSelectedCategory)?.id : undefined,
         memo,
         amount
       });
@@ -3279,9 +3688,7 @@
       Chart.defaults.color = chartTextColor;
       Chart.defaults.font.family = "'M PLUS Rounded 1c', sans-serif";
 
-      // 1. ジャンル別円グラフ
-      const catTotals = {};
-      categories.expense.forEach(c => catTotals[c.label] = 0);
+      // 1. ジャンル別円グラフ（PCは両期間、スマホは選択した期間のみ表示）
       const today = getTodayStr();
       const start30 = past30StartDate();
       const period30 = piePeriod === '30';
@@ -3291,49 +3698,35 @@
         btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold ' + (active ? 'bg-amber-500 text-slate-950' : 'inner-box');
         btn.setAttribute('aria-pressed', String(active));
       }
-      allTransactions().filter(t => t.type === 'expense' && t.dateStr <= today && (!period30 || t.dateStr >= start30)).forEach(t => {
-        catTotals[t.category] = (catTotals[t.category] || 0) + Number(t.amount);
-      });
+      document.getElementById('piePanel30').classList.toggle('hidden', !period30);
+      document.getElementById('piePanel30').classList.toggle('lg:block', !period30);
+      document.getElementById('piePanelAll').classList.toggle('hidden', period30);
+      document.getElementById('piePanelAll').classList.toggle('lg:block', period30);
 
-      const pieLabels = [];
-      const pieData = [];
-      const pieColors = [];
-      categories.expense.forEach(c => {
-        if (catTotals[c.label] > 0) {
-          pieLabels.push(c.label);
-          pieData.push(catTotals[c.label]);
-          pieColors.push(c.color);
-        }
-      });
-
-      const pieEmptyMsg = document.getElementById('pieEmptyMsg');
-      if (pieData.length === 0) {
-        pieEmptyMsg.classList.remove('hidden');
-      } else {
-        pieEmptyMsg.classList.add('hidden');
-      }
-
-      const ctxPie = document.getElementById('categoryPieChart').getContext('2d');
-      if (pieChartInstance) pieChartInstance.destroy();
-      pieChartInstance = new Chart(ctxPie, {
-        type: 'doughnut',
-        data: {
-          labels: pieLabels,
-          datasets: [{
-            data: pieData,
-            backgroundColor: pieColors,
-            borderColor: 'transparent',
-            borderWidth: 2
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { position: 'right', labels: { boxWidth: 12, font: { size: 11 }, color: chartTextColor } }
+      const expenseTx = allTransactions().filter(t => t.type === 'expense' && t.dateStr <= today);
+      const drawPie = (canvasId, emptyId, txs, oldChart) => {
+        const totals = {};
+        categories.expense.forEach(c => { totals[c.label] = 0; });
+        txs.forEach(t => { totals[t.category] = (totals[t.category] || 0) + Number(t.amount); });
+        const labels = [], data = [], colors = [];
+        categories.expense.forEach(c => {
+          if (totals[c.label] > 0) {
+            labels.push(c.label); data.push(totals[c.label]); colors.push(c.color);
           }
-        }
-      });
+        });
+        document.getElementById(emptyId).classList.toggle('hidden', data.length !== 0);
+        if (oldChart) oldChart.destroy();
+        return new Chart(document.getElementById(canvasId).getContext('2d'), {
+          type: 'doughnut',
+          data: { labels, datasets: [{ data, backgroundColor: colors, borderColor: 'transparent', borderWidth: 2 }] },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'right', labels: { boxWidth: 12, font: { size: 11 }, color: chartTextColor } } }
+          }
+        });
+      };
+      pieChartInstance = drawPie('categoryPieChart', 'pieEmptyMsg', expenseTx.filter(t => t.dateStr >= start30), pieChartInstance);
+      pieChartAllInstance = drawPie('categoryPieChartAll', 'pieEmptyMsgAll', expenseTx, pieChartAllInstance);
 
       // 2. 月別出費棒グラフ
       const currentYm = today.slice(0, 7);
@@ -3711,6 +4104,7 @@ ${backupCode}`;
       document.getElementById('parentModalPointsYen').textContent = Math.floor(state.points * state.pointRate).toLocaleString();
 
       renderChildSelector();
+      renderExpenseCategorySettings();
       document.getElementById('cfgAllowance').value = state.monthlyAllowance;
       document.getElementById('cfgRate').value = state.monthlyAllowance === 0 ? 0 : state.interestRate;
       syncAllowanceRateInput();
@@ -3871,7 +4265,7 @@ ${backupCode}`;
 
     function renderParentMissionsList() {
       const list = document.getElementById('parentMissionsList');
-      const missions = state.missions || [];
+      const missions = activeOzeniMissions();
       list.innerHTML = missions.map(m => {
         const id = m.id;
         const rule = bonusRule(id);
@@ -4389,6 +4783,8 @@ ${backupCode}`;
       switchMainTab('matrix');
       renderAll();
       loadPublicFamilyConfig();
+      // 完全な初回訪問だけ、既存の「使い方？」を自動表示する。
+      if (ozeniFirstVisit) openKozenUsage();
       // 起動したまま日付をまたいでも表示を更新する。
       setInterval(refreshTreasureDate, 60 * 1000);
       document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshTreasureDate(); });
@@ -4406,41 +4802,46 @@ ${backupCode}`;
   <!-- STEP 16-1: PC用使い方（PLIP共通ヘッダーから開く） -->
   <div id="kozenUsageModal" class="fixed inset-0 z-[180] hidden items-center justify-center bg-black/80 p-4" role="dialog" aria-modal="true" aria-labelledby="kozenUsageTitle" onclick="if(event.target===this)closeKozenUsage()">
     <div class="inner-box w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-2xl p-5 border" style="color:var(--text-main);border-color:var(--card-border)">
-      <div class="flex items-center justify-between gap-3 mb-3"><h2 id="kozenUsageTitle" class="text-lg font-extrabold">小銭天童の使い方</h2><button type="button" class="kozen-plip-action" onclick="closeKozenUsage()" aria-label="閉じる">× 閉じる</button></div>
+      <div class="flex items-center justify-between gap-3 mb-3"><h2 id="kozenUsageTitle" class="text-lg font-extrabold">☀️ 大銭天道の使い方</h2><button type="button" class="kozen-plip-action" onclick="closeKozenUsage()" aria-label="閉じる">× 閉じる</button></div>
       <div class="text-sm leading-relaxed space-y-4">
         <section>
-          <h3 class="font-extrabold text-base mb-2">🏠 おうちの方へ</h3>
-          <p>小銭天童は、子供の毎日の頑張りを、ご褒美スタンプと小銭ポイントで応援するアプリです。</p>
-          <p class="mt-2">お手伝い、お勉強、毎日の習慣など、ご家庭に合ったミッションを自由に決められます。子供が達成したミッションにスタンプを押すと、ポイントが貯まります。続けて頑張ると、ボーナスポイントも獲得できます。</p>
-          <p class="mt-2">お小遣い管理は任意です。使わない場合は「金銭の記録」も表示されず、通常のミッションだけで楽しめます。</p>
+          <h3 class="font-extrabold text-base mb-2">🌱 大銭天道とは？</h3>
+          <p>大銭天道は、<strong>毎日の小さな積み重ねを、楽しく記録するアプリ</strong>です。</p>
+          <p class="mt-2">日々のお金の使い方を記録しながら、運動・勉強などの自分で決めた「ミッション」を続けていくことを応援します。</p>
+          <p class="mt-2">頑張った日にはスタンプを。完成したミッションには達成プレートを。</p>
+          <p class="mt-2">お天道様と一緒に、毎日の暮らしを少しずつ育てていきましょう！</p>
         </section>
         <section>
           <h3 class="font-extrabold text-base mb-2">🔰 最初にすること</h3>
-          <ol class="list-decimal pl-5 space-y-2">
-            <li><strong>子供が使う端末を決める</strong>：子供のスマホや家族共用のタブレットなど、毎日スタンプやお小遣いを記録する端末で小銭天童を開きます。<strong>最初の設定も、その端末で行ってください。</strong></li>
-            <li><strong>親メニューを開く</strong>：子供が使う端末で、画面の鍵マークを押します。</li>
-            <li><strong>基本設定を確認する</strong>：子供の設定や、ご家庭のルールを決めます。お小遣い管理を使う場合は、金額なども設定します。</li>
-            <li><strong>ミッションを登録する</strong>：「宿題をする」「お手伝いをする」など、頑張ってほしいことと、獲得ポイントや連続ボーナスを設定します。</li>
-            <li><strong>子供に使ってもらう</strong>：まずは続けやすいミッションを少しだけ用意して、毎日の記録を始めましょう。</li>
-          </ol>
+          <p>画面右上の「ミッション設定」（⚙）から、自分が続けたいことを登録しましょう。</p>
+          <p class="mt-2">最初は1つか2つでも十分です。無理なく続けられることから始めましょう。</p>
         </section>
         <section>
-          <h3 class="font-extrabold text-base mb-2">🌟 子供が毎日すること</h3>
-          <ol class="list-decimal pl-5 space-y-2">
-            <li><strong>今日の日付を開こう！</strong> カレンダーから今日を選ぼう。</li>
-            <li><strong>できたミッションにスタンプを押そう！</strong> お勉強やお手伝いなど、できたことを記録しよう。</li>
-            <li><strong>お小遣いを使ったか／使わなかったかを記録しよう！（お小遣い管理を使っている場合）</strong> お金を使った日も、使わなかった日も、忘れずに記録しよう！</li>
-            <li><strong>小銭ポイントが貯まったら、お母さん・お父さんに報告しよう！</strong> 頑張って貯めた小銭ポイントを、おうちの人に見せてあげよう。何かいいことがあるかもしれないよ！ 画面上部の「報告」ボタンから、記録を渡せるよ。</li>
-            <li><strong>お小遣いを受け取ったら、会計を締めよう！（お小遣い管理を使っている場合）</strong> お小遣いをもらったら、その月の「お小遣いを受け取った」ボタンを長押ししよう！ その月の会計が締められて、残ったお金は貯金に移るよ。</li>
-          </ol>
-          <p class="mt-2">テンちゃんとキンちゃんと一緒に、楽しく続けよう！</p>
+          <h3 class="font-extrabold text-base mb-2">📅 毎日の使い方</h3>
+          <p><strong>① お金の使い方を記録する</strong></p>
+          <p class="mt-1">毎日のお金の使い方を記録しましょう。自分の支出傾向を分析できます。</p>
+          <p class="mt-3"><strong>② ミッションを記録する</strong></p>
+          <p class="mt-1">できたミッションにスタンプを押しましょう。過去の日付も記録できます。</p>
         </section>
         <section>
-          <h3 class="font-extrabold text-base mb-2">📨 おうちの方への報告</h3>
-          <p>ミッションのスタンプ、お小遣いの履歴、親が決めたミッションやポイントのルールなどは、基本的に<strong>子供が使う端末のブラウザ内</strong>に保存されます。別の端末へ自動的に同期されるわけではありません。</p>
-          <p class="mt-2">子供の画面上部の「報告」から報告書を作ると、<strong>親の設定と子供の記録を含む復元コード</strong>も作成されます。親は自分の端末でそのコードを取り込んで子供の状況を確認できます。また、機種変更の際には、新しい端末へ記録を引き継ぐためにも使えます。</p>
-          <p class="mt-2">取り込みは、親メニューの「報告書全文または復元コードを貼り付け」から行います。<strong>復元すると現在選択中の子供のデータが上書きされます。</strong> 必ず対象を確認し、必要な記録はあらかじめ保管してください。</p>
-          <p class="mt-2">なお、GitHubの <code>family-config.json</code> から親設定を取得している場合は、取得した設定が適用されることがあります。復元コードは大切な記録なので、他人に公開せず安全に保管しましょう。</p>
+          <h3 class="font-extrabold text-base mb-2">🏆 ミッションを達成したら</h3>
+          <p>目標を達成したり、十分に続けられたと思ったら、ミッション表の「完」ボタンを長押しすることで、達成プレートを残せます。</p>
+          <p class="mt-2">プレートには、取り組んだ期間と実際にスタンプを押した日数が記録されます。</p>
+        </section>
+        <section>
+          <h3 class="font-extrabold text-base mb-2">☀️ お天道様の支出分析</h3>
+          <p>記録した出費は、グラフで振り返ることができます。</p>
+          <p class="mt-2">何にお金を使っているのか、最近の出費はどう変わったのか。</p>
+          <p class="mt-2">自分のお金の使い方のクセを知るきっかけにしましょう。</p>
+        </section>
+        <section>
+          <h3 class="font-extrabold text-base mb-2">💾 記録を大切に</h3>
+          <p>記録は基本的に、使用しているブラウザ内に保存されます。</p>
+          <p class="mt-2">ブラウザのデータ削除や端末の故障で失われる場合があるため、大切な記録はバックアップしておきましょう。</p>
+        </section>
+        <section class="border-t pt-3" style="border-color:var(--card-border)">
+          <p><strong>小さな一歩も、積み重なれば大きな財産。</strong></p>
+          <p class="mt-2">今日から、自分だけの大銭天道を始めましょう！</p>
         </section>
       </div>
     </div>
