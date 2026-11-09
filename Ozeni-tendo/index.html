@@ -529,9 +529,9 @@
       <button onclick="openParentModal()" class="kozen-header-parent tendo-raised tendo-raised-parent bg-slate-800/80 hover:bg-slate-700 text-amber-400 w-9 h-9 rounded-xl border border-amber-500/40 flex items-center justify-center active:scale-95 transition" title="設定モード" aria-label="設定モード">
         <i class="fa-solid fa-gear"></i>
       </button>
-      <button onclick="openReportModal()" title="バックアップ・復元画面を開きます" aria-label="バックアップ・復元" class="kozen-header-report tendo-raised tendo-raised-report bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white text-xs font-bold px-3 py-2 rounded-xl shadow-lg flex items-center gap-1.5 active:scale-95 transition">
+      <button onclick="openReportModal()" title="復元コードを送信・コピーします" aria-label="復元コード送信" class="kozen-header-report tendo-raised tendo-raised-report bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white text-xs font-bold px-3 py-2 rounded-xl shadow-lg flex items-center gap-1.5 active:scale-95 transition">
         <i class="fa-solid fa-paper-plane"></i>
-        <span>バックアップ・復元</span>
+        <span>復元コード送信</span>
       </button>
     </div>
   </header>
@@ -799,6 +799,7 @@
             <li>ミッション完了確定時に専用ファンファーレと金色の紙吹雪を追加。日々のスタンプ演出とは区別。</li>
             <li>保存データのない初回訪問時に「使い方？」を自動表示。</li>
             <li>「使い方？」を大銭天道専用の説明に更新。</li>
+            <li>「バックアップ・復元」を「復元コード送信」に変更し、送信・コピー内容を復元コードのみに整理。</li>
           </ul>
         </article>
         <article>
@@ -923,25 +924,26 @@
   </div>
 
   <!-- ==========================================
-       モーダル2：パパへ報告（Web Share & コピー）
+       モーダル2：復元コード送信（Web Share & コピー）
   =========================================== -->
   <div id="reportModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
     <div class="glass-card rounded-3xl max-w-md w-full p-6 border border-emerald-500/40 space-y-4">
       <div class="flex justify-between items-center">
         <h3 class="font-extrabold text-lg text-emerald-500 flex items-center gap-2">
-          <i class="fa-solid fa-paper-plane"></i> 小銭天童 決算報告書
+          <i class="fa-solid fa-paper-plane"></i> 復元コード送信
         </h3>
         <button onclick="closeReportModal()" class="opacity-60 hover:opacity-100 text-xl"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
       <p class="text-xs opacity-80 leading-relaxed">
-        下のボタンからLINEやメールを選んでお家の人に送ってね！報告書の末尾には、お家の人がデータを取り込むための圧縮復元コードが付いているよ。
+        現在のデータを別の端末に引き継ぐための復元コードです。LINEやメールで送信するか、コピーして保存してください。
       </p>
 
       <p class="text-xs opacity-80 leading-relaxed">
-        LINEやメールの画面が開いた後は、スマホの「戻る」操作を数回行うと、小銭天童に戻れます。
+        別の端末では、設定画面からこのコードを使ってデータを復元できます。復元コードには個人の記録が含まれるため、送信先にご注意ください。
       </p>
 
+      <label for="reportTextPreview" class="block text-xs font-bold">🔑 復元コード</label>
       <textarea id="reportTextPreview" readonly rows="8" class="w-full inner-box rounded-2xl p-3 text-xs font-mono focus:outline-none"></textarea>
 
       <div class="grid grid-cols-1 gap-2.5">
@@ -951,7 +953,7 @@
         </button>
         <button onclick="copyReportToClipboard()" class="w-full py-3 inner-box hover:opacity-80 font-bold rounded-2xl text-sm flex items-center justify-center gap-2">
           <i class="fa-regular fa-copy"></i>
-          <span>レポート文字をコピーする</span>
+          <span>復元コードをコピーする</span>
         </button>
       </div>
     </div>
@@ -3822,71 +3824,14 @@
       return JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(decompressed));
     }
 
+    // 既存の KZ2 圧縮・復元方式を維持し、送信内容だけを復元コードに限定する。
     async function buildReportText() {
-      const fin = calculateFinancials();
-      const today = getTodayStr();
-      const lastReceipt = (state.allowanceReceipts || []).at(-1);
-      const lastDate = lastReceipt?.receivedAt ? new Date(lastReceipt.receivedAt) : null;
-      const validLastDate = lastDate && !Number.isNaN(lastDate.getTime());
-      const localDateStr = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-      let periodStart = null;
-      if (validLastDate) {
-        const nextDay = new Date(lastDate.getFullYear(), lastDate.getMonth(), lastDate.getDate()+1);
-        periodStart = localDateStr(nextDay);
-      }
-      const inMissionPeriod = date => /^\d{4}-\d{2}-\d{2}$/.test(date) && date <= today && (!periodStart || date >= periodStart);
-      const rangeText = `${periodStart || '初回記録から'} ～ ${today}`;
-      const nextMonth = shiftAllowanceMonth(state.allowanceMonth, 1);
-      const nextAmount = Number(state.monthlyAllowance) + fin.expectedBonus;
-      const interestBase = fin.positiveRemaining;
-      const yenPts = Math.floor(state.points * state.pointRate);
-      const txLines = state.transactions.map(t =>
-        `・[${t.dateStr}] (${t.category || 'その他'}) ${t.memo || '記録'}: ${t.type === 'expense' ? '-' : '+'}${Number(t.amount).toLocaleString()}円`
-      ).join('\n') || '・今回の記録はまだありません';
-      const expenseByCategory = {};
-      state.transactions.filter(t => t.type === 'expense').forEach(t => {
-        const key = t.category || 'その他';
-        expenseByCategory[key] = (expenseByCategory[key] || 0) + Number(t.amount || 0);
-      });
-      const categoryLines = Object.entries(expenseByCategory).map(([name, amount]) => `・${name}：${amount.toLocaleString()}円`).join('\n') || '・支出なし';
-      const checkDays = Object.keys(state.stamps || {}).filter(inMissionPeriod).length;
-      const missionCounts = (state.missions || []).map(m => {
-        const count = Object.keys(state.missionLogs || {}).filter(d => inMissionPeriod(d) && getMissionEntry(d, m.id)).length;
-        return `・${m.title}：${count}日`;
-      }).join('\n');
-      const backupCode = await encodeRestoreCode(state);
-
-      return `【小銭天童 報告書】${state.userName}
-━━━━━━━━━━━━━━
-💰 ${allowanceMonthWithYear(nextMonth)}分のお小遣い：${nextAmount.toLocaleString()}円
-基本額 ${Number(state.monthlyAllowance).toLocaleString()}円 ＋ 利子 ${fin.expectedBonus.toLocaleString()}円
-利子の計算：前月分の残高 ${interestBase.toLocaleString()}円 × ${state.interestRate}% ＝ ${fin.expectedBonus.toLocaleString()}円（1円未満切り捨て）
-
-📝 今回の収支（現在の受取期間）
-支出合計：${fin.spentThisMonth.toLocaleString()}円
-その他の収入：${fin.extraIncomeThisMonth.toLocaleString()}円
-残高：${fin.currentMonthRemaining.toLocaleString()}円
-【支出の内訳】
-${categoryLines}
-【全明細】
-${txLines}
-
-🌟 ミッションの記録（${rangeText}）
-・金銭の記録：${checkDays}日
-${missionCounts}
-
-🪙 貯まった小銭ポイント：${state.points} pt（${yenPts.toLocaleString()}円相当）
-
-💎 いまの総資産：${fin.totalWealth.toLocaleString()}円
-（貯金 ${state.baseSavings.toLocaleString()}円 ＋ 現在の残高 ${fin.currentMonthRemaining.toLocaleString()}円）
-━━━━━━━━━━━━━━
-🔑 親スマホ同期コード：
-${backupCode}`;
+      return await encodeRestoreCode(state);
     }
 
     async function openReportModal() {
       const preview = document.getElementById('reportTextPreview');
-      preview.value = '報告書を準備しています…';
+      preview.value = '復元コードを準備しています…';
       try {
         preview.value = await buildReportText();
       } catch (e) {
@@ -3906,10 +3851,10 @@ ${backupCode}`;
 
     async function shareReportWebAPI() {
       const text = document.getElementById('reportTextPreview').value;
-      if (!text.includes('KZ2:')) { showToast('報告書の準備が完了していません'); return; }
+      if (!text.includes('KZ2:')) { showToast('復元コードの準備が完了していません'); return; }
       if (navigator.share) {
         try {
-          await navigator.share({ title: `${state.userName}の小銭天童レポート`, text });
+          await navigator.share({ title: `大銭天道 復元コード`, text });
         } catch (err) {}
       } else {
         copyReportToClipboard();
@@ -3918,10 +3863,10 @@ ${backupCode}`;
 
     function copyReportToClipboard() {
       const textarea = document.getElementById('reportTextPreview');
-      if (!textarea.value.includes('KZ2:')) { showToast('報告書の準備が完了していません'); return; }
+      if (!textarea.value.includes('KZ2:')) { showToast('復元コードの準備が完了していません'); return; }
       textarea.select();
       document.execCommand('copy');
-      showToast('レポートをコピーしたよ！LINEやメールに貼り付けてね');
+      showToast('復元コードをコピーしました');
     }
 
     // ==========================================
