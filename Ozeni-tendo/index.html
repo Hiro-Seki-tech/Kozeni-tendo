@@ -765,8 +765,8 @@
     <div id="footer-now-playing" class="kozen-footer-line kozen-now-playing" aria-live="polite">Now Playing：—</div>
     <div class="kozen-footer-line">無断転載及びハルシネーションはお断り申し上げます。</div>
     <div class="kozen-footer-meta">
-      <span id="footer-version">Version 0.30（開発版・使い方更新）</span><span aria-hidden="true">／</span>
-      <span id="footer-updated">更新日 2026.11.09</span><span aria-hidden="true">／</span>
+      <span id="footer-version">Version 0.31（開発版・カレンダーモーダル改善）</span><span aria-hidden="true">／</span>
+      <span id="footer-updated">更新日 2026.11.11</span><span aria-hidden="true">／</span>
       <button type="button" id="open-trajectory" class="kozen-trajectory-button" onclick="openKozenTrajectory()">📜 大銭天道の軌跡</button>
     </div>
   </footer>
@@ -780,6 +780,13 @@
       </div>
       <div id="plip-history-modal" class="kozen-history text-sm leading-relaxed">
         <span class="sr-only">大銭天道の軌跡</span>
+        <article>
+          <h3>Version 0.31　2026.11.11 — カレンダーの達成表示改善と日付詳細のミッションスタンプ復活</h3>
+          <ul>
+            <li>カレンダーから開いた場合のみ、金銭の記録の下に現在のミッションスタンプカードを表示。ミッション表からの表示は従来どおり維持。</li>
+            <li>カレンダーの日付に達成したミッションのアイコンを表示。4件以上は3個のアイコンと残り件数で表示。</li>
+          </ul>
+        </article>
         <article>
           <h3>Version 0.30　2026.11.09 — 金銭の記録画面とミッション終了の基盤を整備</h3>
           <ul>
@@ -905,7 +912,7 @@
       </section>
 
       <!-- 天童ミッション：記帳とは別の枠で区別する -->
-      <section class="hidden rounded-2xl border border-emerald-500/45 bg-emerald-500/5 p-3 space-y-2.5" aria-label="天童ミッション">
+      <section id="modalOtherMissionsSection" class="hidden rounded-2xl border border-emerald-500/45 bg-emerald-500/5 p-3 space-y-2.5" aria-label="天童ミッション">
       <!-- 自由ミッション：金銭の記録の下に表示 -->
       <div class="pt-3 border-t border-slate-700/60 space-y-2.5">
         <div class="flex items-center justify-between">
@@ -2974,30 +2981,35 @@
         const isFuture = dateStr > todayStr;
         const dayTxs = allTransactions().filter(t => t.dateStr === dateStr);
 
-        let stampIcon = '<span class="text-[10px] opacity-40">-</span>';
-        if (stamp) {
-          stampIcon = ozeniKobanMark();
-        }
+        const stampIcon = stamp ? ozeniKobanMark() : '';
 
         const borderClass = isToday
           ? 'today-pressable'
           : 'inner-box';
 
-        // 取引 or ミッション達成があるか
-        const dayMissions = state.missionLogs[dateStr] || {};
-        const missionDoneCount = Object.keys(dayMissions).filter(mId => getMissionEntry(dateStr, mId)).length;
-
-        const badgeIndicator = (dayTxs.length > 0 || missionDoneCount > 0)
-          ? `<span class="w-1.5 h-1.5 rounded-full ${missionDoneCount > 0 ? 'bg-emerald-500' : 'bg-rose-500'} absolute top-1 right-1"></span>`
-          : '';
+        // 日付ごとの達成ミッションを、設定されたアイコンと色で表示する。
+        // 過去に終了したミッションも、記録が残っていれば表示対象に含める。
+        const dayMissions = state.missionLogs?.[dateStr] || {};
+        const completedMissions = (state.missions || []).filter(m => !!getMissionEntry(dateStr, m.id));
+        const missionIcons = completedMissions.slice(0, 3).map(m => {
+          const color = /^#[0-9a-fA-F]{3,8}$/.test(m.color || '') ? m.color : '#059669';
+          return `<span class="inline-flex items-center justify-center rounded-full text-white" style="width:14px;height:14px;background:${color}" title="${escapeHtml(m.title)} 達成" aria-label="${escapeHtml(m.title)} 達成"><i class="fa-solid ${m.icon} text-[8px]"></i></span>`;
+        }).join('');
+        const extraCount = completedMissions.length > 3
+          ? `<span class="text-[9px] font-bold" title="ほか${completedMissions.length - 3}件達成">+${completedMissions.length - 3}</span>` : '';
+        const badgeIndicator = dayTxs.length > 0
+          ? '<span class="w-1.5 h-1.5 rounded-full bg-rose-500 absolute top-1 right-1" title="収支記録あり"></span>' : '';
 
         grid.innerHTML += `
-          <button type="button" onclick="openDayDetailModal('${dateStr}')"
+          <button type="button" onclick="openDayDetailModal('${dateStr}', true)"
             class="cal-cell relative rounded-xl p-1 flex flex-col items-center justify-between ${borderClass} ${isFuture ? 'opacity-40' : 'hover:opacity-80'}">
             ${badgeIndicator}
             ${isToday ? '<span class="text-[9px] font-black leading-none">今日</span>' : ''}
             <span class="text-[10px] font-bold ${isToday ? 'text-slate-700 text-sm' : 'opacity-80'}">${d}</span>
-            <div class="my-auto">${stampIcon}</div>
+            <div class="my-auto flex flex-col items-center justify-center gap-0.5 min-w-0">
+              ${stampIcon}
+              <div class="flex flex-wrap justify-center items-center gap-0.5">${missionIcons}${extraCount}</div>
+            </div>
           </button>
         `;
       }
@@ -3228,7 +3240,7 @@
     // ==========================================
     // 統合日付詳細モーダル (ミッション＆出費入力)
     // ==========================================
-    function openDayDetailModal(dateStr) {
+    function openDayDetailModal(dateStr, fromCalendar = false) {
       const todayStr = getTodayStr();
       if (dateStr > todayStr) {
         playSE('error');
@@ -3237,6 +3249,8 @@
       }
       playSE('tap');
       currentDetailDate = dateStr;
+      // カレンダー経由のみ、金銭の記録の下に既存のミッションカードを表示する。
+      document.getElementById('modalOtherMissionsSection').classList.toggle('hidden', !fromCalendar);
 
       // 日付タイトル成形
       const parts = dateStr.split('-');
@@ -3334,7 +3348,8 @@
     function renderModalMissions() {
       renderModalDayEarnedPoints();
       const container = document.getElementById('modalMissionsList');
-      const missions = state.missions || [];
+      // ミッション表と同じく、終了済みミッションを除いた現在の一覧を表示する。
+      const missions = activeOzeniMissions();
       if (missions.length === 0) {
         container.innerHTML = `<p class="text-xs opacity-60">ミッションはありません</p>`;
         return;
