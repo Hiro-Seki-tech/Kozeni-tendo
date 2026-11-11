@@ -765,7 +765,7 @@
     <div id="footer-now-playing" class="kozen-footer-line kozen-now-playing" aria-live="polite">Now Playing：—</div>
     <div class="kozen-footer-line">無断転載及びハルシネーションはお断り申し上げます。</div>
     <div class="kozen-footer-meta">
-      <span id="footer-version">Version 0.31（開発版・カレンダーモーダル改善）</span><span aria-hidden="true">／</span>
+      <span id="footer-version">Version 0.32（開発版・達成プレート完了日改善）</span><span aria-hidden="true">／</span>
       <span id="footer-updated">更新日 2026.11.11</span><span aria-hidden="true">／</span>
       <button type="button" id="open-trajectory" class="kozen-trajectory-button" onclick="openKozenTrajectory()">📜 大銭天道の軌跡</button>
     </div>
@@ -781,10 +781,11 @@
       <div id="plip-history-modal" class="kozen-history text-sm leading-relaxed">
         <span class="sr-only">大銭天道の軌跡</span>
         <article>
-          <h3>Version 0.31　2026.11.11 — カレンダーの達成表示改善と日付詳細のミッションスタンプ復活</h3>
+          <h3>Version 0.32　2026.11.11 — カレンダー改善と達成プレート完了日の修正</h3>
           <ul>
             <li>カレンダーから開いた場合のみ、金銭の記録の下に現在のミッションスタンプカードを表示。ミッション表からの表示は従来どおり維持。</li>
             <li>カレンダーの日付に達成したミッションのアイコンを表示。4件以上は3個のアイコンと残り件数で表示。</li>
+            <li>達成プレートの完了日を「完」を押した日ではなく、最後にスタンプを押した日に変更（新規プレートから適用）。</li>
           </ul>
         </article>
         <article>
@@ -2427,6 +2428,13 @@
       }).sort();
       return dates[0] || null;
     }
+    // 達成プレートの完了日は「完」を押した日ではなく、最後にスタンプを押した日とする。
+    function ozeniMissionLastStampDate(id) {
+      const dates = Object.keys(state.missionLogs || {}).filter(date =>
+        /^\d{4}-\d{2}-\d{2}$/.test(date) && !!state.missionLogs[date]?.[id]?.done
+      ).sort();
+      return dates[dates.length - 1] || null;
+    }
     // 同じ日に複数回操作しても1日と数える。完了後の追加・変更では受賞時の数字を変えない。
     function ozeniMissionStampedDays(id, throughDate) {
       return Object.keys(state.missionLogs || {}).filter(date =>
@@ -2460,7 +2468,7 @@
       state.completedMissions.push({
         id: mission.id, title: mission.title, icon: mission.icon, color: mission.color,
         recordId: `plate_${Date.now()}_${Math.random().toString(36).slice(2,8)}`, restored: false,
-        startDate: ozeniMissionStartDate(id), endDate: getTodayStr(),
+        startDate: ozeniMissionStartDate(id), endDate: ozeniMissionLastStampDate(id),
         metal: 'platinum', stampedDays: ozeniMissionStampedDays(id, getTodayStr())
       });
       saveState();
