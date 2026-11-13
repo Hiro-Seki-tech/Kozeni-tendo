@@ -522,14 +522,14 @@
       <!-- PLIP共通ボタンはPCのみ表示。PCは3段、スマホは2段 -->
       <a class="kozen-plip-action kozen-desktop-only" href="https://hiro-seki-tech.github.io/Produce-your-Life-with-IP/links" target="_blank" rel="noopener noreferrer" title="PLIP LINK HP">💡⚡ リンク</a>
       <button type="button" class="kozen-plip-action kozen-desktop-only" onclick="openKozenUsage()">使い方？</button>
-      <button id="soundToggleBtn" onclick="toggleSoundMute()" class="tendo-raised tendo-raised-sound bg-slate-800/80 hover:bg-slate-700 text-amber-400 w-9 h-9 rounded-xl border border-amber-500/40 flex items-center justify-center active:scale-95 transition" title="効果音 ON/OFF">
+      <button id="soundToggleBtn" data-header-click="true" onclick="toggleSoundMute()" class="tendo-raised tendo-raised-sound bg-slate-800/80 hover:bg-slate-700 text-amber-400 w-9 h-9 rounded-xl border border-amber-500/40 flex items-center justify-center active:scale-95 transition" title="効果音 ON/OFF">
         <i id="soundToggleIcon" class="fa-solid fa-volume-high text-xs"></i>
       </button>
-      <button onclick="openChildThemeModal()" class="kozen-header-theme tendo-raised tendo-raised-sound bg-slate-800/80 hover:bg-slate-700 text-amber-400 w-9 h-9 rounded-xl border border-amber-500/40 flex items-center justify-center active:scale-95 transition" title="画面カラーを変更" aria-label="画面カラーを変更"><i class="fa-solid fa-palette"></i></button>
-      <button onclick="openParentModal()" class="kozen-header-parent tendo-raised tendo-raised-parent bg-slate-800/80 hover:bg-slate-700 text-amber-400 w-9 h-9 rounded-xl border border-amber-500/40 flex items-center justify-center active:scale-95 transition" title="設定モード" aria-label="設定モード">
+      <button onclick="openChildThemeModal()" data-header-click="true" class="kozen-header-theme tendo-raised tendo-raised-sound bg-slate-800/80 hover:bg-slate-700 text-amber-400 w-9 h-9 rounded-xl border border-amber-500/40 flex items-center justify-center active:scale-95 transition" title="画面カラーを変更" aria-label="画面カラーを変更"><i class="fa-solid fa-palette"></i></button>
+      <button onclick="openParentModal()" data-header-click="true" class="kozen-header-parent tendo-raised tendo-raised-parent bg-slate-800/80 hover:bg-slate-700 text-amber-400 w-9 h-9 rounded-xl border border-amber-500/40 flex items-center justify-center active:scale-95 transition" title="設定モード" aria-label="設定モード">
         <i class="fa-solid fa-gear"></i>
       </button>
-      <button onclick="openReportModal()" title="復元コードを送信・コピーします" aria-label="復元コード送信" class="kozen-header-report tendo-raised tendo-raised-report bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white text-xs font-bold px-3 py-2 rounded-xl shadow-lg flex items-center gap-1.5 active:scale-95 transition">
+      <button onclick="openReportModal()" data-header-click="true" title="復元コードを送信・コピーします" aria-label="復元コード送信" class="kozen-header-report tendo-raised tendo-raised-report bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white text-xs font-bold px-3 py-2 rounded-xl shadow-lg flex items-center gap-1.5 active:scale-95 transition">
         <i class="fa-solid fa-paper-plane"></i>
         <span>復元コード送信</span>
       </button>
@@ -767,8 +767,8 @@
     <div id="footer-now-playing" class="kozen-footer-line kozen-now-playing" aria-live="polite">Now Playing：—</div>
     <div class="kozen-footer-line">無断転載及びハルシネーションはお断り申し上げます。</div>
     <div class="kozen-footer-meta">
-      <span id="footer-version">Version 0.33（開発版・支出係数追加）</span><span aria-hidden="true">／</span>
-      <span id="footer-updated">更新日 2026.11.12</span><span aria-hidden="true">／</span>
+      <span id="footer-version">Version 0.36（開発版・かんたん再入力）</span><span aria-hidden="true">／</span>
+      <span id="footer-updated">更新日 2026.11.13</span><span aria-hidden="true">／</span>
       <button type="button" id="open-trajectory" class="kozen-trajectory-button" onclick="openKozenTrajectory()">📜 大銭天道の軌跡</button>
     </div>
   </footer>
@@ -782,6 +782,19 @@
       </div>
       <div id="plip-history-modal" class="kozen-history text-sm leading-relaxed">
         <span class="sr-only">大銭天道の軌跡</span>
+        <article>
+          <h3>Version 0.36　2026.11.13 — 記帳通知修正・かんたん再入力</h3>
+          <ul>
+            <li>当日・過去日の支出／収入を記帳した際の旧メダル・ポイント通知を廃止し、記録完了の通知に統一。内部の保存・スタンプ判定処理は維持。</li>
+            <li>支出カテゴリ別に、過去の記録をよく使う順で最大5件表示。タップで内容と金額を入力欄に反映し、保存前に修正可能。</li>
+          </ul>
+        </article>
+        <article>
+          <h3>Version 0.34　2026.11.13 — ヘッダー4ボタンの操作感を改善</h3>
+          <ul>
+            <li>効果音・画面カラー・設定・復元コード送信の4ボタンに、短く控えめなクリック音を追加。既存の押し込み演出と効果音ON/OFF設定を維持。</li>
+          </ul>
+        </article>
         <article>
           <h3>Version 0.33　2026.11.12 — お天道様の支出分析に3つの係数を追加</h3>
           <ul>
@@ -903,6 +916,12 @@
         <div class="relative">
           <input type="number" id="modalTxAmount" inputmode="numeric" placeholder="金額 (円)" class="w-full inner-box rounded-xl px-3 py-2 text-base font-extrabold focus:outline-none focus:border-amber-400">
           <span class="absolute right-3 top-2.5 opacity-60 text-xs font-bold">円</span>
+        </div>
+
+        <!-- 過去の支出を再利用（選択だけでは保存しない） -->
+        <div id="modalFrequentExpense" class="hidden rounded-xl inner-box p-2.5 space-y-2">
+          <p class="text-[11px] font-bold opacity-80"><i class="fa-solid fa-clock-rotate-left mr-1"></i>よく使う記録から入力</p>
+          <div id="modalFrequentExpenseList" class="space-y-1.5"></div>
         </div>
 
         <button onclick="addTransactionFromModal()" class="w-full py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-extrabold rounded-xl text-xs raised-action">
@@ -1576,6 +1595,29 @@
         showToast('🔇 効果音をミュートにしました');
       }
       saveState();
+    }
+
+    // ヘッダー4ボタンのみ。既存の押し込みCSSは維持し、小さなクリック音だけ追加。
+    // ミュート解除時の音は toggleSoundMute() 側で再生するため二重に鳴らさない。
+    document.querySelectorAll('[data-header-click="true"]').forEach(btn => {
+      btn.addEventListener('pointerdown', () => {
+        if (btn.disabled || state.soundMuted) return;
+        if (btn.id === 'soundToggleBtn') {
+          playHeaderClick(); // ミュートに切り替わる前に鳴らす
+        } else {
+          playHeaderClick();
+        }
+      });
+      // キーボード操作にも対応（ポインター操作とは重複しない）
+      btn.addEventListener('keydown', e => {
+        if ((e.key === 'Enter' || e.key === ' ') && !e.repeat && !state.soundMuted) playHeaderClick();
+      });
+    });
+
+    function playHeaderClick() {
+      try {
+        playTone(680, 'triangle', 0.035, 0, 0.035, 490);
+      } catch (e) { /* 音声非対応でもボタン操作は継続 */ }
     }
 
     function updateSoundToggleUI() {
@@ -3284,6 +3326,7 @@
       renderModalStampStatus();
       renderModalTransactions();
       renderModalCategoryChips();
+      renderFrequentExpenseChoices();
 
       document.getElementById('modalTxMemo').value = '';
       document.getElementById('modalTxAmount').value = '';
@@ -3486,6 +3529,7 @@
         bExp.className = 'py-1.5 rounded-lg font-bold text-xs opacity-60 hover:opacity-100';
       }
       renderModalCategoryChips();
+      renderFrequentExpenseChoices();
     }
 
     function renderModalCategoryChips() {
@@ -3509,6 +3553,69 @@
     function selectModalCategory(lbl) {
       modalSelectedCategory = lbl;
       renderModalCategoryChips();
+      renderFrequentExpenseChoices();
+    }
+
+    // 既存の取引だけから集計。保存形式・ポイント・スタンプ処理は変更しない。
+    function renderFrequentExpenseChoices() {
+      const panel = document.getElementById('modalFrequentExpense');
+      const list = document.getElementById('modalFrequentExpenseList');
+      if (!panel || !list) return;
+      list.replaceChildren();
+      panel.classList.add('hidden');
+      if (currentModalTxType !== 'expense') return;
+      const selected = categories.expense.find(cat => cat.label === modalSelectedCategory);
+      if (!selected) return;
+
+      const groups = new Map();
+      for (const tx of allTransactions()) {
+        if (tx.type !== 'expense') continue;
+        // IDのある記録はIDで判定。旧形式は現在のカテゴリ名との一致で判定。
+        if (tx.categoryId ? tx.categoryId !== selected.id : tx.category !== selected.label) continue;
+        const memo = String(tx.memo || '').trim();
+        const amount = Number(tx.amount);
+        if (!memo || !Number.isFinite(amount) || amount <= 0) continue;
+        let group = groups.get(memo);
+        if (!group) {
+          group = { memo, count: 0, latest: '', amounts: new Map() };
+          groups.set(memo, group);
+        }
+        group.count++;
+        const date = String(tx.dateStr || '');
+        if (date > group.latest) group.latest = date;
+        let amt = group.amounts.get(amount);
+        if (!amt) {
+          amt = { amount, count: 0, latest: '' };
+          group.amounts.set(amount, amt);
+        }
+        amt.count++;
+        if (date > amt.latest) amt.latest = date;
+      }
+      const choices = [...groups.values()].sort((a, b) =>
+        b.count - a.count || b.latest.localeCompare(a.latest) || a.memo.localeCompare(b.memo, 'ja')
+      ).slice(0, 5);
+      if (!choices.length) return;
+      for (const group of choices) {
+        const best = [...group.amounts.values()].sort((a, b) =>
+          b.count - a.count || b.latest.localeCompare(a.latest) || a.amount - b.amount
+        )[0];
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'w-full flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-xs inner-box raised-action';
+        const memo = document.createElement('span');
+        memo.className = 'min-w-0 break-words';
+        memo.textContent = group.memo;
+        const price = document.createElement('span');
+        price.className = 'font-extrabold whitespace-nowrap';
+        price.textContent = `${best.amount.toLocaleString('ja-JP')}円`;
+        button.append(memo, price);
+        button.addEventListener('click', () => {
+          document.getElementById('modalTxMemo').value = group.memo;
+          document.getElementById('modalTxAmount').value = best.amount;
+        });
+        list.appendChild(button);
+      }
+      panel.classList.remove('hidden');
     }
 
     function addTransactionFromModal() {
@@ -3577,21 +3684,9 @@
       renderModalTransactions();
       renderModalStampStatus();
 
-      if (targetStampType === 'gold' && earnedPts > 0) {
-        playSE('gold');
-        confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
-        showToast(`🌟 当日記帳スタンプで +${earnedPts}小銭pt！`);
-      } else if (targetStampType === 'silver' && earnedPts > 0) {
-        playSE('silver');
-        confetti({ particleCount: 30, spread: 50, origin: { y: 0.7 } });
-        showToast(`🥈 過去${sDays}日内の記帳で +${earnedPts}pt(${sRate}%)ゲット！`);
-      } else if (targetStampType === 'bronze') {
-        playSE('bronze');
-        showToast(`🥉 銅メダルで +${earnedPts}pt！記帳したよ！`);
-      } else {
-        playSE('tap');
-        showToast('帳面に記録したよ！');
-      }
+      // 大銭天道では記帳時にメダル・ポイントの獲得通知を表示しない。
+      playSE('tap');
+      showToast('帳面に記録したよ！');
     }
 
     function renderModalTransactions() {
