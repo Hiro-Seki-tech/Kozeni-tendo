@@ -683,7 +683,7 @@
     <div class="kozen-footer-line">無断転載及びハルシネーションはお断り申し上げます。</div>
     <div class="kozen-footer-meta">
       <span id="footer-version">Version 0.10（開発版 STEP 16-18）</span><span aria-hidden="true">／</span>
-      <span id="footer-updated">更新日 2026.11.08</span><span aria-hidden="true">／</span>
+      <span id="footer-updated">更新日 2026.11.13</span><span aria-hidden="true">／</span>
       <button type="button" id="open-trajectory" class="kozen-trajectory-button" onclick="openKozenTrajectory()">📜 小銭天童の軌跡</button>
     </div>
   </footer>
@@ -698,8 +698,9 @@
       <div id="plip-history-modal" class="kozen-history text-sm leading-relaxed">
         <span class="sr-only">小銭天童の軌跡</span>
         <article>
-          <h3>Version 0.10　2026.11.08</h3>
+          <h3>Version 0.10　2026.11.13</h3>
           <ul>
+            <li>出費のカテゴリごとに、過去の入力回数が多い品目を最大5件表示し、内容と金額をかんたん再入力できる機能を追加。</li>
             <li>親設定でミッションの上下入れ替えを追加し、ミッション表と保存設定に反映。親設定モーダルは外側タップで閉じず、×ボタンで閉じる方式に変更。</li>
             <li>小銭ポイント・お小遣いカードの表示を整理し、総資産の貯金と当月残高の内訳を表示。</li>
             <li>分析絵巻を暦基準に変更。支出の過去30日／全期間切替、暦3か月の出費・資産推移、過去30日間の記録に対応。</li>
@@ -817,6 +818,12 @@
         <div class="relative">
           <input type="number" id="modalTxAmount" inputmode="numeric" placeholder="金額 (円)" class="w-full inner-box rounded-xl px-3 py-2 text-base font-extrabold focus:outline-none focus:border-amber-400">
           <span class="absolute right-3 top-2.5 opacity-60 text-xs font-bold">円</span>
+        </div>
+
+        <!-- 過去の出費を再利用。選択だけでは保存しない -->
+        <div id="modalFrequentExpense" class="hidden rounded-xl inner-box p-2.5 space-y-2">
+          <p class="text-[11px] font-bold opacity-80"><i class="fa-solid fa-clock-rotate-left mr-1"></i>よく使う記録から入力</p>
+          <div id="modalFrequentExpenseList" class="space-y-1.5"></div>
         </div>
 
         <button onclick="addTransactionFromModal()" class="w-full py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-extrabold rounded-xl text-xs raised-action">
@@ -2781,6 +2788,7 @@
       renderModalStampStatus();
       renderModalTransactions();
       renderModalCategoryChips();
+      renderFrequentExpenseChoices();
 
       document.getElementById('modalTxMemo').value = '';
       document.getElementById('modalTxAmount').value = '';
@@ -3014,6 +3022,7 @@
         bExp.className = 'py-1.5 rounded-lg font-bold text-xs opacity-60 hover:opacity-100';
       }
       renderModalCategoryChips();
+      renderFrequentExpenseChoices();
     }
 
     function renderModalCategoryChips() {
@@ -3033,6 +3042,65 @@
     function selectModalCategory(lbl) {
       modalSelectedCategory = lbl;
       renderModalCategoryChips();
+      renderFrequentExpenseChoices();
+    }
+
+    // 過去の保存済み出費から、選択カテゴリのよく使う品目を最大5件表示する。
+    function renderFrequentExpenseChoices() {
+      const panel = document.getElementById('modalFrequentExpense');
+      const list = document.getElementById('modalFrequentExpenseList');
+      if (!panel || !list) return;
+      list.replaceChildren();
+      panel.classList.add('hidden');
+      if (currentModalTxType !== 'expense') return;
+
+      const groups = new Map();
+      for (const tx of allTransactions()) {
+        if (tx.type !== 'expense' || tx.category !== modalSelectedCategory) continue;
+        const memo = String(tx.memo || '').trim();
+        const amount = Number(tx.amount);
+        if (!memo || !Number.isFinite(amount) || amount <= 0) continue;
+        let group = groups.get(memo);
+        if (!group) {
+          group = { memo, count: 0, latest: '', amounts: new Map() };
+          groups.set(memo, group);
+        }
+        group.count++;
+        const date = String(tx.dateStr || '');
+        if (date > group.latest) group.latest = date;
+        let amt = group.amounts.get(amount);
+        if (!amt) {
+          amt = { amount, count: 0, latest: '' };
+          group.amounts.set(amount, amt);
+        }
+        amt.count++;
+        if (date > amt.latest) amt.latest = date;
+      }
+      const choices = [...groups.values()].sort((a, b) =>
+        b.count - a.count || b.latest.localeCompare(a.latest) || a.memo.localeCompare(b.memo, 'ja')
+      ).slice(0, 5);
+      if (!choices.length) return;
+      for (const group of choices) {
+        const best = [...group.amounts.values()].sort((a, b) =>
+          b.count - a.count || b.latest.localeCompare(a.latest) || a.amount - b.amount
+        )[0];
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'w-full flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-xs inner-box raised-action';
+        const memo = document.createElement('span');
+        memo.className = 'min-w-0 break-words';
+        memo.textContent = group.memo;
+        const price = document.createElement('span');
+        price.className = 'font-extrabold whitespace-nowrap';
+        price.textContent = `${best.amount.toLocaleString('ja-JP')}円`;
+        button.append(memo, price);
+        button.addEventListener('click', () => {
+          document.getElementById('modalTxMemo').value = group.memo;
+          document.getElementById('modalTxAmount').value = best.amount;
+        });
+        list.appendChild(button);
+      }
+      panel.classList.remove('hidden');
     }
 
     function addTransactionFromModal() {
