@@ -767,7 +767,7 @@
     <div id="footer-now-playing" class="kozen-footer-line kozen-now-playing" aria-live="polite">Now Playing：—</div>
     <div class="kozen-footer-line">無断転載及びハルシネーションはお断り申し上げます。</div>
     <div class="kozen-footer-meta">
-      <span id="footer-version">Version 0.37（開発版・ミッションアイコン追加）</span><span aria-hidden="true">／</span>
+      <span id="footer-version">Version 0.38（開発版・プレート完成ボイス）</span><span aria-hidden="true">／</span>
       <span id="footer-updated">更新日 2026.11.13</span><span aria-hidden="true">／</span>
       <button type="button" id="open-trajectory" class="kozen-trajectory-button" onclick="openKozenTrajectory()">📜 大銭天道の軌跡</button>
     </div>
@@ -782,6 +782,12 @@
       </div>
       <div id="plip-history-modal" class="kozen-history text-sm leading-relaxed">
         <span class="sr-only">大銭天道の軌跡</span>
+        <article>
+          <h3>Version 0.38　2026.11.15 — プレート完成ボイス</h3>
+          <ul>
+            <li>ミッションを長押しで完了し、達成プレートが誕生するとき、テンちゃん／キンちゃんの完成ボイスをランダムで1つ再生。従来の紙吹雪や保存処理は維持。</li>
+          </ul>
+        </article>
         <article>
           <h3>Version 0.37　2026.11.14 — ミッションアイコンを追加</h3>
           <ul>
@@ -1568,18 +1574,18 @@
         colors: ['#F6D98B', '#D5A548', '#FFF8E3', '#E9C46A'] });
     }
 
-    // 大銭天道：ミッションを卒業した瞬間だけの祝福。日々のシャンパン演出とは区別する。
+    // 大銭天道：ミッションの達成プレート誕生時だけ、テン／キンの声をランダム再生する。
+    // 日々の全ミッション達成ボイスとは独立。紙吹雪演出は従来どおり。
+    const OZENI_PLATE_VOICES = ['se/ten_complete.mp3', 'se/kin_complete.mp3'];
+    function playOzeniPlateCompleteVoice() {
+      if (state.soundMuted) return;
+      const src = OZENI_PLATE_VOICES[Math.floor(Math.random() * OZENI_PLATE_VOICES.length)];
+      const audio = new Audio(src);
+      audio.volume = 0.85;
+      audio.play().catch(() => {});
+    }
     function celebrateOzeniMissionGraduation() {
-      if (!state.soundMuted) {
-        // 少し長めの上昇ファンファーレ＋金属プレート誕生の余韻。
-        try {
-          [523.25,659.25,783.99,1046.50].forEach((freq,i) =>
-            playTone(freq, 'triangle', i === 3 ? 0.55 : 0.19, i * 0.16, 0.15));
-          playTone(1318.51, 'sine', 0.46, 0.62, 0.13);
-          playTone(1567.98, 'sine', 0.65, 0.76, 0.14);
-          playTone(2093.00, 'sine', 0.85, 0.88, 0.09);
-        } catch (e) {}
-      }
+      playOzeniPlateCompleteVoice();
       if (typeof confetti !== 'function' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       // 紙吹雪は一度だけ。既存のスタンプ演出や保存処理には影響させない。
       confetti({ particleCount: 95, spread: 78, startVelocity: 37, gravity: 0.85,
