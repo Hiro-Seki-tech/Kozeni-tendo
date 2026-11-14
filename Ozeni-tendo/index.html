@@ -767,7 +767,7 @@
     <div id="footer-now-playing" class="kozen-footer-line kozen-now-playing" aria-live="polite">Now Playing：—</div>
     <div class="kozen-footer-line">無断転載及びハルシネーションはお断り申し上げます。</div>
     <div class="kozen-footer-meta">
-      <span id="footer-version">Version 0.36（開発版・かんたん再入力）</span><span aria-hidden="true">／</span>
+      <span id="footer-version">Version 0.37（開発版・ミッションアイコン追加）</span><span aria-hidden="true">／</span>
       <span id="footer-updated">更新日 2026.11.13</span><span aria-hidden="true">／</span>
       <button type="button" id="open-trajectory" class="kozen-trajectory-button" onclick="openKozenTrajectory()">📜 大銭天道の軌跡</button>
     </div>
@@ -782,6 +782,12 @@
       </div>
       <div id="plip-history-modal" class="kozen-history text-sm leading-relaxed">
         <span class="sr-only">大銭天道の軌跡</span>
+        <article>
+          <h3>Version 0.37　2026.11.14 — ミッションアイコンを追加</h3>
+          <ul>
+            <li>PLIP作品の制作記録に使える砂時計・金貨・ロケット・地球・猫・魚・時計・盾・山・本・音楽・創作・AIなどのアイコンを追加。従来の選択肢と保存形式は維持。</li>
+          </ul>
+        </article>
         <article>
           <h3>Version 0.36　2026.11.13 — 記帳通知修正・かんたん再入力</h3>
           <ul>
@@ -1682,7 +1688,13 @@
       'fa-car', 'fa-plane',
       // 家事・暮らし
       'fa-kitchen-set', 'fa-shirt', 'fa-jug-detergent', 'fa-spray-can-sparkles', 'fa-basket-shopping',
-      'fa-house', 'fa-leaf', 'fa-droplet', 'fa-screwdriver-wrench', 'fa-dog'
+      'fa-house', 'fa-leaf', 'fa-droplet', 'fa-screwdriver-wrench', 'fa-dog',
+      // PLIP作品・創作活動（既存候補はそのまま維持）
+      'fa-hourglass-half', 'fa-money-bill-1', 'fa-rocket', 'fa-earth-asia',
+      'fa-cat', 'fa-fish', 'fa-clock', 'fa-shield-halved', 'fa-khanda',
+      'fa-mountain', 'fa-book-open', 'fa-microphone', 'fa-headphones',
+      'fa-palette', 'fa-image', 'fa-robot', 'fa-code', 'fa-wand-magic-sparkles',
+      'fa-dragon', 'fa-chess-rook', 'fa-masks-theater', 'fa-scroll'
     ];
 
     const CHECK_ID = '__allowance_check__'; // 固定の金銭の記録（親の追加ミッションとは別）
