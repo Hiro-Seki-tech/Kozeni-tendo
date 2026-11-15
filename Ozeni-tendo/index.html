@@ -767,7 +767,7 @@
     <div id="footer-now-playing" class="kozen-footer-line kozen-now-playing" aria-live="polite">Now Playing：—</div>
     <div class="kozen-footer-line">無断転載及びハルシネーションはお断り申し上げます。</div>
     <div class="kozen-footer-meta">
-      <span id="footer-version">Version 0.39（開発版・かんたん再入力の文字検索）</span><span aria-hidden="true">／</span>
+      <span id="footer-version">Version 0.40（開発版・日別支出合計）</span><span aria-hidden="true">／</span>
       <span id="footer-updated">更新日 2026.11.13</span><span aria-hidden="true">／</span>
       <button type="button" id="open-trajectory" class="kozen-trajectory-button" onclick="openKozenTrajectory()">📜 大銭天道の軌跡</button>
     </div>
@@ -783,10 +783,11 @@
       <div id="plip-history-modal" class="kozen-history text-sm leading-relaxed">
         <span class="sr-only">大銭天道の軌跡</span>
         <article>
-          <h3>Version 0.39　2026.11.15 — プレート完成ボイス・かんたん再入力の文字検索</h3>
+          <h3>Version 0.40　2026.11.15 — プレート完成ボイス・かんたん再入力の文字検索・日別支出合計</h3>
           <ul>
             <li>ミッションの達成プレート完成時に、テンちゃん／キンちゃんのボイスをランダム再生。</li>
             <li>金銭記録の内容欄に文字を入力すると、その文字で始まる過去の記録を頻度順に最大5件表示。未入力時は従来どおり。</li>
+            <li>日付別の記録一覧の右側に、その日の支出合計を表示。記録の追加・削除時にも更新。</li>
           </ul>
         </article>
         <article>
@@ -945,7 +946,10 @@
 
       <!-- ③ その日の既存取引ログ -->
       <div class="pt-2 border-t border-slate-700/60">
-        <p class="text-[11px] opacity-75 font-bold mb-1.5">この日の記録一覧:</p>
+        <div class="flex items-center justify-between gap-2 mb-1.5">
+          <p class="text-[11px] opacity-75 font-bold">この日の記録一覧:</p>
+          <p class="text-[11px] font-bold whitespace-nowrap">支出合計 <span id="modalDayExpenseTotal" class="text-rose-500">0円</span></p>
+        </div>
         <div id="modalDayTxList" class="space-y-1.5 max-h-36 overflow-y-auto pr-1">
           <!-- JSで描画 -->
         </div>
@@ -3718,6 +3722,9 @@
     function renderModalTransactions() {
       const list = document.getElementById('modalDayTxList');
       const dayTxs = allTransactions().filter(t => t.dateStr === currentDetailDate);
+      const expenseTotal = dayTxs.reduce((sum, tx) =>
+        sum + (tx.type === 'expense' ? Number(tx.amount) || 0 : 0), 0);
+      document.getElementById('modalDayExpenseTotal').textContent = `${expenseTotal.toLocaleString()}円`;
 
       if (dayTxs.length === 0) {
         list.innerHTML = `<p class="text-xs opacity-50 py-2">この日の出費・収入はありません</p>`;
