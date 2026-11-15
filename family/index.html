@@ -683,7 +683,7 @@
     <div class="kozen-footer-line">無断転載及びハルシネーションはお断り申し上げます。</div>
     <div class="kozen-footer-meta">
       <span id="footer-version">Version 0.10（開発版 STEP 16-18）</span><span aria-hidden="true">／</span>
-      <span id="footer-updated">更新日 2026.11.13</span><span aria-hidden="true">／</span>
+      <span id="footer-updated">更新日 2026.11.15</span><span aria-hidden="true">／</span>
       <button type="button" id="open-trajectory" class="kozen-trajectory-button" onclick="openKozenTrajectory()">📜 小銭天童の軌跡</button>
     </div>
   </footer>
@@ -697,6 +697,12 @@
       </div>
       <div id="plip-history-modal" class="kozen-history text-sm leading-relaxed">
         <span class="sr-only">小銭天童の軌跡</span>
+        <article>
+          <h3>Version 0.10　2026.11.15</h3>
+          <ul>
+            <li>出費の品目入力に応じて、過去の「かんたん再入力」候補を文字で絞り込めるように改善。</li>
+          </ul>
+        </article>
         <article>
           <h3>Version 0.10　2026.11.13</h3>
           <ul>
@@ -812,7 +818,7 @@
         <div id="modalCategoryChips" class="flex flex-wrap gap-1"></div>
 
         <div>
-          <input type="text" id="modalTxMemo" placeholder="内容 (例: お菓子、マンガなど)" class="w-full inner-box rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-400">
+          <input type="text" id="modalTxMemo" oninput="renderFrequentExpenseChoices()" placeholder="内容 (例: お菓子、マンガなど)" class="w-full inner-box rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-amber-400">
         </div>
 
         <div class="relative">
@@ -3076,7 +3082,10 @@
         amt.count++;
         if (date > amt.latest) amt.latest = date;
       }
-      const choices = [...groups.values()].sort((a, b) =>
+      const searchText = document.getElementById('modalTxMemo').value.trim().toLocaleLowerCase('ja-JP');
+      const choices = [...groups.values()].filter(group =>
+        !searchText || group.memo.toLocaleLowerCase('ja-JP').includes(searchText)
+      ).sort((a, b) =>
         b.count - a.count || b.latest.localeCompare(a.latest) || a.memo.localeCompare(b.memo, 'ja')
       ).slice(0, 5);
       if (!choices.length) return;
