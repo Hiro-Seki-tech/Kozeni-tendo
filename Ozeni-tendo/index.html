@@ -767,7 +767,7 @@
     <div id="footer-now-playing" class="kozen-footer-line kozen-now-playing" aria-live="polite">Now Playing：—</div>
     <div class="kozen-footer-line">無断転載及びハルシネーションはお断り申し上げます。</div>
     <div class="kozen-footer-meta">
-      <span id="footer-version">Version 0.38（開発版・プレート完成ボイス）</span><span aria-hidden="true">／</span>
+      <span id="footer-version">Version 0.39（開発版・かんたん再入力の文字検索）</span><span aria-hidden="true">／</span>
       <span id="footer-updated">更新日 2026.11.13</span><span aria-hidden="true">／</span>
       <button type="button" id="open-trajectory" class="kozen-trajectory-button" onclick="openKozenTrajectory()">📜 大銭天道の軌跡</button>
     </div>
@@ -783,9 +783,10 @@
       <div id="plip-history-modal" class="kozen-history text-sm leading-relaxed">
         <span class="sr-only">大銭天道の軌跡</span>
         <article>
-          <h3>Version 0.38　2026.11.15 — プレート完成ボイス</h3>
+          <h3>Version 0.39　2026.11.15 — プレート完成ボイス・かんたん再入力の文字検索</h3>
           <ul>
-            <li>ミッションを長押しで完了し、達成プレートが誕生するとき、テンちゃん／キンちゃんの完成ボイスをランダムで1つ再生。従来の紙吹雪や保存処理は維持。</li>
+            <li>ミッションの達成プレート完成時に、テンちゃん／キンちゃんのボイスをランダム再生。</li>
+            <li>金銭記録の内容欄に文字を入力すると、その文字で始まる過去の記録を頻度順に最大5件表示。未入力時は従来どおり。</li>
           </ul>
         </article>
         <article>
@@ -932,7 +933,7 @@
 
         <!-- 過去の支出を再利用（選択だけでは保存しない） -->
         <div id="modalFrequentExpense" class="hidden rounded-xl inner-box p-2.5 space-y-2">
-          <p class="text-[11px] font-bold opacity-80"><i class="fa-solid fa-clock-rotate-left mr-1"></i>よく使う記録から入力</p>
+          <p class="text-[11px] font-bold opacity-80"><i class="fa-solid fa-clock-rotate-left mr-1"></i><span id="modalFrequentExpenseTitle">よく使う記録から入力</span></p>
           <div id="modalFrequentExpenseList" class="space-y-1.5"></div>
         </div>
 
@@ -3344,10 +3345,9 @@
       renderModalStampStatus();
       renderModalTransactions();
       renderModalCategoryChips();
-      renderFrequentExpenseChoices();
-
       document.getElementById('modalTxMemo').value = '';
       document.getElementById('modalTxAmount').value = '';
+      renderFrequentExpenseChoices();
 
       dayDetailInputBaseline = getDayDetailInputSnapshot();
       const modal = document.getElementById('dayDetailModal');
@@ -3574,16 +3574,21 @@
       renderFrequentExpenseChoices();
     }
 
+    document.getElementById('modalTxMemo').addEventListener('input', renderFrequentExpenseChoices);
+
     // 既存の取引だけから集計。保存形式・ポイント・スタンプ処理は変更しない。
     function renderFrequentExpenseChoices() {
       const panel = document.getElementById('modalFrequentExpense');
       const list = document.getElementById('modalFrequentExpenseList');
+      const title = document.getElementById('modalFrequentExpenseTitle');
       if (!panel || !list) return;
       list.replaceChildren();
       panel.classList.add('hidden');
       if (currentModalTxType !== 'expense') return;
       const selected = categories.expense.find(cat => cat.label === modalSelectedCategory);
       if (!selected) return;
+      const prefix = document.getElementById('modalTxMemo').value.trim();
+      if (title) title.textContent = prefix ? '入力した文字から探す' : 'よく使う記録から入力';
 
       const groups = new Map();
       for (const tx of allTransactions()) {
@@ -3593,6 +3598,7 @@
         const memo = String(tx.memo || '').trim();
         const amount = Number(tx.amount);
         if (!memo || !Number.isFinite(amount) || amount <= 0) continue;
+        if (prefix && !memo.startsWith(prefix)) continue;
         let group = groups.get(memo);
         if (!group) {
           group = { memo, count: 0, latest: '', amounts: new Map() };
@@ -3630,6 +3636,7 @@
         button.addEventListener('click', () => {
           document.getElementById('modalTxMemo').value = group.memo;
           document.getElementById('modalTxAmount').value = best.amount;
+          renderFrequentExpenseChoices();
         });
         list.appendChild(button);
       }
@@ -3694,6 +3701,7 @@
 
       document.getElementById('modalTxMemo').value = '';
       document.getElementById('modalTxAmount').value = '';
+      renderFrequentExpenseChoices();
       dayDetailInputBaseline = getDayDetailInputSnapshot();
       const celebrate = markDailyCompletionIfNew(currentDetailDate, wasComplete);
 
