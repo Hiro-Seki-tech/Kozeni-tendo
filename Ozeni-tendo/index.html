@@ -767,7 +767,7 @@
     <div id="footer-now-playing" class="kozen-footer-line kozen-now-playing" aria-live="polite">Now Playing：—</div>
     <div class="kozen-footer-line">無断転載及びハルシネーションはお断り申し上げます。</div>
     <div class="kozen-footer-meta">
-      <span id="footer-version">Version 0.42（開発版・共有テスト）</span><span aria-hidden="true">／</span>
+      <span id="footer-version">Version 0.42D（共有診断版）</span><span aria-hidden="true">／</span>
       <span id="footer-updated">更新日 2026.11.13</span><span aria-hidden="true">／</span>
       <button type="button" id="open-trajectory" class="kozen-trajectory-button" onclick="openKozenTrajectory()">📜 大銭天道の軌跡</button>
     </div>
@@ -783,7 +783,7 @@
       <div id="plip-history-modal" class="kozen-history text-sm leading-relaxed">
         <span class="sr-only">大銭天道の軌跡</span>
         <article>
-          <h3>Version 0.42　2026.11.16 — 説明文・復元コード・バックアップファイルの一括共有テスト</h3>
+          <h3>Version 0.42D　2026.11.16 — 一括共有失敗時の原因表示（診断用）</h3>
           <ul>
             <li>共有ボタン1つで説明文・復元コード・圧縮ファイルを共有する試験機能を追加。</li>
             <li>ファイル復元と従来の復元コード方式を維持。共有非対応環境向けの保存・コピーは折りたたみ内に配置。</li>
@@ -4120,15 +4120,44 @@
       modal.classList.remove('flex');
     }
 
+    // v0.42診断版：共有失敗の理由だけを表示。共有仕様や保存データは変更しない。
     async function shareReportWebAPI() {
-      const text = document.getElementById('reportTextPreview').value;
-      if (!text.includes('KZ2:') || !preparedBackupFile) { showToast('送信データを準備中です'); return; }
-      const payload = { title:'大銭天道の記録', text, files:[preparedBackupFile] };
-      if (navigator.share && navigator.canShare && navigator.canShare({files:[preparedBackupFile]})) {
-        try { await navigator.share(payload); }
-        catch (err) { if (err.name !== 'AbortError') showToast('共有できませんでした。下の「共有できない場合」をご利用ください'); }
-      } else {
-        showToast('この環境ではファイルの直接共有に対応していません。下の「共有できない場合」をご利用ください');
+      const reportText = document.getElementById('reportTextPreview').value;
+      if (!reportText.includes('KZ2:') || !preparedBackupFile) { showToast('送信データを準備中です'); return; }
+      const payload = { title:'大銭天道の記録', text:reportText, files:[preparedBackupFile] };
+      const hasShare = typeof navigator.share === 'function';
+      const hasCanShare = typeof navigator.canShare === 'function';
+      let fileSupported = false, combinedSupported = false;
+      let checkError = '';
+      try {
+        if (hasCanShare) {
+          fileSupported = navigator.canShare({files:[preparedBackupFile]});
+          combinedSupported = navigator.canShare(payload);
+        }
+      } catch (err) { checkError = `${err.name || 'Error'}: ${err.message || String(err)}`; }
+      const diagnostic = (reason) => {
+        const info = [
+          '【共有診断 v0.42D】', reason,
+          `共有機能: ${hasShare ? 'あり' : 'なし'}`,
+          `ファイル共有判定機能: ${hasCanShare ? 'あり' : 'なし'}`,
+          `ファイルのみ共有可能: ${fileSupported}`,
+          `文章＋ファイル共有可能: ${combinedSupported}`,
+          `文章の長さ: ${reportText.length}文字`,
+          `ファイルサイズ: ${preparedBackupFile.size}バイト`,
+          `安全な接続: ${window.isSecureContext ? 'はい' : 'いいえ'}`,
+          ...(checkError ? [`判定エラー: ${checkError}`] : [])
+        ].join('\n');
+        alert(info);
+      };
+      if (!hasShare || !hasCanShare || !fileSupported) {
+        diagnostic('共有機能またはファイル共有の事前判定が利用できません。');
+        return;
+      }
+      try {
+        await navigator.share(payload);
+      } catch (err) {
+        if (err && err.name === 'AbortError') return;
+        diagnostic(`共有エラー: ${err && err.name ? err.name : '不明'}\n詳細: ${err && err.message ? err.message : String(err)}`);
       }
     }
 
