@@ -3536,11 +3536,16 @@ ${missionCounts}
 ${backupCode}`;
     }
 
+    let preparedRestoreTextFile = null;
+
     async function openReportModal() {
       const preview = document.getElementById('reportTextPreview');
+      preparedRestoreTextFile = null;
       preview.value = '報告書を準備しています…';
       try {
         preview.value = await buildReportText();
+        const safeName = String(state.userName || '記録').replace(/[\\/:*?"<>|\x00-\x1f]/g, '_').slice(0, 40);
+        preparedRestoreTextFile = new File([preview.value], `小銭天童_${safeName}_${getTodayStr()}.txt`, {type:'text/plain'});
       } catch (e) {
         preview.value = '';
         showToast('このブラウザでは圧縮コードを作成できません');
@@ -3570,28 +3575,19 @@ ${backupCode}`;
 
     // 従来の報告書全文（KZ2復元コードを含む）を、そのままTXTにする。
     async function shareReportAsTxt() {
-      const report = document.getElementById('reportTextPreview').value;
-      if (!report.includes('KZ2:')) { showToast('報告書の準備が完了していません'); return; }
-      const safeName = String(state.userName || '記録').replace(/[\\/:*?"<>|\x00-\x1f]/g, '_').slice(0, 40);
-      const file = new File([report], `小銭天童_${safeName}_${getTodayStr()}.txt`, {type:'text/plain;charset=utf-8'});
-      if (navigator.share && navigator.canShare && navigator.canShare({files:[file]})) {
-        try {
-          await navigator.share({title:'小銭天童 報告書',files:[file]});
-          return;
-        } catch (err) {
-          if (err && err.name === 'AbortError') return;
+      if (!preparedRestoreTextFile) { showToast('送信データを準備中です'); return; }
+      const file = preparedRestoreTextFile;
+      if (typeof navigator.share !== 'function' || typeof navigator.canShare !== 'function' || !navigator.canShare({files:[file]})) {
+        showToast('この環境ではTXTファイルの直接共有に対応していません');
+        return;
+      }
+      try { await navigator.share({files:[file]}); }
+      catch (err) {
+        if (err?.name !== 'AbortError') {
+          console.error('TXTファイル共有失敗', err);
+          showToast('TXTファイルを共有できませんでした');
         }
       }
-      // PC等、ファイル共有に非対応の環境ではTXTを保存してから送ってもらう。
-      const url = URL.createObjectURL(file);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = file.name;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 60000);
-      showToast('この環境では直接共有できないためTXTを保存しました。LINEやメールに添付してね');
     }
 
     async function restoreFromTxtFile(input) {
