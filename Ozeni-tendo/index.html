@@ -767,7 +767,7 @@
     <div id="footer-now-playing" class="kozen-footer-line kozen-now-playing" aria-live="polite">Now Playing：—</div>
     <div class="kozen-footer-line">無断転載及びハルシネーションはお断り申し上げます。</div>
     <div class="kozen-footer-meta">
-      <span id="footer-version">Version 0.40（開発版・日別支出合計）</span><span aria-hidden="true">／</span>
+      <span id="footer-version">Version 0.41（開発版・圧縮バックアップ）</span><span aria-hidden="true">／</span>
       <span id="footer-updated">更新日 2026.11.13</span><span aria-hidden="true">／</span>
       <button type="button" id="open-trajectory" class="kozen-trajectory-button" onclick="openKozenTrajectory()">📜 大銭天道の軌跡</button>
     </div>
@@ -782,6 +782,13 @@
       </div>
       <div id="plip-history-modal" class="kozen-history text-sm leading-relaxed">
         <span class="sr-only">大銭天道の軌跡</span>
+        <article>
+          <h3>Version 0.41　2026.11.16 — 圧縮バックアップファイルの保存・復元</h3>
+          <ul>
+            <li>復元コード送信画面に、圧縮バックアップファイル（.json.gz）の保存機能を追加。</li>
+            <li>設定画面からバックアップファイルを選んで復元できるようにした。従来の復元コード方式も維持。</li>
+          </ul>
+        </article>
         <article>
           <h3>Version 0.40　2026.11.15 — プレート完成ボイス・かんたん再入力の文字検索・日別支出合計</h3>
           <ul>
@@ -998,6 +1005,10 @@
 
       <label for="reportTextPreview" class="block text-xs font-bold">🔑 復元コード</label>
       <textarea id="reportTextPreview" readonly rows="8" class="w-full inner-box rounded-2xl p-3 text-xs font-mono focus:outline-none"></textarea>
+
+      <button onclick="downloadBackupFile()" class="w-full py-3 inner-box hover:opacity-80 font-bold rounded-2xl text-sm flex items-center justify-center gap-2">
+        <i class="fa-solid fa-file-arrow-down"></i><span>圧縮バックアップファイルを保存</span>
+      </button>
 
       <div class="grid grid-cols-1 gap-2.5">
         <button onclick="shareReportWebAPI()" class="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-extrabold rounded-2xl shadow-lg flex items-center justify-center gap-2">
@@ -1341,6 +1352,14 @@
               <label class="opacity-75 font-bold block mb-1">親の合言葉（暗証番号）</label>
               <input type="text" id="cfgPin" class="w-full inner-box rounded-xl px-3 py-2 font-bold">
             </div>
+
+          <!-- 圧縮バックアップファイルから復元 -->
+          <div class="pt-2 border-t border-slate-700/50 space-y-2">
+            <p class="text-[11px] opacity-75 font-bold">📁 バックアップファイルから復元</p>
+            <p class="text-[11px] opacity-70">保存した .json.gz ファイルを選びます。復元すると、この端末の現在の記録が上書きされます。</p>
+            <input type="file" id="backupFileInput" accept=".gz,.json.gz,application/gzip" class="w-full text-xs inner-box rounded-xl p-2" aria-label="バックアップファイルを選択">
+            <button type="button" onclick="restoreFromBackupFile()" class="inner-box hover:opacity-80 px-3.5 py-2 rounded-xl text-xs font-bold text-amber-500">選択したファイルから復元</button>
+          </div>
 
           <!-- 復元同期コード -->
           <div class="pt-2 border-t border-slate-700/50 space-y-2">
@@ -4017,6 +4036,57 @@
       const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
       const decompressed = await new Response(stream).arrayBuffer();
       return JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(decompressed));
+    }
+
+    // 圧縮済みのJSONをファイルで保存・復元。既存のKZ2方式や保存データ形式は変更しない。
+    async function downloadBackupFile() {
+      try {
+        if (typeof CompressionStream === 'undefined') throw new Error('圧縮非対応');
+        const bytes = new TextEncoder().encode(JSON.stringify(state));
+        const stream = new Blob([bytes]).stream().pipeThrough(new CompressionStream('gzip'));
+        const compressed = await new Response(stream).blob();
+        const date = new Date();
+        const stamp = `${date.getFullYear()}${String(date.getMonth()+1).padStart(2,'0')}${String(date.getDate()).padStart(2,'0')}_${String(date.getHours()).padStart(2,'0')}${String(date.getMinutes()).padStart(2,'0')}${String(date.getSeconds()).padStart(2,'0')}`;
+        const url = URL.createObjectURL(compressed);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `大銭天道_バックアップ_${stamp}.json.gz`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
+        showToast('バックアップファイルの保存を開始しました');
+      } catch (e) {
+        console.error('バックアップ保存失敗', e);
+        showToast('バックアップファイルを作成できませんでした');
+      }
+    }
+
+    async function restoreFromBackupFile() {
+      const input = document.getElementById('backupFileInput');
+      const file = input.files && input.files[0];
+      if (!file) { showToast('バックアップファイルを選択してください'); return; }
+      if (!/\.json\.gz$/i.test(file.name)) { showToast('.json.gz ファイルを選択してください'); return; }
+      if (file.size > 20 * 1024 * 1024) { showToast('ファイルが大きすぎます（20MBまで）'); return; }
+      try {
+        if (typeof DecompressionStream === 'undefined') throw new Error('展開非対応');
+        const stream = file.stream().pipeThrough(new DecompressionStream('gzip'));
+        const json = await new Response(stream).text();
+        if (json.length > 100 * 1024 * 1024) throw new Error('展開後のデータが大きすぎます');
+        const decoded = JSON.parse(json);
+        if (!decoded || Array.isArray(decoded) || typeof decoded !== 'object' || typeof decoded.monthlyAllowance !== 'number' || !Number.isFinite(decoded.monthlyAllowance)) throw new Error('形式が不正');
+        openConfirmModal('バックアップファイルの内容で、この端末の現在の記録を上書きします。現在の記録は失われるため、必要なら先にバックアップしてください。続けますか？', () => {
+          state = normalizeChildState(decoded);
+          applyCurrentTheme();
+          saveState();
+          closeParentModal();
+          input.value = '';
+          showToast('バックアップファイルから復元しました');
+        });
+      } catch (e) {
+        console.error('バックアップ復元失敗', e);
+        showToast('バックアップファイルを読み取れませんでした');
+      }
     }
 
     // 既存の KZ2 圧縮・復元方式を維持し、送信内容だけを復元コードに限定する。
