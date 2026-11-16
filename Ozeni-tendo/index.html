@@ -767,7 +767,7 @@
     <div id="footer-now-playing" class="kozen-footer-line kozen-now-playing" aria-live="polite">Now Playing：—</div>
     <div class="kozen-footer-line">無断転載及びハルシネーションはお断り申し上げます。</div>
     <div class="kozen-footer-meta">
-      <span id="footer-version">Version 0.42C（文章＋TXT同時共有診断版）</span><span aria-hidden="true">／</span>
+      <span id="footer-version">Version 0.43（送信・TXT復元対応）</span><span aria-hidden="true">／</span>
       <span id="footer-updated">更新日 2026.11.16</span><span aria-hidden="true">／</span>
       <button type="button" id="open-trajectory" class="kozen-trajectory-button" onclick="openKozenTrajectory()">📜 大銭天道の軌跡</button>
     </div>
@@ -783,10 +783,10 @@
       <div id="plip-history-modal" class="kozen-history text-sm leading-relaxed">
         <span class="sr-only">大銭天道の軌跡</span>
         <article>
-          <h3>Version 0.42C　2026.11.16 — 説明文とTXTファイルの同時共有診断（診断用）</h3>
+          <h3>Version 0.43　2026.11.16 — 復元コード送信とTXTファイル送信・復元</h3>
           <ul>
-            <li>説明文＋復元コードをメッセージ本文に入れ、同内容のTXTファイルと一緒に共有する診断機能。</li>
-            <li>ファイル復元と従来の復元コード方式を維持。共有非対応環境向けの保存・コピーは折りたたみ内に配置。</li>
+            <li>メッセージ送信とTXTファイル送信を別ボタンに整理。TXTファイルからの復元にも対応。</li>
+            <li>従来の復元コード方式を維持し、旧形式の圧縮バックアップも読み込み可能。</li>
           </ul>
         </article>
         <article>
@@ -995,18 +995,19 @@
         <button onclick="closeReportModal()" class="opacity-60 hover:opacity-100 text-xl"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
-      <p class="text-xs opacity-80 leading-relaxed">今回は診断のため、説明文＋復元コードをメッセージ本文とTXT添付ファイルの両方で共有します。共有先アプリによっては片方だけ届く場合があります。</p>
-      <label for="reportTextPreview" class="block text-xs font-bold">🔑 メッセージ本文とTXTに入れる説明文・復元コード</label>
+      <p class="text-xs opacity-80 leading-relaxed">通常はメッセージで送信します。長いコードが送れない場合は、下のTXTファイル送信を使ってください。</p>
+      <label for="reportTextPreview" class="block text-xs font-bold">🔑 送信する説明文・復元コード</label>
       <textarea id="reportTextPreview" readonly rows="8" class="w-full inner-box rounded-2xl p-3 text-xs font-mono focus:outline-none"></textarea>
 
       <div class="grid grid-cols-1 gap-2.5">
-        <button onclick="shareReportWebAPI()" class="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-extrabold rounded-2xl shadow-lg flex items-center justify-center gap-2">
+        <button onclick="shareReportMessage()" class="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-extrabold rounded-2xl shadow-lg flex items-center justify-center gap-2">
           <i class="fa-solid fa-share-nodes"></i>
-          <span>説明文＋TXTを一緒に送る（診断）</span>
+          <span>① メッセージで送信</span>
         </button>
-        <details class="text-xs opacity-80"><summary class="cursor-pointer">共有できない場合・従来の復元コード</summary>
-          <button onclick="downloadBackupFile()" class="w-full py-2 inner-box rounded-xl mt-2">バックアップファイルを保存</button>
+        <button onclick="shareReportTextFile()" class="w-full py-3 inner-box rounded-2xl font-bold flex items-center justify-center gap-2"><i class="fa-solid fa-file-lines"></i><span>② TXTファイルで送信</span></button>
+        <details class="text-xs opacity-80"><summary class="cursor-pointer">共有できない場合</summary>
           <button onclick="copyReportToClipboard()" class="w-full py-2 inner-box rounded-xl mt-2">説明文と復元コードをコピー</button>
+          <button onclick="downloadReportTextFile()" class="w-full py-2 inner-box rounded-xl mt-2">TXTファイルを保存</button>
         </details>
       </div>
     </div>
@@ -1342,21 +1343,19 @@
               <input type="text" id="cfgPin" class="w-full inner-box rounded-xl px-3 py-2 font-bold">
             </div>
 
-          <!-- 圧縮バックアップファイルから復元 -->
+          <!-- 復元コードを優先、TXTファイルは補助 -->
           <div class="pt-2 border-t border-slate-700/50 space-y-2">
-            <p class="text-[11px] opacity-75 font-bold">📁 バックアップファイルから復元</p>
-            <p class="text-[11px] opacity-70">保存した .json.gz ファイルを選びます。復元すると、この端末の現在の記録が上書きされます。</p>
-            <input type="file" id="backupFileInput" accept=".gz,.json.gz,application/gzip" class="w-full text-xs inner-box rounded-xl p-2" aria-label="バックアップファイルを選択">
-            <button type="button" onclick="restoreFromBackupFile()" class="inner-box hover:opacity-80 px-3.5 py-2 rounded-xl text-xs font-bold text-amber-500">選択したファイルから復元</button>
-          </div>
-
-          <!-- 復元同期コード -->
-          <div class="pt-2 border-t border-slate-700/50 space-y-2">
-            <p class="text-[11px] opacity-75 font-bold">📱 復元コードからデータを復元</p>
+            <p class="text-[11px] opacity-75 font-bold">① 復元コードを貼り付け</p>
             <div class="flex gap-2">
               <input type="text" id="restoreCodeInput" placeholder="復元コードを貼り付け" class="flex-1 inner-box rounded-xl px-3 py-2 text-xs">
               <button onclick="restoreFromCode()" class="inner-box hover:opacity-80 px-3.5 py-2 rounded-xl text-xs font-bold text-amber-500">復元</button>
             </div>
+          </div>
+          <div class="pt-2 border-t border-slate-700/50 space-y-2">
+            <p class="text-[11px] opacity-75 font-bold">② TXTファイルから復元</p>
+            <p class="text-[11px] opacity-70">受け取ったTXTファイルを選択します。復元すると現在の記録が上書きされます。</p>
+            <input type="file" id="backupFileInput" accept=".txt,text/plain,.json.gz,application/gzip" class="w-full text-xs inner-box rounded-xl p-2" aria-label="復元ファイルを選択">
+            <button type="button" onclick="restoreFromBackupFile()" class="inner-box hover:opacity-80 px-3.5 py-2 rounded-xl text-xs font-bold text-amber-500">選択したファイルから復元</button>
           </div>
         </div>
 
@@ -4055,26 +4054,32 @@
       const input = document.getElementById('backupFileInput');
       const file = input.files && input.files[0];
       if (!file) { showToast('バックアップファイルを選択してください'); return; }
-      if (!/\.json\.gz$/i.test(file.name)) { showToast('.json.gz ファイルを選択してください'); return; }
+      if (!/\.(txt|json\.gz)$/i.test(file.name)) { showToast('TXTファイルを選択してください'); return; }
       if (file.size > 20 * 1024 * 1024) { showToast('ファイルが大きすぎます（20MBまで）'); return; }
       try {
-        if (typeof DecompressionStream === 'undefined') throw new Error('展開非対応');
-        const stream = file.stream().pipeThrough(new DecompressionStream('gzip'));
-        const json = await new Response(stream).text();
-        if (json.length > 100 * 1024 * 1024) throw new Error('展開後のデータが大きすぎます');
-        const decoded = JSON.parse(json);
+        let decoded;
+        if (/\.txt$/i.test(file.name)) {
+          const content = await file.text();
+          decoded = await decodeRestoreCode(content);
+        } else {
+          if (typeof DecompressionStream === 'undefined') throw new Error('展開非対応');
+          const stream = file.stream().pipeThrough(new DecompressionStream('gzip'));
+          const json = await new Response(stream).text();
+          if (json.length > 100 * 1024 * 1024) throw new Error('展開後のデータが大きすぎます');
+          decoded = JSON.parse(json);
+        }
         if (!decoded || Array.isArray(decoded) || typeof decoded !== 'object' || typeof decoded.monthlyAllowance !== 'number' || !Number.isFinite(decoded.monthlyAllowance)) throw new Error('形式が不正');
-        openConfirmModal('バックアップファイルの内容で、この端末の現在の記録を上書きします。現在の記録は失われるため、必要なら先にバックアップしてください。続けますか？', () => {
+        openConfirmModal('選択したファイルの内容で、この端末の現在の記録を上書きします。現在の記録は失われます。続けますか？', () => {
           state = normalizeChildState(decoded);
           applyCurrentTheme();
           saveState();
           closeParentModal();
           input.value = '';
-          showToast('バックアップファイルから復元しました');
+          showToast('ファイルから復元しました');
         });
       } catch (e) {
         console.error('バックアップ復元失敗', e);
-        showToast('バックアップファイルを読み取れませんでした');
+        showToast('復元ファイルを読み取れませんでした');
       }
     }
 
@@ -4110,7 +4115,7 @@
         const dateText = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日`;
         preview.value = `【大銭天道の記録】\n${dateText}の大銭天道の復元データです。\n\n復元方法：
 ① 下の「KZ2:」から始まる復元コードをコピーし、大銭天道の設定画面「復元コードからデータを復元」に貼り付ける。
-② 添付のTXTファイルにも同じコードが入っています（TXTファイルの直接読み込みは次の開発段階で対応予定）。\n\n※復元すると端末の現在の記録が上書きされます。記録には個人情報が含まれるため、送信先にご注意ください。\n\n【復元コード】\n${code}`;
+② TXTファイルで受け取った場合は、設定画面「TXTファイルから復元」で読み込む。\n\n※復元すると端末の現在の記録が上書きされます。記録には個人情報が含まれるため、送信先にご注意ください。\n\n【復元コード】\n${code}`;
         preparedRestoreTextFile = new File([preview.value], `大銭天道_復元コード_${stamp}.txt`, {type:'text/plain'});
       } catch (e) {
         console.error('共有データ準備失敗',e);
@@ -4125,30 +4130,31 @@
       modal.classList.remove('flex');
     }
 
-    // v0.42C診断版：準備済みの説明文とTXTを一度の共有操作に渡す。
-    async function shareReportWebAPI() {
+    // 文章とファイルを分けて共有する。LINEの本文表示を優先するため同時共有はしない。
+    async function shareReportMessage() {
+      const message = document.getElementById('reportTextPreview').value;
+      if (!message.includes('KZ2:')) { showToast('送信データを準備中です'); return; }
+      if (typeof navigator.share !== 'function') { showToast('共有に対応していません。コピーをご利用ください'); return; }
+      try { await navigator.share({title:'大銭天道の記録',text:message}); }
+      catch (err) { if (err?.name !== 'AbortError') showToast('メッセージを共有できませんでした'); }
+    }
+
+    async function shareReportTextFile() {
       if (!preparedRestoreTextFile) { showToast('送信データを準備中です'); return; }
       const file = preparedRestoreTextFile;
-      const message = document.getElementById('reportTextPreview').value;
-      const hasShare = typeof navigator.share === 'function';
-      const hasCanShare = typeof navigator.canShare === 'function';
-      let supported = false;
-      try { supported = hasCanShare && navigator.canShare({files:[file]}); } catch (e) {}
-      const diagnostic = (reason) => alert([
-        '【文章＋TXT同時共有診断 v0.42C】', reason,
-        `共有機能: ${hasShare ? 'あり' : 'なし'}`,
-        `TXTファイル共有可能: ${supported}`,
-        `TXTサイズ: ${file.size}バイト`,
-        `本文文字数: ${message.length}`,
-        `安全な接続: ${window.isSecureContext ? 'はい' : 'いいえ'}`
-      ].join('\n'));
-      if (!hasShare || !supported) { diagnostic('ファイル共有の事前判定が利用できません。'); return; }
-      try {
-        await navigator.share({title:'大銭天道の記録', text:message, files:[file]});
-      } catch (err) {
-        if (err && err.name === 'AbortError') return;
-        diagnostic(`共有エラー: ${err && err.name ? err.name : '不明'}\n詳細: ${err && err.message ? err.message : String(err)}`);
+      if (typeof navigator.share !== 'function' || typeof navigator.canShare !== 'function' || !navigator.canShare({files:[file]})) {
+        showToast('ファイル共有に対応していません。TXT保存をご利用ください'); return;
       }
+      try { await navigator.share({files:[file]}); }
+      catch (err) { if (err?.name !== 'AbortError') showToast('TXTファイルを共有できませんでした'); }
+    }
+
+    function downloadReportTextFile() {
+      if (!preparedRestoreTextFile) { showToast('送信データを準備中です'); return; }
+      const url = URL.createObjectURL(preparedRestoreTextFile);
+      const a = document.createElement('a'); a.href = url; a.download = preparedRestoreTextFile.name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
     }
 
     function copyReportToClipboard() {
