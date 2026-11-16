@@ -682,8 +682,8 @@
     <div id="footer-now-playing" class="kozen-footer-line kozen-now-playing" aria-live="polite">Now Playing：—</div>
     <div class="kozen-footer-line">無断転載及びハルシネーションはお断り申し上げます。</div>
     <div class="kozen-footer-meta">
-      <span id="footer-version">Version 0.10（公開版）</span><span aria-hidden="true">／</span>
-      <span id="footer-updated">更新日 2026.11.15</span><span aria-hidden="true">／</span>
+      <span id="footer-version">Version 0.11（公開版）</span><span aria-hidden="true">／</span>
+      <span id="footer-updated">更新日 2026.11.16</span><span aria-hidden="true">／</span>
       <button type="button" id="open-trajectory" class="kozen-trajectory-button" onclick="openKozenTrajectory()">📜 小銭天童の軌跡</button>
     </div>
   </footer>
@@ -696,6 +696,12 @@
         <button type="button" id="kozenTrajectoryClose" class="kozen-plip-action" onclick="closeKozenTrajectory()" aria-label="閉じる">× 閉じる</button>
       </div>
       <div id="plip-history-modal" class="kozen-history text-sm leading-relaxed">
+        <article>
+          <h3>Version 0.11　2026.11.16</h3>
+          <ul>
+            <li>報告書をTXTファイルとして送る機能と、親画面でTXTファイルから記録を復元する機能を追加。従来の復元コードも維持。</li>
+          </ul>
+        </article>
         <span class="sr-only">小銭天童の軌跡</span>
         <article>
           <h3>Version 0.10　2026.11.15</h3>
@@ -895,9 +901,9 @@
           <i class="fa-solid fa-share-nodes"></i>
           <span>アプリを選んで送る（LINE / メール等）</span>
         </button>
-        <button onclick="copyReportToClipboard()" class="w-full py-3 inner-box hover:opacity-80 font-bold rounded-2xl text-sm flex items-center justify-center gap-2">
-          <i class="fa-regular fa-copy"></i>
-          <span>レポート文字をコピーする</span>
+        <button onclick="shareReportAsTxt()" class="w-full py-3 inner-box hover:opacity-80 font-bold rounded-2xl text-sm flex items-center justify-center gap-2">
+          <i class="fa-regular fa-file-lines"></i>
+          <span>ファイルで送る（いざという時用！）</span>
         </button>
       </div>
     </div>
@@ -1221,6 +1227,10 @@
             <div class="flex gap-2">
               <input type="text" id="restoreCodeInput" placeholder="報告書全文または復元コードを貼り付け" class="flex-1 inner-box rounded-xl px-3 py-2 text-xs">
               <button onclick="restoreFromCode()" class="inner-box hover:opacity-80 px-3.5 py-2 rounded-xl text-xs font-bold text-amber-500">同期</button>
+            </div>
+            <div class="flex gap-2 items-center">
+              <button type="button" onclick="document.getElementById('restoreTxtInput').click()" class="inner-box hover:opacity-80 px-3.5 py-2 rounded-xl text-xs font-bold text-amber-500">TXTファイルから復元（予備）</button>
+              <input id="restoreTxtInput" type="file" accept=".txt,text/plain" class="hidden" onchange="restoreFromTxtFile(this)">
             </div>
           </div>
         </div>
@@ -3555,6 +3565,56 @@ ${backupCode}`;
         } catch (err) {}
       } else {
         copyReportToClipboard();
+      }
+    }
+
+    // 従来の報告書全文（KZ2復元コードを含む）を、そのままTXTにする。
+    async function shareReportAsTxt() {
+      const report = document.getElementById('reportTextPreview').value;
+      if (!report.includes('KZ2:')) { showToast('報告書の準備が完了していません'); return; }
+      const safeName = String(state.userName || '記録').replace(/[\\/:*?"<>|\x00-\x1f]/g, '_').slice(0, 40);
+      const file = new File([report], `小銭天童_${safeName}_${getTodayStr()}.txt`, {type:'text/plain;charset=utf-8'});
+      if (navigator.share && navigator.canShare && navigator.canShare({files:[file]})) {
+        try {
+          await navigator.share({title:'小銭天童 報告書',files:[file]});
+          return;
+        } catch (err) {
+          if (err && err.name === 'AbortError') return;
+        }
+      }
+      // PC等、ファイル共有に非対応の環境ではTXTを保存してから送ってもらう。
+      const url = URL.createObjectURL(file);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = file.name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+      showToast('この環境では直接共有できないためTXTを保存しました。LINEやメールに添付してね');
+    }
+
+    async function restoreFromTxtFile(input) {
+      const file = input.files && input.files[0];
+      input.value = '';
+      if (!file) return;
+      if (!/\.txt$/i.test(file.name) || file.size > 10 * 1024 * 1024) {
+        showToast('10MB以下のTXTファイルを選んでください');
+        return;
+      }
+      try {
+        const report = await file.text();
+        const decoded = await decodeRestoreCode(report);
+        if (!decoded || typeof decoded.monthlyAllowance !== 'number') throw new Error('復元データ不正');
+        openConfirmModal('現在選択中の子供のデータをTXTファイルで上書きします。別の子供のデータではないことを確認してください。続けますか？', () => {
+          state = normalizeChildState(decoded);
+          applyCurrentTheme();
+          saveState();
+          closeParentModal();
+          showToast('TXTファイルから記録を復元しました！');
+        });
+      } catch (e) {
+        showToast('TXTファイルの復元コードを読み取れませんでした');
       }
     }
 
