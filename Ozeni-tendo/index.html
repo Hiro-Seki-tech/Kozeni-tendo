@@ -249,6 +249,9 @@
     }
     .today-pressable { background:linear-gradient(160deg,#ffffff,#f0f4f4) !important; color:#334155 !important; border:2px solid #d7e0e5 !important; box-shadow:0 4px 0 #94a3b8,0 0 0 2px rgba(255,255,255,.22) !important; transform:scale(1.12); position:relative; z-index:2; font-weight:900; cursor:pointer; transition:transform .12s,box-shadow .12s; }
     .today-pressable:active { transform:scale(1.03) translateY(3px) !important; box-shadow:0 1px 0 #94a3b8 !important; }
+    /* ミッション表：週末の日付列だけを淡く色分け */
+    #matrixContainer .habit-matrix .matrix-saturday { background-color:rgba(75,155,235,.13); }
+    #matrixContainer .habit-matrix .matrix-sunday { background-color:rgba(235,105,120,.13); }
     .today-column { background:rgba(255,255,255,.075); }
     .today-column-header { background:rgba(255,255,255,.16); color:inherit !important; border-radius:8px; font-weight:900 !important; }
     .today-pressable .opacity-30 { opacity:.7; }
@@ -767,8 +770,8 @@
     <div id="footer-now-playing" class="kozen-footer-line kozen-now-playing" aria-live="polite">Now Playing：—</div>
     <div class="kozen-footer-line">無断転載及びハルシネーションはお断り申し上げます。</div>
     <div class="kozen-footer-meta">
-      <span id="footer-version">Version 0.43（送信・TXT復元対応）</span><span aria-hidden="true">／</span>
-      <span id="footer-updated">更新日 2026.11.16</span><span aria-hidden="true">／</span>
+      <span id="footer-version">Version 0.44（ミッション表の週末色分け）</span><span aria-hidden="true">／</span>
+      <span id="footer-updated">更新日 2026.11.17</span><span aria-hidden="true">／</span>
       <button type="button" id="open-trajectory" class="kozen-trajectory-button" onclick="openKozenTrajectory()">📜 大銭天道の軌跡</button>
     </div>
   </footer>
@@ -782,6 +785,12 @@
       </div>
       <div id="plip-history-modal" class="kozen-history text-sm leading-relaxed">
         <span class="sr-only">大銭天道の軌跡</span>
+        <article>
+          <h3>Version 0.44　2026.11.17 — ミッション表の週末を色分け</h3>
+          <ul>
+            <li>土曜日は淡い青、日曜日は淡い赤で日付列全体を表示。平日と既存の操作は維持。</li>
+          </ul>
+        </article>
         <article>
           <h3>Version 0.43　2026.11.16 — 復元コード送信とTXTファイル送信・復元</h3>
           <ul>
@@ -3237,7 +3246,7 @@
       dates.forEach(d => {
         const st = state.stamps[d.dateStr];
         const mark = st ? ozeniKobanMark() : '<span class="opacity-30">✕</span>';
-        html += `<td class="text-center px-1 ${d.isToday ? 'today-column' : ''}"><button onclick="openDayDetailModal('${d.dateStr}')" title="金銭の記録を開く" class="${d.isToday ? 'today-pressable w-9 h-9' : 'inner-box w-7 h-7'} rounded-lg inline-flex items-center justify-center">${mark}</button></td>`;
+        html += `<td class="text-center px-1 ${d.weekendClass} ${d.isToday ? 'today-column' : ''}"><button onclick="openDayDetailModal('${d.dateStr}')" title="金銭の記録を開く" class="${d.isToday ? 'today-pressable w-9 h-9' : 'inner-box w-7 h-7'} rounded-lg inline-flex items-center justify-center">${mark}</button></td>`;
       });
       return html + `<td class="matrix-fixed-right text-center px-1"><span class="font-extrabold text-amber-400 text-[11px]">🔥${streak}日</span></td></tr>`;
     }
@@ -3259,7 +3268,8 @@
         dates.push({
           dateStr: `${y}-${m}-${day}`,
           label: `${d.getMonth() + 1}/${d.getDate()}`,
-          isToday: i === 0
+          isToday: i === 0,
+          weekendClass: d.getDay() === 6 ? 'matrix-saturday' : d.getDay() === 0 ? 'matrix-sunday' : ''
         });
       }
       // 左から右へ時間が進む自然な並び（今日が右端）。
@@ -3267,7 +3277,7 @@
 
       let html = `<table class="habit-matrix text-xs text-left"><colgroup><col style="width:116px">${dates.map(() => '<col style="width:49px">').join('')}<col style="width:84px"></colgroup><thead><tr class="border-b border-slate-700/60"><th class="matrix-fixed-left pb-2 font-bold">ミッション</th>`;
       dates.forEach(d => {
-        html += `<th class="pb-2 text-center font-bold px-1 ${d.isToday ? 'today-column-header' : 'opacity-70'}">${d.isToday ? '今日 ' : ''}${d.label}</th>`;
+        html += `<th class="pb-2 text-center font-bold px-1 ${d.weekendClass} ${d.isToday ? 'today-column-header' : 'opacity-70'}">${d.isToday ? '今日 ' : ''}${d.label}</th>`;
       });
       html += `<th class="matrix-fixed-right pb-2 text-center font-bold px-1 text-amber-500">連続記録</th></tr></thead><tbody>`;
 
@@ -3290,7 +3300,7 @@
           let cellContent = `<span class="opacity-30 text-[11px]">✕</span>`;
           if (entry && entry.done) cellContent = ozeniDoneCheck();
 
-          html += `<td class="text-center px-1 ${d.isToday ? 'today-column' : ''}">
+          html += `<td class="text-center px-1 ${d.weekendClass} ${d.isToday ? 'today-column' : ''}">
             <button onclick="toggleMissionFromMatrix('${d.dateStr}', '${m.id}')"
               class="${d.isToday ? 'today-pressable w-9 h-9' : 'inner-box w-7 h-7'} rounded-lg inline-flex items-center justify-center transition active:scale-90">
               ${cellContent}
