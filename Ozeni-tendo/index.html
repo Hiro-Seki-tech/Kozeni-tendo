@@ -767,8 +767,8 @@
     <div id="footer-now-playing" class="kozen-footer-line kozen-now-playing" aria-live="polite">Now Playing：—</div>
     <div class="kozen-footer-line">無断転載及びハルシネーションはお断り申し上げます。</div>
     <div class="kozen-footer-meta">
-      <span id="footer-version">Version 0.42T（TXT単独共有診断版）</span><span aria-hidden="true">／</span>
-      <span id="footer-updated">更新日 2026.11.13</span><span aria-hidden="true">／</span>
+      <span id="footer-version">Version 0.42C（文章＋TXT同時共有診断版）</span><span aria-hidden="true">／</span>
+      <span id="footer-updated">更新日 2026.11.16</span><span aria-hidden="true">／</span>
       <button type="button" id="open-trajectory" class="kozen-trajectory-button" onclick="openKozenTrajectory()">📜 大銭天道の軌跡</button>
     </div>
   </footer>
@@ -783,9 +783,9 @@
       <div id="plip-history-modal" class="kozen-history text-sm leading-relaxed">
         <span class="sr-only">大銭天道の軌跡</span>
         <article>
-          <h3>Version 0.42T　2026.11.16 — 復元コードTXT単独共有の診断（診断用）</h3>
+          <h3>Version 0.42C　2026.11.16 — 説明文とTXTファイルの同時共有診断（診断用）</h3>
           <ul>
-            <li>説明文と復元コードをTXTファイルに入れ、TXT単独で共有する診断機能を追加。</li>
+            <li>説明文＋復元コードをメッセージ本文に入れ、同内容のTXTファイルと一緒に共有する診断機能。</li>
             <li>ファイル復元と従来の復元コード方式を維持。共有非対応環境向けの保存・コピーは折りたたみ内に配置。</li>
           </ul>
         </article>
@@ -995,14 +995,14 @@
         <button onclick="closeReportModal()" class="opacity-60 hover:opacity-100 text-xl"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
-      <p class="text-xs opacity-80 leading-relaxed">今回は診断のため、説明文と復元コードを入れたTXTファイルだけを共有します。メッセージ本文や圧縮ファイルは送りません。</p>
-      <label for="reportTextPreview" class="block text-xs font-bold">🔑 TXTファイルに入れる説明文・復元コード</label>
+      <p class="text-xs opacity-80 leading-relaxed">今回は診断のため、説明文＋復元コードをメッセージ本文とTXT添付ファイルの両方で共有します。共有先アプリによっては片方だけ届く場合があります。</p>
+      <label for="reportTextPreview" class="block text-xs font-bold">🔑 メッセージ本文とTXTに入れる説明文・復元コード</label>
       <textarea id="reportTextPreview" readonly rows="8" class="w-full inner-box rounded-2xl p-3 text-xs font-mono focus:outline-none"></textarea>
 
       <div class="grid grid-cols-1 gap-2.5">
         <button onclick="shareReportWebAPI()" class="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-extrabold rounded-2xl shadow-lg flex items-center justify-center gap-2">
           <i class="fa-solid fa-share-nodes"></i>
-          <span>復元コードTXTだけを送る（診断）</span>
+          <span>説明文＋TXTを一緒に送る（診断）</span>
         </button>
         <details class="text-xs opacity-80"><summary class="cursor-pointer">共有できない場合・従来の復元コード</summary>
           <button onclick="downloadBackupFile()" class="w-full py-2 inner-box rounded-xl mt-2">バックアップファイルを保存</button>
@@ -4108,7 +4108,9 @@
         for (let i=0;i<arr.length;i+=8192) binary += String.fromCharCode(...arr.subarray(i,i+8192));
         const code = 'KZ2:' + btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
         const dateText = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日`;
-        preview.value = `【大銭天道の記録】\n${dateText}の大銭天道の復元データです。\n\nこのTXTファイル内の【復元コード】から「KZ2:」で始まる文字列を最後までコピーし、大銭天道の設定画面「復元コードからデータを復元」に貼り付けてください。\n\n※復元すると端末の現在の記録が上書きされます。記録には個人情報が含まれるため、送信先にご注意ください。\n\n【復元コード】\n${code}`;
+        preview.value = `【大銭天道の記録】\n${dateText}の大銭天道の復元データです。\n\n復元方法：
+① 下の「KZ2:」から始まる復元コードをコピーし、大銭天道の設定画面「復元コードからデータを復元」に貼り付ける。
+② 添付のTXTファイルにも同じコードが入っています（TXTファイルの直接読み込みは次の開発段階で対応予定）。\n\n※復元すると端末の現在の記録が上書きされます。記録には個人情報が含まれるため、送信先にご注意ください。\n\n【復元コード】\n${code}`;
         preparedRestoreTextFile = new File([preview.value], `大銭天道_復元コード_${stamp}.txt`, {type:'text/plain'});
       } catch (e) {
         console.error('共有データ準備失敗',e);
@@ -4123,24 +4125,26 @@
       modal.classList.remove('flex');
     }
 
-    // v0.42T診断版：事前生成したTXTファイルだけを共有する。
+    // v0.42C診断版：準備済みの説明文とTXTを一度の共有操作に渡す。
     async function shareReportWebAPI() {
       if (!preparedRestoreTextFile) { showToast('送信データを準備中です'); return; }
       const file = preparedRestoreTextFile;
+      const message = document.getElementById('reportTextPreview').value;
       const hasShare = typeof navigator.share === 'function';
       const hasCanShare = typeof navigator.canShare === 'function';
       let supported = false;
       try { supported = hasCanShare && navigator.canShare({files:[file]}); } catch (e) {}
       const diagnostic = (reason) => alert([
-        '【TXT単独共有診断 v0.42T】', reason,
+        '【文章＋TXT同時共有診断 v0.42C】', reason,
         `共有機能: ${hasShare ? 'あり' : 'なし'}`,
         `TXTファイル共有可能: ${supported}`,
         `TXTサイズ: ${file.size}バイト`,
+        `本文文字数: ${message.length}`,
         `安全な接続: ${window.isSecureContext ? 'はい' : 'いいえ'}`
       ].join('\n'));
       if (!hasShare || !supported) { diagnostic('ファイル共有の事前判定が利用できません。'); return; }
       try {
-        await navigator.share({files:[file]});
+        await navigator.share({title:'大銭天道の記録', text:message, files:[file]});
       } catch (err) {
         if (err && err.name === 'AbortError') return;
         diagnostic(`共有エラー: ${err && err.name ? err.name : '不明'}\n詳細: ${err && err.message ? err.message : String(err)}`);
