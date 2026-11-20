@@ -772,7 +772,7 @@
     <div id="footer-now-playing" class="kozen-footer-line kozen-now-playing" aria-live="polite">Now Playing：—</div>
     <div class="kozen-footer-line">無断転載及びハルシネーションはお断り申し上げます。</div>
     <div class="kozen-footer-meta">
-      <span id="footer-version">Version 0.45（完ボタンの視認性改善）</span><span aria-hidden="true">／</span>
+      <span id="footer-version">Version 0.46（復元時の警告文を修正）</span><span aria-hidden="true">／</span>
       <span id="footer-updated">更新日 2026.11.20</span><span aria-hidden="true">／</span>
       <button type="button" id="open-trajectory" class="kozen-trajectory-button" onclick="openKozenTrajectory()">📜 大銭天道の軌跡</button>
     </div>
@@ -788,9 +788,10 @@
       <div id="plip-history-modal" class="kozen-history text-sm leading-relaxed">
         <span class="sr-only">大銭天道の軌跡</span>
         <article>
-          <h3>Version 0.45　2026.11.20 — ミッション完了ボタンの見た目を改善</h3>
+          <h3>Version 0.46　2026.11.20 — 完ボタンの改善と復元時の警告文修正</h3>
           <ul>
             <li>「完」ボタンの文字色・背景・枠・影を調整し、押せるボタンとしての立体感を強化。長押し操作と完了演出は維持。</li>
+            <li>復元コードによる上書き確認の警告文を大銭天道向けに修正。</li>
           </ul>
         </article>
         <article>
@@ -4951,7 +4952,7 @@
       try {
         const decoded = await decodeRestoreCode(code);
         if (decoded && typeof decoded.monthlyAllowance === 'number') {
-          openConfirmModal('現在選択中の子供のデータを復元コードで上書きします。別の子供のデータではないことを確認してください。続けますか？', () => {
+          openConfirmModal('現在選択中のデータを復元コードで上書きします。復元するデータが正しいことを確認してください。続けますか？', () => {
             state = normalizeChildState(decoded);
             applyCurrentTheme();
             saveState();
