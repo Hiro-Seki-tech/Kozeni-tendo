@@ -436,7 +436,9 @@
     }
 
     /* 大銭天道 v0.27：完了ボタンの長押し充填と発光 */
-    .ozeni-complete-btn { position:relative; isolation:isolate; overflow:hidden; font-weight:900; font-size:13px; line-height:1; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; }
+    .ozeni-complete-btn { position:relative; isolation:isolate; overflow:hidden; font-weight:900; font-size:13px; line-height:1; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; color:#fff1b8; border-color:rgba(251,191,36,.85); background:linear-gradient(180deg,rgba(180,115,24,.52),rgba(91,55,13,.72)); box-shadow:inset 0 1px 0 rgba(255,245,196,.48),inset 0 -2px 0 rgba(66,36,4,.4),0 2px 4px rgba(0,0,0,.42); text-shadow:0 1px 1px rgba(55,29,2,.75); cursor:pointer; transition:box-shadow .15s ease,filter .15s ease; }
+    .ozeni-complete-btn:hover { filter:brightness(1.15); box-shadow:inset 0 1px 0 rgba(255,245,196,.6),inset 0 -2px 0 rgba(66,36,4,.4),0 3px 6px rgba(0,0,0,.48); }
+    .ozeni-complete-btn:active,.ozeni-complete-btn.is-holding { box-shadow:inset 0 2px 4px rgba(0,0,0,.4),0 1px 2px rgba(0,0,0,.25); }
     .ozeni-complete-btn::before { content:''; position:absolute; inset:0; background:linear-gradient(0deg,rgba(251,191,36,.68),rgba(253,230,138,.30)); transform:scaleY(0); transform-origin:bottom; pointer-events:none; z-index:-1; }
     .ozeni-complete-btn.is-holding::before { animation:ozeniCompleteFill .95s linear forwards; }
     .ozeni-complete-btn.is-ready { animation:ozeniCompleteReady .48s ease-out; }
@@ -770,8 +772,8 @@
     <div id="footer-now-playing" class="kozen-footer-line kozen-now-playing" aria-live="polite">Now Playing：—</div>
     <div class="kozen-footer-line">無断転載及びハルシネーションはお断り申し上げます。</div>
     <div class="kozen-footer-meta">
-      <span id="footer-version">Version 0.44（ミッション表の週末色分け）</span><span aria-hidden="true">／</span>
-      <span id="footer-updated">更新日 2026.11.17</span><span aria-hidden="true">／</span>
+      <span id="footer-version">Version 0.45（完ボタンの視認性改善）</span><span aria-hidden="true">／</span>
+      <span id="footer-updated">更新日 2026.11.20</span><span aria-hidden="true">／</span>
       <button type="button" id="open-trajectory" class="kozen-trajectory-button" onclick="openKozenTrajectory()">📜 大銭天道の軌跡</button>
     </div>
   </footer>
@@ -785,6 +787,12 @@
       </div>
       <div id="plip-history-modal" class="kozen-history text-sm leading-relaxed">
         <span class="sr-only">大銭天道の軌跡</span>
+        <article>
+          <h3>Version 0.45　2026.11.20 — ミッション完了ボタンの見た目を改善</h3>
+          <ul>
+            <li>「完」ボタンの文字色・背景・枠・影を調整し、押せるボタンとしての立体感を強化。長押し操作と完了演出は維持。</li>
+          </ul>
+        </article>
         <article>
           <h3>Version 0.44　2026.11.17 — ミッション表の週末を色分け</h3>
           <ul>
