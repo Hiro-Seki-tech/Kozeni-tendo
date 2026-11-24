@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>大銭天道（おおぜにてんどう） | PLIP</title>
+  <title>大銭天道（おおぜにてんどう） LIFE＋ | PLIP</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Font Awesome v6 -->
@@ -364,6 +364,7 @@
       justify-content:center; gap:5px; white-space:nowrap; line-height:40px;
       font-size:34px; pointer-events:none;
     }
+    .kozen-header-life {font-family:'M PLUS Rounded 1c',sans-serif;font-size:.72em;font-weight:800;letter-spacing:0;color:#65a58a;}
     .kozen-header-reading {font-family:'M PLUS Rounded 1c',sans-serif;font-size:.57em;font-weight:700;letter-spacing:0;}
     .kozen-header-identity {min-width:0; align-items:center; gap:12px;}
     .kozen-header-profile {min-width:0; flex:1;}
@@ -468,7 +469,7 @@
 
   <!-- トップヘッダー -->
   <header class="kozen-main-header sticky top-0 z-30 glass-card px-4 py-2.5 flex items-center justify-between border-b border-amber-500/30">
-    <h1 class="kozen-header-title font-tendo font-bold text-amber-500 drop-shadow tracking-wider">大銭天道<span class="kozen-header-reading">（おおぜにてんどう）</span></h1>
+    <h1 class="kozen-header-title font-tendo font-bold text-amber-500 drop-shadow tracking-wider">大銭天道<span class="kozen-header-reading">（おおぜにてんどう）</span><span class="kozen-header-life">LIFE＋</span></h1>
     <div class="kozen-header-identity flex items-center gap-2.5">
       <!-- PLIP参照式シンボルボタン：既存の招き猫アイコンと置換 -->
       <div class="kozen-symbol-area" aria-label="大銭天道シンボル">
@@ -735,6 +736,12 @@
         </div>
       </div>
 
+      <div class="inner-box rounded-2xl p-4">
+        <h3 class="text-xs font-extrabold text-emerald-500 mb-2 flex items-center gap-1.5"><i class="fa-solid fa-heart-pulse"></i> 3. 月間健康記録</h3>
+        <p id="healthMonthTitle" class="text-xs font-bold mb-3"></p>
+        <div id="healthMonthStats" class="space-y-3 text-xs"></div>
+      </div>
+
       <!-- ③ 総残高の推移（折れ線グラフ） -->
       <div class="inner-box rounded-2xl p-4 hidden">
         <h3 class="text-xs font-extrabold text-emerald-500 mb-2 flex items-center gap-1.5">
@@ -772,8 +779,8 @@
     <div id="footer-now-playing" class="kozen-footer-line kozen-now-playing" aria-live="polite">Now Playing：—</div>
     <div class="kozen-footer-line">無断転載及びハルシネーションはお断り申し上げます。</div>
     <div class="kozen-footer-meta">
-      <span id="footer-version">Version 0.46（復元時の警告文を修正）</span><span aria-hidden="true">／</span>
-      <span id="footer-updated">更新日 2026.11.20</span><span aria-hidden="true">／</span>
+      <span id="footer-version">Version 0.53.3（LIFE＋タイトル）</span><span aria-hidden="true">／</span>
+      <span id="footer-updated">更新日 2026.11.25</span><span aria-hidden="true">／</span>
       <button type="button" id="open-trajectory" class="kozen-trajectory-button" onclick="openKozenTrajectory()">📜 大銭天道の軌跡</button>
     </div>
   </footer>
@@ -787,6 +794,14 @@
       </div>
       <div id="plip-history-modal" class="kozen-history text-sm leading-relaxed">
         <span class="sr-only">大銭天道の軌跡</span>
+        <article>
+          <h3>Version 0.53.3　2026.11.25 — LIFE＋タイトル</h3>
+          <ul><li>作品タイトルの読み仮名の後ろに LIFE＋ を追加。</li></ul>
+        </article>
+        <article>
+          <h3>Version 0.53.1　2026.11.24 — 健康管理・体調チェック</h3>
+          <ul><li>財政管理・習慣管理・健康管理・データ管理に再構成。症状の登録・編集・並べ替え・非表示と保存に対応。健康管理用アイコン42種類を絵文字のみの一覧から選択可能に。ミッション表の金銭記録の次に体調チェックを追加し、総合体調・症状・メモの記録に対応。カレンダーの日付詳細からも同じ健康記録を入力・編集可能に。帳面の習慣ミッション見出しを統一し、旧表記を削除。帳面も財・健・習の順に変更し、月間健康記録カードを追加。体調チェックの連続記録日数を表示。</li></ul>
+        </article>
         <article>
           <h3>Version 0.46　2026.11.20 — 完ボタンの改善と復元時の警告文修正</h3>
           <ul>
@@ -905,6 +920,16 @@
   <!-- ==========================================
        統合モーダル：日付詳細モーダル (ミッション＆出費・収入入力)
   =========================================== -->
+  <div id="healthDayModal" style="z-index: 60" onclick="if(event.target===this)closeHealthDay()" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4 overflow-y-auto">
+    <div role="dialog" aria-modal="true" aria-labelledby="healthDayTitle" class="glass-card rounded-3xl max-w-md w-full p-4 border border-emerald-500/40 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b border-slate-700/60 pb-2"><div><h3 id="healthDayTitle" class="font-extrabold text-lg">💚 体調チェック</h3><p id="healthDayDate" class="text-xs opacity-70"></p></div><button type="button" aria-label="閉じる" onclick="closeHealthDay()" class="text-2xl p-2">×</button></div>
+      <div class="font-bold text-sm">総合体調</div><div id="healthConditionChoices" class="grid grid-cols-5 gap-1"></div>
+      <div class="font-bold text-sm">今日の症状</div><div id="healthDaySymptoms" class="space-y-3"></div>
+      <label for="healthDayMemo" class="font-bold text-sm">体調メモ</label><textarea id="healthDayMemo" rows="3" class="inner-box w-full rounded-xl p-3 text-sm" placeholder="気づいたことなど"></textarea>
+      <button type="button" onclick="saveHealthDay()" class="w-full rounded-xl bg-amber-500 text-slate-900 font-bold p-3">この内容で記録する</button>
+      <button type="button" id="healthDayDelete" onclick="deleteHealthDay()" class="w-full text-sm opacity-70 p-2">この日の記録を削除</button>
+    </div>
+  </div>
   <div id="dayDetailModal" onclick="if(event.target===this)closeDayDetailModal()" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4 overflow-y-auto">
     <div class="glass-card rounded-3xl max-w-md w-full p-6 border border-amber-500/40 space-y-4 my-6 max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center pb-2 border-b border-slate-700/60">
@@ -982,21 +1007,26 @@
 
       </section>
 
+      <section id="modalHealthSection" class="hidden rounded-2xl border border-emerald-500/45 bg-emerald-500/5 p-3 space-y-2">
+        <h4 class="font-extrabold text-sm">💚 体調チェック</h4>
+        <button type="button" onclick="openHealthDay(currentDetailDate)" class="inner-box rounded-xl w-full p-3 flex items-center justify-between gap-2 text-sm font-bold"><span id="modalHealthSummary">未記録</span><span>入力・編集 ›</span></button>
+      </section>
+
       <!-- 天童ミッション：記帳とは別の枠で区別する -->
-      <section id="modalOtherMissionsSection" class="hidden rounded-2xl border border-emerald-500/45 bg-emerald-500/5 p-3 space-y-2.5" aria-label="天童ミッション">
+      <section id="modalOtherMissionsSection" class="hidden rounded-2xl border border-emerald-500/45 bg-emerald-500/5 p-3 space-y-2.5" aria-label="習慣ミッション">
       <!-- 自由ミッション：金銭の記録の下に表示 -->
       <div class="pt-3 border-t border-slate-700/60 space-y-2.5">
         <div class="flex items-center justify-between">
-          <h4 class="font-extrabold text-xs text-amber-400 flex items-center gap-1.5">
-            <i class="fa-solid fa-list-check"></i> この日の天童ミッション (ToDo)
+          <h4 class="font-extrabold text-sm text-amber-500 flex items-center gap-2">
+            <i class="fa-solid fa-list-check"></i> 習慣ミッション
           </h4>
-          <span class="text-[10px] opacity-75">チェックすると即小銭pt獲得！</span>
         </div>
         <div id="modalMissionsList" class="space-y-2">
           <!-- JSでミッションチェックリスト生成 -->
         </div>
       </div>
       </section>
+
 
     </div>
   </div>
@@ -1111,15 +1141,21 @@
         </div>
 
         <!-- 親設定の横並び4タブ -->
-        <div id="parentSubTabBar" class="grid grid-cols-3 gap-1 inner-box p-1 rounded-xl">
+        <div id="parentSubTabBar" class="grid grid-cols-4 gap-1 inner-box p-1 rounded-xl">
           <button id="parentSubTabGeneralBtn" onclick="switchParentSubTab('general')" class="py-2 rounded-lg font-bold text-[11px] bg-amber-500 text-slate-950 transition">
-            <i class="fa-solid fa-gears mr-0.5"></i> 基本設定
+            <i class="fa-solid fa-coins block mb-1"></i><span class="whitespace-nowrap">財政管理</span>
           </button>
           <button id="parentSubTabAllowanceBtn" style="display:none" onclick="switchParentSubTab('allowance')" class="py-2 rounded-lg font-bold text-[11px] opacity-70 hover:opacity-100 transition">
             <i class="fa-solid fa-coins mr-0.5"></i> お小遣い
           </button>
           <button id="parentSubTabMissionsBtn" onclick="switchParentSubTab('missions')" class="py-2 rounded-lg font-bold text-[11px] opacity-70 hover:opacity-100 transition">
-            <i class="fa-solid fa-list-check mr-0.5"></i> ミッション
+            <i class="fa-solid fa-list-check block mb-1"></i><span class="whitespace-nowrap">習慣管理</span>
+          </button>
+          <button id="parentSubTabHealthBtn" onclick="switchParentSubTab('health')" class="py-2 rounded-lg font-bold text-[11px] opacity-70 hover:opacity-100 transition">
+            <i class="fa-solid fa-heart-pulse block mb-1"></i><span class="whitespace-nowrap">健康管理</span>
+          </button>
+          <button id="parentSubTabDataBtn" onclick="switchParentSubTab('data')" class="py-2 rounded-lg font-bold text-[11px] opacity-70 hover:opacity-100 transition">
+            <i class="fa-solid fa-database block mb-1"></i><span class="whitespace-nowrap">データ管理</span>
           </button>
           <button id="parentSubTabRescueBtn" style="display:none" onclick="switchParentSubTab('rescue')" class="py-2 rounded-lg font-bold text-[11px] opacity-70 hover:opacity-100 transition">
             <i class="fa-solid fa-hand-holding-heart mr-0.5"></i> 過去救済
@@ -1361,6 +1397,30 @@
               <input type="text" id="cfgPin" class="w-full inner-box rounded-xl px-3 py-2 font-bold">
             </div>
 
+        </div>
+        <div id="parentSubTabHealth" class="hidden space-y-4">
+          <div class="inner-box rounded-2xl p-4 space-y-2">
+            <h4 class="font-extrabold text-xs text-amber-500">健康管理</h4>
+            <p class="text-xs opacity-75">体調チェックで記録する症状を設定します。</p>
+            <form id="healthSymptomForm" onsubmit="event.preventDefault(); saveHealthSymptom();" class="space-y-2">
+              <label for="healthSymptomName" class="text-xs font-bold">症状名・アイコン</label>
+              <div class="flex gap-2">
+                <input id="healthSymptomIcon" aria-label="症状アイコン" value="🩺" maxlength="16" class="inner-box rounded-xl p-2 w-16 text-center">
+                <input id="healthSymptomName" required maxlength="40" placeholder="例：肩こり" class="inner-box rounded-xl p-2 flex-1 min-w-0 text-sm">
+              </div>
+              <details class="inner-box rounded-xl p-2"><summary class="cursor-pointer text-xs font-bold">アイコンを選ぶ（42種類）</summary><p class="text-xs opacity-75 py-2">候補を押すと入力欄に反映されます。直接入力もできます。</p><div class="grid grid-cols-7 gap-1 mt-1"><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="🤕" aria-label="🤕"><span class="block text-xl">🤕</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="👁️" aria-label="👁️"><span class="block text-xl">👁️</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="👂" aria-label="👂"><span class="block text-xl">👂</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="👃" aria-label="👃"><span class="block text-xl">👃</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="🦷" aria-label="🦷"><span class="block text-xl">🦷</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="🧠" aria-label="🧠"><span class="block text-xl">🧠</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="🦴" aria-label="🦴"><span class="block text-xl">🦴</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="💪" aria-label="💪"><span class="block text-xl">💪</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="🦵" aria-label="🦵"><span class="block text-xl">🦵</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="🫀" aria-label="🫀"><span class="block text-xl">🫀</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="🫁" aria-label="🫁"><span class="block text-xl">🫁</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="🩹" aria-label="🩹"><span class="block text-xl">🩹</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="🤒" aria-label="🤒"><span class="block text-xl">🤒</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="🤧" aria-label="🤧"><span class="block text-xl">🤧</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="😷" aria-label="😷"><span class="block text-xl">😷</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="🤢" aria-label="🤢"><span class="block text-xl">🤢</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="😵‍💫" aria-label="😵‍💫"><span class="block text-xl">😵‍💫</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="🥶" aria-label="🥶"><span class="block text-xl">🥶</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="⚡" aria-label="⚡"><span class="block text-xl">⚡</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="💥" aria-label="💥"><span class="block text-xl">💥</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="🐜" aria-label="🐜"><span class="block text-xl">🐜</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="🔥" aria-label="🔥"><span class="block text-xl">🔥</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="📍" aria-label="📍"><span class="block text-xl">📍</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="🪨" aria-label="🪨"><span class="block text-xl">🪨</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="〰️" aria-label="〰️"><span class="block text-xl">〰️</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="🎈" aria-label="🎈"><span class="block text-xl">🎈</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="🔴" aria-label="🔴"><span class="block text-xl">🔴</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="💧" aria-label="💧"><span class="block text-xl">💧</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="🌀" aria-label="🌀"><span class="block text-xl">🌀</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="💨" aria-label="💨"><span class="block text-xl">💨</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="🔋" aria-label="🔋"><span class="block text-xl">🔋</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="😴" aria-label="😴"><span class="block text-xl">😴</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="💤" aria-label="💤"><span class="block text-xl">💤</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="😫" aria-label="😫"><span class="block text-xl">😫</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="😰" aria-label="😰"><span class="block text-xl">😰</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="💭" aria-label="💭"><span class="block text-xl">💭</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="🌼" aria-label="🌼"><span class="block text-xl">🌼</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="🍽️" aria-label="🍽️"><span class="block text-xl">🍽️</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="🚽" aria-label="🚽"><span class="block text-xl">🚽</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="💊" aria-label="💊"><span class="block text-xl">💊</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="🩸" aria-label="🩸"><span class="block text-xl">🩸</span></button><button type="button" class="inner-box rounded-lg p-1 text-center" onclick="document.getElementById('healthSymptomIcon').value=this.dataset.icon; this.closest('details').open=false;" data-icon="🩺" aria-label="🩺"><span class="block text-xl">🩺</span></button></div></details>
+              <div class="flex gap-2"><button id="healthSymptomSubmit" type="submit" class="flex-1 bg-amber-500 text-slate-950 rounded-xl p-2 text-xs font-bold">＋ 症状を登録</button><button id="healthSymptomCancel" type="button" onclick="resetHealthSymptomForm()" class="hidden inner-box rounded-xl p-2 text-xs">キャンセル</button></div>
+            </form>
+            <h4 class="font-bold text-xs pt-2">登録済みの症状</h4>
+            <div id="healthSymptomList" class="space-y-2"></div>
+            <p class="text-xs opacity-75">非表示にしても症状の設定は残ります。</p>
+          </div>
+        </div>
+        <div id="parentSubTabData" class="hidden space-y-4">
+          <div class="inner-box rounded-2xl p-4 space-y-2">
+            <h4 class="font-extrabold text-xs text-amber-500">バックアップ・送信</h4>
+            <button type="button" onclick="closeParentModal(); if(document.getElementById('parentModal').classList.contains('hidden')) openReportModal();" class="w-full inner-box rounded-xl py-2 text-xs font-bold">復元コード送信・TXT保存</button>
+          </div>
           <!-- 復元コードを優先、TXTファイルは補助 -->
           <div class="pt-2 border-t border-slate-700/50 space-y-2">
             <p class="text-[11px] opacity-75 font-bold">① 復元コードを貼り付け</p>
@@ -1414,7 +1474,7 @@
   </div>
 
   <script>
-    const STORAGE_KEY = 'ozeni_tendo_v2';
+    const STORAGE_KEY = 'ozeni_plus_tendo_v2';
 
     // ==========================================
     // 小銭天童 サウンドエンジン (Web Audio API 合成SE)
@@ -1742,7 +1802,15 @@
       { id: 'm4', title: '健康管理', pts: 5, icon: 'fa-heart-pulse', color: '#f59e0b' }
     ];
 
+    const defaultHealthSymptoms = [
+      {id:'health_headache',name:'頭痛',icon:'🤕',active:true},
+      {id:'health_pollen',name:'花粉症',icon:'🌼',active:true},
+      {id:'health_back',name:'腰痛',icon:'🦴',active:true},
+      {id:'health_fatigue',name:'疲労感',icon:'🔋',active:true}
+    ];
     const defaultState = {
+      healthSymptoms: structuredClone(defaultHealthSymptoms),
+      healthRecords: {},
       userName: 'キッズ',
       monthlyAllowance: 1000,
       allowanceMonth: null, // 現在の受取済み対象月（YYYY-MM）
@@ -1780,10 +1848,10 @@
     };
 
     // STEP13: 旧データは消さず、初回のみ子供別領域へコピーする。
-    const FAMILY_INDEX_KEY = 'ozeni_tendo_family_index_v1';
-    const CHILD_DATA_PREFIX = 'ozeni_tendo_child_v1_';
-    const PUBLIC_CONFIG_CACHE_KEY = 'ozeni_tendo_public_config_cache_v1';
-    const PARENT_RULES_KEY = 'ozeni_tendo_parent_rules_v2';
+    const FAMILY_INDEX_KEY = 'ozeni_plus_tendo_family_index_v1';
+    const CHILD_DATA_PREFIX = 'ozeni_plus_tendo_child_v1_';
+    const PUBLIC_CONFIG_CACHE_KEY = 'ozeni_plus_tendo_public_config_cache_v1';
+    const PARENT_RULES_KEY = 'ozeni_plus_tendo_parent_rules_v2';
     const PUBLIC_RULE_KEYS = ['monthlyAllowance','interestRate','pointRate','silverMaxDays','silverRate','bronzeRate','streakBonusInterval','streakBonusPts'];
     const VALID_THEMES = ['theme-classic','theme-sakura','theme-matcha','theme-sky','theme-cyber','theme-sunset','theme-mint','theme-obsidian'];
     // 初回判定は初期化が保存領域を作る前に行う。既存利用者のデータには触れない。
@@ -1894,7 +1962,7 @@
 
     function childStorageKey(id) { return CHILD_DATA_PREFIX + id; }
     // STEP15: 既存の実データは登録済みとして扱い、空の端末だけ登録画面を出す。
-    const FIRST_SETUP_ACTIVE_KEY = 'ozeni_tendo_first_setup_active_v1';
+    const FIRST_SETUP_ACTIVE_KEY = 'ozeni_plus_tendo_first_setup_active_v1';
     function hasRegisteredChild(id) {
       try {
         const raw = localStorage.getItem(childStorageKey(id));
@@ -2036,6 +2104,8 @@
     function normalizeChildState(parsed) {
       return {
         ...defaultState, ...parsed,
+        healthSymptoms: Array.isArray(parsed.healthSymptoms) ? parsed.healthSymptoms : structuredClone(defaultHealthSymptoms),
+        healthRecords: parsed.healthRecords && typeof parsed.healthRecords === "object" && !Array.isArray(parsed.healthRecords) ? parsed.healthRecords : {},
         // 初回登録直後も受取対象月を必ず有効な YYYY-MM に正規化する。
         allowanceMonth: /^\d{4}-(0[1-9]|1[0-2])$/.test(String(parsed.allowanceMonth || '')) ? parsed.allowanceMonth : getTodayStr().slice(0,7),
         silverMaxDays: parsed.silverMaxDays !== undefined ? Number(parsed.silverMaxDays) : 5,
@@ -2295,7 +2365,7 @@
       localStorage.setItem(FAMILY_INDEX_KEY, JSON.stringify(familyIndex));
     }
     // 親メニューのタブ表示設定だけを子供別に保持する。お小遣い計算やミッション記録には触れない。
-    const PARENT_TAB_PREFS_KEY = 'ozeni_parent_tab_preferences_v1';
+    const PARENT_TAB_PREFS_KEY = 'ozeni_plus_parent_tab_preferences_v1';
     function readParentTabPreferences() {
       try {
         const saved = JSON.parse(localStorage.getItem(PARENT_TAB_PREFS_KEY) || '{}');
@@ -2309,7 +2379,7 @@
     function refreshParentTabPreferences() {
       const prefs = currentParentTabPreferences();
       document.getElementById('parentUseAllowance').value = prefs.allowance ? 'yes' : 'no';
-      const visible = 1 + Number(prefs.missions);
+      const visible = 3 + Number(prefs.missions);
       const bar = document.getElementById('parentSubTabBar');
       bar.classList.remove('grid-cols-2', 'grid-cols-3', 'grid-cols-4');
       bar.classList.add('grid-cols-' + visible);
@@ -2330,12 +2400,12 @@
       }
       refreshParentTabPreferences();
       renderAll();
-      const selected = ['general', 'allowance', 'missions', 'rescue'].find(t =>
+      const selected = ['general', 'allowance', 'missions', 'rescue', 'health', 'data'].find(t =>
         !document.getElementById('parentSubTab' + t[0].toUpperCase() + t.slice(1)).classList.contains('hidden')) || 'general';
       switchParentSubTab(selected);
     }
     // 子供ごとの換金表示設定。既存のポイントや換金履歴は変更しない。
-    const PARENT_REDEEM_PREFS_KEY = 'ozeni_parent_redeem_preferences_v1';
+    const PARENT_REDEEM_PREFS_KEY = 'ozeni_plus_parent_redeem_preferences_v1';
     function readParentRedeemPreferences() {
       try {
         const saved = JSON.parse(localStorage.getItem(PARENT_REDEEM_PREFS_KEY) || '{}');
@@ -2399,7 +2469,7 @@
       Object.entries(fields).forEach(([id, value]) => { const el = document.getElementById(id); if (el) el.value = value ?? ''; });
       updateThemeButtonsUI();
       refreshPointsRedemptionPreference();
-      const activeTab = ['general','allowance','missions','rescue'].find(t => !document.getElementById('parentSubTab' + t[0].toUpperCase() + t.slice(1))?.classList.contains('hidden')) || 'general';
+      const activeTab = ['general','allowance','missions','rescue','health','data'].find(t => !document.getElementById('parentSubTab' + t[0].toUpperCase() + t.slice(1))?.classList.contains('hidden')) || 'general';
       switchParentSubTab(activeTab);
     }
     function switchManagedChild(id) {
@@ -2994,6 +3064,7 @@
       updateSoundToggleUI();
       renderTransactions();
       renderCharts(fin);
+      renderHealthMonth();
     }
 
     // 習慣化称号30階級。1つのミッションの歴代最長連続日数で判定する。
@@ -3069,6 +3140,7 @@
     }
 
     function renderCalendar() {
+      renderHealthMonth();
       document.getElementById('calendarTitle').textContent = `${calYear}年 ${calMonth + 1}月`;
       const grid = document.getElementById('calendarGrid');
       grid.innerHTML = '';
@@ -3291,6 +3363,7 @@
       html += `<th class="matrix-fixed-right pb-2 text-center font-bold px-1 text-amber-500">連続記録</th></tr></thead><tbody>`;
 
       if (currentParentTabPreferences().allowance) html += renderCheckMatrixRow(dates);
+      html += renderHealthMatrixRow(dates);
       missions.forEach(m => {
         const streak = calculateStreak(m.id);
         html += `<tr data-ozeni-mission-id="${escapeHtml(m.id)}" class="border-b border-slate-800/60 hover:bg-slate-800/30">
@@ -3335,6 +3408,98 @@
         : Math.max(0, container.scrollWidth - container.clientWidth - previousRightGap);
     }
 
+    const healthConditions = [['😄','絶好調'],['🙂','良好'],['😐','普通'],['😞','不調'],['😣','絶不調']];
+    let healthDayDate = null, healthDayOwner = null, healthDayDraft = null, healthDayBaseline = null, healthDayFocus = null;
+    function renderHealthMonth() {
+      const prefix = `${calYear}-${String(calMonth+1).padStart(2,'0')}-`;
+      const records = Object.entries(state.healthRecords || {}).filter(([date,r]) => date.startsWith(prefix) && Number.isInteger(r?.condition) && r.condition>=0 && r.condition<5).map(([,r])=>r);
+      const counts = healthConditions.map((_,i)=>records.filter(r=>r.condition===i).length);
+      const n=records.length, colors=['#449c79','#8fbe82','#c8b66a','#d99b60','#d46b6b'];
+      document.getElementById('healthMonthTitle').textContent=`${calYear}年${calMonth+1}月（カレンダー表示月）`;
+      const symptoms=new Map((state.healthSymptoms||[]).filter(x=>x.active!==false).map(x=>[x.id,{name:x.name,icon:x.icon,days:0,severe:0,known:0}]));
+      for(const r of records) for(const [id,v] of Object.entries(r.symptoms||{})) {
+        if(!Number.isInteger(v?.level)||v.level<0||v.level>3) continue;
+        if(!symptoms.has(id)) {const item=(state.healthSymptoms||[]).find(x=>x.id===id);symptoms.set(id,{name:item?.name||v.name||'症状',icon:item?.icon||v.icon||'🩺',days:0,severe:0,known:0});}
+        const t=symptoms.get(id);t.known++;if(v.level>0)t.days++;if(v.level===3)t.severe++;
+      }
+      document.getElementById('healthMonthStats').innerHTML=`<div class="grid grid-cols-3 gap-1 text-center"><div>記録日数<div class="text-lg font-extrabold">${n}日</div></div><div>良好以上<div class="text-lg font-extrabold">${n?Math.round((counts[0]+counts[1])/n*100)+'%':'—'}</div></div><div>不調・絶不調<div class="text-lg font-extrabold">${counts[3]+counts[4]}日</div></div></div>
+      <div class="grid grid-cols-5 gap-1 text-center">${healthConditions.map((c,i)=>`<div><div class="text-xl" title="${c[1]}">${c[0]}</div><div class="font-bold">${counts[i]}日</div></div>`).join('')}</div>
+      ${n?`<div class="flex h-2 rounded-full overflow-hidden">${counts.map((c,i)=>`<div style="width:${c/n*100}%;background:${colors[i]}"></div>`).join('')}</div>`:'<p class="opacity-70">この月の健康記録はありません</p>'}
+      <div class="border-t border-slate-500/30 pt-2 font-bold">症状別の記録</div>${[...symptoms.values()].map(t=>`<div class="flex items-center justify-between gap-2"><span class="break-all">${escapeHtml(t.icon)} ${escapeHtml(t.name)}</span><span class="shrink-0">${t.known?`${t.days}日（重度 ${t.severe}日）`:'未記録'}</span></div>`).join('')}<p class="opacity-70">未記録は集計対象外。症状は入力された日だけを集計します。</p>`;
+    }
+    function calculateHealthStreak(endDateStr = getTodayStr()) {
+      const [y,m,d] = endDateStr.split('-').map(Number);
+      const cur = new Date(y,m-1,d);
+      const recorded = date => {
+        const condition = state.healthRecords?.[date]?.condition;
+        return Number.isInteger(condition) && condition >= 0 && condition < 5;
+      };
+      if (!recorded(dateStrForStreak(cur))) cur.setDate(cur.getDate()-1);
+      let streak = 0;
+      while (recorded(dateStrForStreak(cur))) {
+        streak++;
+        cur.setDate(cur.getDate()-1);
+      }
+      return streak;
+    }
+    function renderHealthMatrixRow(dates) {
+      const streak = calculateHealthStreak();
+      return `<tr class="border-t border-emerald-500/40"><td class="matrix-fixed-left py-2.5 pr-1"><span class="matrix-name font-bold text-[11px]">💚 体調チェック</span></td>${dates.map(d=>{
+        const r=state.healthRecords?.[d.dateStr], c=healthConditions[r?.condition];
+        return `<td class="text-center px-1 ${d.weekendClass} ${d.isToday?'today-column':''}"><button type="button" data-health-date="${d.dateStr}" aria-label="${d.dateStr} 体調チェック ${c?c[1]:'未記録'}" onclick="openHealthDay('${d.dateStr}')" class="${d.isToday?'today-pressable w-9 h-9':'inner-box w-7 h-7'} rounded-lg inline-flex items-center justify-center text-lg">${c?c[0]:''}</button></td>`;
+      }).join('')}<td class="matrix-fixed-right text-center px-1"><span class="font-extrabold text-[11px] text-emerald-500">📝 ${streak}日</span></td></tr>`;
+    }
+    function renderModalHealthSummary() {
+      const c=healthConditions[state.healthRecords?.[currentDetailDate]?.condition];
+      document.getElementById('modalHealthSummary').textContent=c?c.join(' '):'未記録';
+    }
+    function openHealthDay(date) {
+      if(date>getTodayStr()) return;
+      healthDayDate=date; healthDayOwner=activeChildId; healthDayFocus=document.activeElement;
+      const old=state.healthRecords?.[date];
+      healthDayDraft={condition:old?.condition??null,symptoms:structuredClone(old?.symptoms||{})};
+      document.getElementById('healthDayDate').textContent=date.replace(/-/g,'/');
+      document.getElementById('healthDayMemo').value=old?.memo||'';
+      document.getElementById('healthDayDelete').classList.toggle('hidden',!old);
+      renderHealthDayChoices(); healthDayBaseline=healthDaySnapshot();
+      const modal=document.getElementById('healthDayModal'); modal.classList.remove('hidden'); modal.classList.add('flex');
+      document.getElementById('dayDetailModal').inert=true;
+      modal.querySelector('button').focus();
+    }
+    function healthDaySnapshot(){return JSON.stringify([healthDayDraft,document.getElementById('healthDayMemo').value]);}
+    function renderHealthDayChoices(){
+      const choices=document.getElementById('healthConditionChoices'), list=document.getElementById('healthDaySymptoms');
+      choices.replaceChildren(); list.replaceChildren();
+      function choice(parent,label,selected,fn,color){
+        const b=document.createElement('button'); b.type='button'; b.className='inner-box rounded-lg border p-2 text-xs min-w-0'; b.textContent=label; b.setAttribute('aria-pressed',String(selected));
+        if(selected){b.style.borderColor=color;b.style.boxShadow='inset 0 0 0 2px '+color;} b.onclick=fn; parent.append(b); return b;
+      }
+      healthConditions.forEach((c,i)=>{const b=choice(choices,'',healthDayDraft.condition===i,()=>{healthDayDraft.condition=i;renderHealthDayChoices();},'#f59e0b');const face=document.createElement('div');face.className='text-2xl';face.textContent=c[0];b.append(face,document.createTextNode(c[1]));});
+      const items=state.healthSymptoms.filter(x=>x.active!==false || Object.hasOwn(healthDayDraft.symptoms,x.id));
+      items.forEach(item=>{
+        const section=document.createElement('div'), title=document.createElement('div'), row=document.createElement('div');
+        title.className='text-sm font-bold mb-1';title.textContent=item.icon+' '+item.name+(item.active===false?'（非表示）':'');row.className='grid grid-cols-4 gap-1';section.append(title,row);list.append(section);
+        ['なし','軽度','中度','重度'].forEach((label,i)=>choice(row,label,healthDayDraft.symptoms[item.id]?.level===i,()=>{healthDayDraft.symptoms[item.id]={level:i,name:item.name,icon:item.icon};renderHealthDayChoices();},['#65a884','#d9b34e','#e99b45','#e57373'][i]));
+      });
+      if(!items.length) list.textContent='登録された症状はありません。';
+    }
+    function closeHealthDay(force=false){
+      if(!force && healthDaySnapshot()!==healthDayBaseline && !confirm('入力した内容を保存せずに閉じますか？')) return;
+      const modal=document.getElementById('healthDayModal');modal.classList.add('hidden');modal.classList.remove('flex');
+      document.getElementById('dayDetailModal').inert=false;
+      if(healthDayFocus?.isConnected)healthDayFocus.focus();healthDayDraft=null;
+    }
+    function persistHealthDay(remove){
+      if(healthDayOwner!==activeChildId || !hasRegisteredChild(activeChildId)){showToast('先に利用者登録を完了してください');return;}
+      const next={...state.healthRecords};
+      if(remove) delete next[healthDayDate]; else next[healthDayDate]={...healthDayDraft,memo:document.getElementById('healthDayMemo').value};
+      try{const key=childStorageKey(activeChildId),stored=JSON.parse(localStorage.getItem(key)||'{}');stored.healthRecords=next;localStorage.setItem(key,JSON.stringify(stored));}catch(e){console.error(e);showToast('体調記録を保存できませんでした');return;}
+      state.healthRecords=next;closeHealthDay(true);renderHealthMonth();renderMatrix();renderModalHealthSummary();if(document.getElementById('dayDetailModal').classList.contains('hidden'))document.querySelector('[data-health-date="'+healthDayDate+'"]')?.focus({preventScroll:true});showToast(remove?'体調記録を削除しました':'体調を記録しました');
+    }
+    function saveHealthDay(){if(healthDayDraft.condition===null){showToast('総合体調を選択してください');return;}persistHealthDay(false);}
+    function deleteHealthDay(){if(confirm('この日の体調記録を削除しますか？'))persistHealthDay(true);}
+    document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.getElementById('healthDayModal').classList.contains('hidden')){e.preventDefault();closeHealthDay();}});
+
     function toggleMissionFromMatrix(dateStr, missionId) {
       const todayStr = getTodayStr();
       if (dateStr > todayStr) {
@@ -3359,6 +3524,8 @@
       currentDetailDate = dateStr;
       // カレンダー経由のみ、金銭の記録の下に既存のミッションカードを表示する。
       document.getElementById('modalOtherMissionsSection').classList.toggle('hidden', !fromCalendar);
+      document.getElementById('modalHealthSection').classList.toggle('hidden', !fromCalendar);
+      renderModalHealthSummary();
 
       // 日付タイトル成形
       const parts = dateStr.split('-');
@@ -3409,7 +3576,7 @@
     }
 
     document.addEventListener('keydown', function(event) {
-      if (event.key === 'Escape' && !document.getElementById('dayDetailModal').classList.contains('hidden')) {
+      if (event.key === 'Escape' && !event.defaultPrevented && !document.getElementById('dayDetailModal').classList.contains('hidden')) {
         event.preventDefault();
         closeDayDetailModal();
       }
@@ -4109,7 +4276,7 @@
       const now = new Date();
       const dateText = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日`;
       const code = await encodeRestoreCode(state);
-      return `【大銭天道の記録】\n${dateText}の大銭天道の復元データです。\n\n復元方法は2つあります。\n① 添付ファイルを保存し、大銭天道の設定画面「バックアップファイルから復元」で読み込む。\n② 下の復元コードをコピーし、設定画面「復元コードからデータを復元」に貼り付ける。\n\n※復元すると端末の現在の記録が上書きされます。記録には個人情報が含まれるため、送信先にご注意ください。\n\n【復元コード】\n${code}`;
+      return `【大銭天道の記録】\n${dateText}の大銭天道の復元データです。\n\n復元方法は2つあります。\n① 添付ファイルを保存し、大銭天道の設定画面のデータ管理「バックアップファイルから復元」で読み込む。\n② 下の復元コードをコピーし、設定画面のデータ管理「復元コードからデータを復元」に貼り付ける。\n\n※復元すると端末の現在の記録が上書きされます。記録には個人情報が含まれるため、送信先にご注意ください。\n\n【復元コード】\n${code}`;
     }
 
     async function openReportModal() {
@@ -4133,8 +4300,8 @@
         const code = 'KZ2:' + btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
         const dateText = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日`;
         preview.value = `【大銭天道の記録】\n${dateText}の大銭天道の復元データです。\n\n復元方法：
-① 下の「KZ2:」から始まる復元コードをコピーし、大銭天道の設定画面「復元コードからデータを復元」に貼り付ける。
-② TXTファイルで受け取った場合は、設定画面「TXTファイルから復元」で読み込む。\n\n※復元すると端末の現在の記録が上書きされます。記録には個人情報が含まれるため、送信先にご注意ください。\n\n【復元コード】\n${code}`;
+① 下の「KZ2:」から始まる復元コードをコピーし、大銭天道の設定画面のデータ管理「復元コードからデータを復元」に貼り付ける。
+② TXTファイルで受け取った場合は、設定画面のデータ管理「TXTファイルから復元」で読み込む。\n\n※復元すると端末の現在の記録が上書きされます。記録には個人情報が含まれるため、送信先にご注意ください。\n\n【復元コード】\n${code}`;
         preparedRestoreTextFile = new File([preview.value], `大銭天道_復元コード_${stamp}.txt`, {type:'text/plain'});
       } catch (e) {
         console.error('共有データ準備失敗',e);
@@ -4230,6 +4397,10 @@
       bMis.className = subTab === 'missions' ? activeClass : inactiveClass;
       bRes.className = subTab === 'rescue' ? activeClass : inactiveClass;
       bGen.className = subTab === 'general' ? activeClass : inactiveClass;
+      document.getElementById('parentSubTabHealthBtn').className = subTab === 'health' ? activeClass : inactiveClass;
+      document.getElementById('parentSubTabDataBtn').className = subTab === 'data' ? activeClass : inactiveClass;
+      document.getElementById('parentSubTabHealth').classList.toggle('hidden', subTab !== 'health');
+      document.getElementById('parentSubTabData').classList.toggle('hidden', subTab !== 'data');
       refreshParentTabPreferences();
 
       sAllow.classList.toggle('hidden', subTab !== 'allowance');
@@ -4239,6 +4410,7 @@
 
       if (subTab === 'allowance') renderParentAllowanceCheckBonus();
       if (subTab === 'missions') renderParentMissionsList();
+      if (subTab === 'health') { resetHealthSymptomForm(); renderHealthSymptoms(); }
       if (subTab === 'rescue') {
         const rescueInput = document.getElementById('rescueDateInput');
         if (!rescueInput.value) rescueInput.value = getTodayStr();
@@ -4469,7 +4641,7 @@
             <div><label class="opacity-75 font-bold block mb-1">記帳した場合（1日あたり）</label><input type="number" min="0" step="1" value="${checkBasePts('entry')}" onchange="updateCheckPointSetting('entryPts', this.value)" class="w-full inner-box rounded-xl px-3 py-2 font-bold text-amber-400"></div>
             <div><label class="opacity-75 font-bold block mb-1">出費なしの場合（1日あたり）</label><input type="number" min="0" step="1" value="${checkBasePts('noSpend')}" onchange="updateCheckPointSetting('noSpendPts', this.value)" class="w-full inner-box rounded-xl px-3 py-2 font-bold text-amber-400"></div>
           </div>
-          <p class="text-[11px] opacity-70">当日100%・銀と銅のメダルは「基本設定」の共通付与率を使います。0Pでも記録は残ります。</p>
+          <p class="text-[11px] opacity-70">当日100%・銀と銅のメダルは「財政管理」の共通付与率を使います。0Pでも記録は残ります。</p>
           <div class="space-y-2">
             <label class="opacity-75 font-bold block">連続したことによってあげる特別連続ボーナス小銭ポイント</label>
             <div class="grid grid-cols-2 gap-2">
@@ -4945,6 +5117,76 @@
       ['pointerup','pointerleave','pointercancel'].forEach(e => btn.addEventListener(e, cancelRedeemPress));
       btn.addEventListener('contextmenu', e => e.preventDefault());
     })();
+
+    // 健康管理：症状設定（記録本体とは独立）
+    let healthEditingId = null;
+    function resetHealthSymptomForm() {
+      healthEditingId = null;
+      document.getElementById('healthSymptomName').value = '';
+      document.getElementById('healthSymptomIcon').value = '🩺';
+      document.getElementById('healthSymptomSubmit').textContent = '＋ 症状を登録';
+      document.getElementById('healthSymptomCancel').classList.add('hidden');
+    }
+    function renderHealthSymptoms() {
+      const list = document.getElementById('healthSymptomList');
+      list.replaceChildren();
+      state.healthSymptoms.forEach((item,i) => {
+        const row = document.createElement('div');
+        row.className = 'inner-box rounded-xl p-2 space-y-2';
+        const label = document.createElement('div');
+        label.className = 'text-sm font-bold break-all';
+        label.textContent = item.icon + ' ' + item.name + (item.active === false ? '（非表示）' : '');
+        row.append(label);
+        const controls = document.createElement('div');
+        controls.className = 'flex flex-wrap gap-1';
+        function button(text, action, disabled=false) {
+          const b = document.createElement('button'); b.type='button'; b.textContent=text;
+          b.className='inner-box rounded-lg px-2 py-1.5 text-xs font-bold disabled:opacity-30';
+          b.disabled=disabled; b.onclick=action; controls.append(b);
+        }
+        button('↑ 上へ',()=>moveHealthSymptom(i,-1),i===0);
+        button('↓ 下へ',()=>moveHealthSymptom(i,1),i===state.healthSymptoms.length-1);
+        button('編集',()=>{
+          healthEditingId=item.id;
+          document.getElementById('healthSymptomName').value=item.name;
+          document.getElementById('healthSymptomIcon').value=item.icon;
+          document.getElementById('healthSymptomSubmit').textContent='この内容で更新';
+          document.getElementById('healthSymptomCancel').classList.remove('hidden');
+          document.getElementById('healthSymptomName').focus();
+        });
+        button(item.active===false?'再表示':'非表示',()=>{
+          persistHealthSymptoms(state.healthSymptoms.map(x=>x.id===item.id?{...x,active:x.active===false}:x));
+        });
+        row.append(controls); list.append(row);
+      });
+    }
+    function persistHealthSymptoms(next) {
+      if (!hasRegisteredChild(activeChildId)) { showToast('先に利用者登録を完了してください'); return false; }
+      try {
+        const key=childStorageKey(activeChildId);
+        const stored=JSON.parse(localStorage.getItem(key)||'{}');
+        stored.healthSymptoms=next;
+        localStorage.setItem(key,JSON.stringify(stored));
+        state.healthSymptoms=next;
+        renderHealthSymptoms();
+        showToast('症状設定を保存しました');
+        return true;
+      } catch(e) { console.error(e); showToast('症状設定を保存できませんでした'); return false; }
+    }
+    function saveHealthSymptom() {
+      const name=document.getElementById('healthSymptomName').value.trim();
+      const icon=document.getElementById('healthSymptomIcon').value.trim()||'🩺';
+      if (!name) { showToast('症状名を入力してください'); return; }
+      if (state.healthSymptoms.some(x=>x.name===name && x.id!==healthEditingId)) { showToast('同じ症状名が登録されています'); return; }
+      const next=healthEditingId===null ? [...state.healthSymptoms,{id:'health_'+Date.now()+'_'+Math.random().toString(36).slice(2),name,icon,active:true}] : state.healthSymptoms.map(x=>x.id===healthEditingId?{...x,name,icon}:x);
+      if(persistHealthSymptoms(next)) resetHealthSymptomForm();
+    }
+    function moveHealthSymptom(i,delta) {
+      const next=[...state.healthSymptoms], j=i+delta;
+      if(j<0||j>=next.length)return;
+      [next[i],next[j]]=[next[j],next[i]];
+      persistHealthSymptoms(next);
+    }
 
     async function restoreFromCode() {
       const code = document.getElementById('restoreCodeInput').value.trim();
