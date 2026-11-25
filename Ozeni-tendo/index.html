@@ -779,7 +779,7 @@
     <div id="footer-now-playing" class="kozen-footer-line kozen-now-playing" aria-live="polite">Now Playing：—</div>
     <div class="kozen-footer-line">無断転載及びハルシネーションはお断り申し上げます。</div>
     <div class="kozen-footer-meta">
-      <span id="footer-version">Version 0.53.3（LIFE＋タイトル）</span><span aria-hidden="true">／</span>
+      <span id="footer-version">Version 0.53.4（旧版データ引き継ぎ）</span><span aria-hidden="true">／</span>
       <span id="footer-updated">更新日 2026.11.25</span><span aria-hidden="true">／</span>
       <button type="button" id="open-trajectory" class="kozen-trajectory-button" onclick="openKozenTrajectory()">📜 大銭天道の軌跡</button>
     </div>
@@ -795,8 +795,8 @@
       <div id="plip-history-modal" class="kozen-history text-sm leading-relaxed">
         <span class="sr-only">大銭天道の軌跡</span>
         <article>
-          <h3>Version 0.53.3　2026.11.25 — LIFE＋タイトル</h3>
-          <ul><li>作品タイトルの読み仮名の後ろに LIFE＋ を追加。</li></ul>
+          <h3>Version 0.53.4　2026.11.25 — LIFE＋タイトル・旧版データ引き継ぎ</h3>
+          <ul><li>作品タイトルの読み仮名の後ろに LIFE＋ を追加。</li><li>LIFE＋の保存データがない場合、旧大銭天道の記録と設定を自動で引き継ぐ。旧版のデータは保持。</li></ul>
         </article>
         <article>
           <h3>Version 0.53.1　2026.11.24 — 健康管理・体調チェック</h3>
@@ -1854,6 +1854,45 @@
     const PARENT_RULES_KEY = 'ozeni_plus_tendo_parent_rules_v2';
     const PUBLIC_RULE_KEYS = ['monthlyAllowance','interestRate','pointRate','silverMaxDays','silverRate','bronzeRate','streakBonusInterval','streakBonusPts'];
     const VALID_THEMES = ['theme-classic','theme-sakura','theme-matcha','theme-sky','theme-cyber','theme-sunset','theme-mint','theme-obsidian'];
+    // LIFE＋初回のみ、旧大銭天道の保存領域を非破壊でコピーする。
+    function migrateOzeniLegacyStorage(storage) {
+      const pairs = [
+        ['ozeni_tendo_v2', STORAGE_KEY],
+        ['ozeni_tendo_family_index_v1', FAMILY_INDEX_KEY],
+        ['ozeni_tendo_public_config_cache_v1', PUBLIC_CONFIG_CACHE_KEY],
+        ['ozeni_tendo_parent_rules_v2', PARENT_RULES_KEY],
+        ['ozeni_tendo_first_setup_active_v1', 'ozeni_plus_tendo_first_setup_active_v1'],
+        ['ozeni_parent_tab_preferences_v1', 'ozeni_plus_parent_tab_preferences_v1'],
+        ['ozeni_parent_redeem_preferences_v1', 'ozeni_plus_parent_redeem_preferences_v1']
+      ];
+      const keys = Array.from({length: storage.length}, (_, i) => storage.key(i));
+      if (keys.some(k => k && k.startsWith(CHILD_DATA_PREFIX)) || pairs.some(([,to]) => storage.getItem(to) !== null)) return false;
+      const oldPrefix = 'ozeni_tendo_child_v1_';
+      for (const k of keys) if (k && k.startsWith(oldPrefix)) pairs.push([k, CHILD_DATA_PREFIX + k.slice(oldPrefix.length)]);
+      const index = JSON.parse(storage.getItem('ozeni_tendo_family_index_v1') || 'null');
+      if (!index || !Array.isArray(index.children) || !index.children.some(c => c.id === index.activeId)) return false;
+      if (!index.children.some(c => { const d = JSON.parse(storage.getItem(oldPrefix + c.id) || 'null'); return d && !d.__bootstrapPlaceholder; })) return false;
+      const written = [];
+      try {
+        for (const [from,to] of pairs) {
+          const value = storage.getItem(from);
+          if (value === null) continue;
+          if (storage.getItem(to) !== null) throw new Error('移行先に既存データがあります');
+          storage.setItem(to,value);
+          written.push(to);
+        }
+        return true;
+      } catch (error) {
+        for (const key of written.reverse()) storage.removeItem(key);
+        throw error;
+      }
+    }
+    try { migrateOzeniLegacyStorage(localStorage); }
+    catch (error) {
+      console.error('旧大銭天道のデータ引き継ぎに失敗', error);
+      alert('旧大銭天道のデータを引き継げませんでした。旧版の記録は削除していません。空き容量などを確認して再読み込みしてください。');
+      throw error; // 空の新規データを作らず、次回の移行を可能にする。
+    }
     // 初回判定は初期化が保存領域を作る前に行う。既存利用者のデータには触れない。
     const ozeniFirstVisit = (() => {
       try {
