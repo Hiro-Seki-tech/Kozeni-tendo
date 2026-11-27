@@ -595,13 +595,17 @@
 
       <!-- ① 月間カレンダー コンテンツ -->
       <div id="calendarViewSection" class="space-y-3">
+        <div class="grid grid-cols-2 gap-1 inner-box rounded-xl p-1" role="group" aria-label="カレンダー表示切り替え">
+          <button type="button" id="calendarMissionMode" onclick="setCalendarMode('mission')" aria-pressed="true" class="rounded-lg py-2 text-xs font-extrabold bg-amber-500 text-slate-950">🏅 ミッション</button>
+          <button type="button" id="calendarHealthMode" onclick="setCalendarMode('health')" aria-pressed="false" class="rounded-lg py-2 text-xs font-extrabold opacity-70">💚 健康</button>
+        </div>
         <div class="flex items-center justify-between px-1">
           <button onclick="changeCalendarMonth(-1)" class="w-8 h-8 rounded-xl inner-box hover:opacity-80 flex items-center justify-center active:scale-90">
             <i class="fa-solid fa-chevron-left text-xs"></i>
           </button>
           <div class="text-center">
             <h2 id="calendarTitle" class="font-extrabold text-base">2026年 10月</h2>
-            <p class="text-[10px] opacity-75">日付をタップすると「その日のミッション＆出費」が開くよ</p>
+            <p class="text-[10px] opacity-75">日付をタップすると「天道の帳面」が開くよ</p>
           </div>
           <button onclick="changeCalendarMonth(1)" class="w-8 h-8 rounded-xl inner-box hover:opacity-80 flex items-center justify-center active:scale-90">
             <i class="fa-solid fa-chevron-right text-xs"></i>
@@ -624,6 +628,7 @@
           <div id="calendarGrid" class="grid grid-cols-7 gap-1.5">
             <!-- JSで動的生成 -->
           </div>
+          <div id="calendarHealthLegend" class="hidden flex-wrap gap-x-3 gap-y-1 text-xs mt-2"></div>
         </div>
       </div>
 
@@ -690,8 +695,8 @@
             <i class="fa-solid fa-chart-pie text-base"></i>
           </div>
           <div>
-            <h2 class="font-extrabold text-base text-cyan-600 dark:text-cyan-300">お天道様による支出分析</h2>
-            <p class="text-[11px] opacity-75">自分のお金の使い方のクセを分析してみよう！</p>
+            <h2 class="font-extrabold text-base text-cyan-600 dark:text-cyan-300">お天道様による支出・健康分析</h2>
+            <p class="text-[11px] opacity-75">自分のお金の使い方や健康状態の傾向を分析してみよう！</p>
           </div>
         </div>
       </div>
@@ -742,6 +747,16 @@
         <div id="healthMonthStats" class="space-y-3 text-xs"></div>
       </div>
 
+      <div class="inner-box rounded-2xl p-4">
+        <h3 class="text-xs font-extrabold text-emerald-500 mb-2 flex items-center gap-1.5"><i class="fa-solid fa-heart-pulse"></i> 4. 年間健康記録</h3>
+        <div class="flex items-center justify-between px-1">
+          <button type="button" onclick="changeHealthAnnualYear(-1)" aria-label="前年" class="w-8 h-8 rounded-xl inner-box hover:opacity-80 flex items-center justify-center active:scale-90"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+          <h4 id="healthAnnualYearTitle" class="font-extrabold text-base" aria-live="polite"></h4>
+          <button type="button" onclick="changeHealthAnnualYear(1)" aria-label="翌年" class="w-8 h-8 rounded-xl inner-box hover:opacity-80 flex items-center justify-center active:scale-90"><i class="fa-solid fa-chevron-right text-xs"></i></button>
+        </div>
+        <div id="healthAnnualChart" class="mt-3 text-xs space-y-2"></div>
+      </div>
+
       <!-- ③ 総残高の推移（折れ線グラフ） -->
       <div class="inner-box rounded-2xl p-4 hidden">
         <h3 class="text-xs font-extrabold text-emerald-500 mb-2 flex items-center gap-1.5">
@@ -779,8 +794,8 @@
     <div id="footer-now-playing" class="kozen-footer-line kozen-now-playing" aria-live="polite">Now Playing：—</div>
     <div class="kozen-footer-line">無断転載及びハルシネーションはお断り申し上げます。</div>
     <div class="kozen-footer-meta">
-      <span id="footer-version">Version 0.53.4（旧版データ引き継ぎ）</span><span aria-hidden="true">／</span>
-      <span id="footer-updated">更新日 2026.11.25</span><span aria-hidden="true">／</span>
+      <span id="footer-version">Version 0.53.13（年間健康集計）</span><span aria-hidden="true">／</span>
+      <span id="footer-updated">更新日 2026.11.27</span><span aria-hidden="true">／</span>
       <button type="button" id="open-trajectory" class="kozen-trajectory-button" onclick="openKozenTrajectory()">📜 大銭天道の軌跡</button>
     </div>
   </footer>
@@ -794,6 +809,10 @@
       </div>
       <div id="plip-history-modal" class="kozen-history text-sm leading-relaxed">
         <span class="sr-only">大銭天道の軌跡</span>
+        <article>
+          <h3>Version 0.53.13　2026.11.27 — 健康管理・分析表示の充実</h3>
+          <ul><li>登録済み症状の削除機能を追加。確認後に対象症状と過去の症状記録を削除。</li><li>症状入力の「なし」を廃止し、未選択を症状なしとして保存。再タップで選択解除。</li><li>月間カレンダーに健康表示を追加。総合体調と発生症状を一覧表示。分析見出しを更新し、症状別の31日固定・重症度別横棒グラフを追加。年間健康記録カードと独立した年選択、重症度別の年間縦棒グラフと分析対象の症状選択を追加。年間症状発生日数・健康記録日数・症状発生割合・最多月を表示。</li></ul>
+        </article>
         <article>
           <h3>Version 0.53.4　2026.11.25 — LIFE＋タイトル・旧版データ引き継ぎ</h3>
           <ul><li>作品タイトルの読み仮名の後ろに LIFE＋ を追加。</li><li>LIFE＋の保存データがない場合、旧大銭天道の記録と設定を自動で引き継ぐ。旧版のデータは保持。</li></ul>
@@ -924,7 +943,7 @@
     <div role="dialog" aria-modal="true" aria-labelledby="healthDayTitle" class="glass-card rounded-3xl max-w-md w-full p-4 border border-emerald-500/40 space-y-4 max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center border-b border-slate-700/60 pb-2"><div><h3 id="healthDayTitle" class="font-extrabold text-lg">💚 体調チェック</h3><p id="healthDayDate" class="text-xs opacity-70"></p></div><button type="button" aria-label="閉じる" onclick="closeHealthDay()" class="text-2xl p-2">×</button></div>
       <div class="font-bold text-sm">総合体調</div><div id="healthConditionChoices" class="grid grid-cols-5 gap-1"></div>
-      <div class="font-bold text-sm">今日の症状</div><div id="healthDaySymptoms" class="space-y-3"></div>
+      <div class="font-bold text-sm">今日の症状</div><p class="text-xs opacity-70">症状がある場合だけ選択してください。再タップで解除できます。</p><div id="healthDaySymptoms" class="space-y-3"></div>
       <label for="healthDayMemo" class="font-bold text-sm">体調メモ</label><textarea id="healthDayMemo" rows="3" class="inner-box w-full rounded-xl p-3 text-sm" placeholder="気づいたことなど"></textarea>
       <button type="button" onclick="saveHealthDay()" class="w-full rounded-xl bg-amber-500 text-slate-900 font-bold p-3">この内容で記録する</button>
       <button type="button" id="healthDayDelete" onclick="deleteHealthDay()" class="w-full text-sm opacity-70 p-2">この日の記録を削除</button>
@@ -1413,7 +1432,7 @@
             </form>
             <h4 class="font-bold text-xs pt-2">登録済みの症状</h4>
             <div id="healthSymptomList" class="space-y-2"></div>
-            <p class="text-xs opacity-75">非表示にしても症状の設定は残ります。</p>
+            <p class="text-xs opacity-75">非表示にしても設定と記録は残ります。削除すると、その症状の過去の記録も消えます。</p>
           </div>
         </div>
         <div id="parentSubTabData" class="hidden space-y-4">
@@ -3178,8 +3197,31 @@
       renderCalendar();
     }
 
+    let calendarMode = 'mission';
+    function setCalendarMode(mode) {
+      if (!['mission','health'].includes(mode)) return;
+      playSE('tap');
+      calendarMode = mode;
+      renderCalendar();
+    }
+    function calendarHealthItems(record) {
+      return Object.entries(record?.symptoms || {}).filter(([,v]) => Number.isInteger(v?.level) && v.level >= 1 && v.level <= 3).map(([id,v]) => {
+        const item = (state.healthSymptoms || []).find(x => x.id === id);
+        return {id, name:item?.name || v.name || '症状', icon:item?.icon || v.icon || '🩺'};
+      });
+    }
     function renderCalendar() {
       renderHealthMonth();
+      const healthMode = calendarMode === 'health';
+      for (const [id,selected] of [['calendarMissionMode',!healthMode],['calendarHealthMode',healthMode]]) {
+        const b=document.getElementById(id);
+        b.setAttribute('aria-pressed',String(selected));
+        b.className='rounded-lg py-2 text-xs font-extrabold '+(selected?'bg-amber-500 text-slate-950':'opacity-70 hover:opacity-100');
+      }
+      const legend=document.getElementById('calendarHealthLegend');
+      legend.classList.toggle('hidden',!healthMode);
+      legend.classList.toggle('flex',healthMode);
+      const legendItems=new Map();
       document.getElementById('calendarTitle').textContent = `${calYear}年 ${calMonth + 1}月`;
       const grid = document.getElementById('calendarGrid');
       grid.innerHTML = '';
@@ -3205,6 +3247,20 @@
           ? 'today-pressable'
           : 'inner-box';
 
+        if (healthMode) {
+          const record=state.healthRecords?.[dateStr];
+          const condition=Number.isInteger(record?.condition)?healthConditions[record.condition]:null;
+          const items=condition?calendarHealthItems(record):[];
+          items.forEach(item=>legendItems.set(item.id,item));
+          grid.innerHTML += `<button type="button" onclick="openDayDetailModal('${dateStr}', true)" class="cal-cell relative rounded-xl p-1 flex flex-col items-center justify-between min-w-0 ${borderClass} ${isFuture?'opacity-40':'hover:opacity-80'}">
+            ${isToday?'<span class="text-[9px] font-black leading-none">今日</span>':''}
+            <span class="text-[10px] font-bold ${isToday?'text-slate-700 text-sm':'opacity-80'}">${d}</span>
+            <div class="my-auto flex flex-col items-center gap-0.5 w-full min-w-0">
+              ${condition?`<span class="text-xl leading-none" title="${escapeHtml(condition[1])}" aria-label="${escapeHtml(condition[1])}">${condition[0]}</span>`:''}
+              <div class="flex flex-wrap justify-center gap-0.5 w-full text-xs leading-tight">${items.map(item=>`<span title="${escapeHtml(item.name)}" aria-label="${escapeHtml(item.name)}">${escapeHtml(item.icon)}</span>`).join('')}</div>
+            </div></button>`;
+          continue;
+        }
         // 日付ごとの達成ミッションを、設定されたアイコンと色で表示する。
         // 過去に終了したミッションも、記録が残っていれば表示対象に含める。
         const dayMissions = state.missionLogs?.[dateStr] || {};
@@ -3231,6 +3287,7 @@
           </button>
         `;
       }
+      legend.innerHTML=healthMode?[...legendItems.values()].map(item=>`<span>${escapeHtml(item.icon)} ${escapeHtml(item.name)}</span>`).join(''):'';
     }
 
     // ==========================================
@@ -3449,22 +3506,81 @@
 
     const healthConditions = [['😄','絶好調'],['🙂','良好'],['😐','普通'],['😞','不調'],['😣','絶不調']];
     let healthDayDate = null, healthDayOwner = null, healthDayDraft = null, healthDayBaseline = null, healthDayFocus = null;
+    let healthAnnualYear = new Date().getFullYear();
+    let healthAnnualSymptomId = null;
+    function collectHealthAnnualLevels(year, id, records) {
+      const months = Array.from({length:12},()=>({levels:[0,0,0],known:0,recorded:0}));
+      for (const [date,r] of Object.entries(records || {})) {
+        const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
+        if (!match || Number(match[1]) !== year || !Number.isInteger(r?.condition) || r.condition<0 || r.condition>4) continue;
+        const m=Number(match[2]), d=Number(match[3]);
+        if(m<1 || m>12 || d<1 || d>new Date(year,m,0).getDate()) continue;
+        months[m-1].recorded++;
+        const level=r.symptoms?.[id]?.level;
+        if(!Number.isInteger(level)||level<0||level>3) continue;
+        months[m-1].known++;
+        if(level>0) months[m-1].levels[level-1]++;
+      }
+      return months;
+    }
+    function summarizeHealthAnnualLevels(months) {
+      const totals=months.map(m=>m.levels.reduce((a,b)=>a+b,0));
+      const days=totals.reduce((a,b)=>a+b,0);
+      const known=months.reduce((a,m)=>a+m.known,0);
+      const recorded=months.reduce((a,m)=>a+m.recorded,0);
+      const peak=Math.max(0,...totals);
+      return {days,known,recorded,peak,peakMonths:totals.flatMap((v,i)=>v===peak&&peak>0?[i+1]:[])};
+    }
+    function renderHealthAnnualYear() {
+      document.getElementById('healthAnnualYearTitle').textContent = `${healthAnnualYear}年`;
+      const target=document.getElementById('healthAnnualChart');
+      const items=state.healthSymptoms||[];
+      const item=items.find(x=>x.id===healthAnnualSymptomId)||items[0];
+      healthAnnualSymptomId=item?.id??null;
+      if(!item){target.textContent='登録済みの症状がありません';return;}
+      const months=collectHealthAnnualLevels(healthAnnualYear,item.id,state.healthRecords);
+      const summary=summarizeHealthAnnualLevels(months);
+      const stats=[['年間症状発生日数',summary.known?`${summary.days}日`:'—'],['年間健康記録日数',summary.recorded?`${summary.recorded}日`:'—'],['症状があった日の割合',summary.known?`${(summary.days/summary.known*100).toFixed(1)}%`:'—'],['最も症状が多かった月',summary.peak?`${summary.peakMonths.map(m=>m+'月').join('・')}（${summary.peak}日）`:'—']];
+      const statsHtml=`<div class="grid grid-cols-2 gap-2 mt-3">${stats.map(([label,value])=>`<div class="inner-box rounded-xl p-3 min-w-0"><p class="opacity-70 text-[11px]">${label}</p><p class="font-extrabold text-base break-words mt-1">${value}</p></div>`).join('')}</div><p class="opacity-70 text-[11px]">割合は選択した症状の記録 ${summary.known} 日を分母として計算。未記録日は含みません。</p>`;
+      const colors=['#e5c65d','#e99a50','#d56969'], labels=['軽度','中度','重度'];
+      const bars=months.map((m,i)=>{
+        let sum=0;
+        const x=32+i*25;
+        const rects=m.levels.map((v,j)=>{sum+=v;return `<rect x="${x}" y="${132-sum*3.6}" width="17" height="${v*3.6}" fill="${colors[j]}"><title>${i+1}月 ${labels[j]} ${v}日</title></rect>`;}).join('');
+        return `${rects}<text x="${x+8.5}" y="${sum?127-sum*3.6:127}" text-anchor="middle" font-size="9" fill="currentColor">${m.known?sum:'—'}</text><text x="${x+8.5}" y="148" text-anchor="middle" font-size="9" fill="currentColor">${i+1}月</text>`;
+      }).join('');
+      target.innerHTML=`<label class="block font-bold" for="healthAnnualSymptomSelect">分析する症状</label><select id="healthAnnualSymptomSelect" class="w-full inner-box rounded-xl px-3 py-2 font-bold" onchange="changeHealthAnnualSymptom(this.value)">${items.map(x=>`<option value="${escapeHtml(x.id)}" ${x.id===item.id?'selected':''}>${escapeHtml(x.icon)} ${escapeHtml(x.name)}${x.active===false?'（非表示）':''}</option>`).join('')}</select><div class="flex flex-wrap justify-end gap-3">${labels.map((l,i)=>`<span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${colors[i]}"></span> ${l}</span>`).join('')}</div><svg viewBox="0 0 335 155" style="width:100%;height:auto;display:block" role="img" aria-label="${escapeHtml(item.name)}の年間症状発生日数。${months.map((m,i)=>`${i+1}月 ${m.known?m.levels.reduce((a,b)=>a+b,0)+'日':'未記録'}`).join('、')}">${[0,10,20,31].map(v=>`<line x1="28" x2="332" y1="${132-v*3.6}" y2="${132-v*3.6}" stroke="currentColor" opacity=".18" stroke-dasharray="3 3"/><text x="23" y="${135-v*3.6}" font-size="9" text-anchor="end" fill="currentColor">${v}</text>`).join('')}${bars}</svg><p class="opacity-70">—：症状未記録　0：記録あり・症状なし</p>${statsHtml}`;
+    }
+    function changeHealthAnnualSymptom(id) {
+      if (!(state.healthSymptoms||[]).some(x=>x.id===id)) return;
+      healthAnnualSymptomId=id;
+      renderHealthAnnualYear();
+      document.getElementById('healthAnnualSymptomSelect')?.focus({preventScroll:true});
+    }
+    function changeHealthAnnualYear(delta) {
+      if (delta !== -1 && delta !== 1) return;
+      playSE('tap');
+      healthAnnualYear += delta;
+      renderHealthAnnualYear();
+    }
+    document.getElementById('healthAnnualYearTitle').textContent = `${healthAnnualYear}年`;
     function renderHealthMonth() {
+      renderHealthAnnualYear();
       const prefix = `${calYear}-${String(calMonth+1).padStart(2,'0')}-`;
       const records = Object.entries(state.healthRecords || {}).filter(([date,r]) => date.startsWith(prefix) && Number.isInteger(r?.condition) && r.condition>=0 && r.condition<5).map(([,r])=>r);
       const counts = healthConditions.map((_,i)=>records.filter(r=>r.condition===i).length);
       const n=records.length, colors=['#449c79','#8fbe82','#c8b66a','#d99b60','#d46b6b'];
       document.getElementById('healthMonthTitle').textContent=`${calYear}年${calMonth+1}月（カレンダー表示月）`;
-      const symptoms=new Map((state.healthSymptoms||[]).filter(x=>x.active!==false).map(x=>[x.id,{name:x.name,icon:x.icon,days:0,severe:0,known:0}]));
+      const symptoms=new Map((state.healthSymptoms||[]).filter(x=>x.active!==false).map(x=>[x.id,{name:x.name,icon:x.icon,days:0,severe:0,known:0,levels:[0,0,0]}]));
       for(const r of records) for(const [id,v] of Object.entries(r.symptoms||{})) {
         if(!Number.isInteger(v?.level)||v.level<0||v.level>3) continue;
-        if(!symptoms.has(id)) {const item=(state.healthSymptoms||[]).find(x=>x.id===id);symptoms.set(id,{name:item?.name||v.name||'症状',icon:item?.icon||v.icon||'🩺',days:0,severe:0,known:0});}
-        const t=symptoms.get(id);t.known++;if(v.level>0)t.days++;if(v.level===3)t.severe++;
+        if(!symptoms.has(id)) {const item=(state.healthSymptoms||[]).find(x=>x.id===id);symptoms.set(id,{name:item?.name||v.name||'症状',icon:item?.icon||v.icon||'🩺',days:0,severe:0,known:0,levels:[0,0,0]});}
+        const t=symptoms.get(id);t.known++;if(v.level>0){t.days++;t.levels[v.level-1]++;}if(v.level===3)t.severe++;
       }
       document.getElementById('healthMonthStats').innerHTML=`<div class="grid grid-cols-3 gap-1 text-center"><div>記録日数<div class="text-lg font-extrabold">${n}日</div></div><div>良好以上<div class="text-lg font-extrabold">${n?Math.round((counts[0]+counts[1])/n*100)+'%':'—'}</div></div><div>不調・絶不調<div class="text-lg font-extrabold">${counts[3]+counts[4]}日</div></div></div>
       <div class="grid grid-cols-5 gap-1 text-center">${healthConditions.map((c,i)=>`<div><div class="text-xl" title="${c[1]}">${c[0]}</div><div class="font-bold">${counts[i]}日</div></div>`).join('')}</div>
       ${n?`<div class="flex h-2 rounded-full overflow-hidden">${counts.map((c,i)=>`<div style="width:${c/n*100}%;background:${colors[i]}"></div>`).join('')}</div>`:'<p class="opacity-70">この月の健康記録はありません</p>'}
-      <div class="border-t border-slate-500/30 pt-2 font-bold">症状別の記録</div>${[...symptoms.values()].map(t=>`<div class="flex items-center justify-between gap-2"><span class="break-all">${escapeHtml(t.icon)} ${escapeHtml(t.name)}</span><span class="shrink-0">${t.known?`${t.days}日（重度 ${t.severe}日）`:'未記録'}</span></div>`).join('')}<p class="opacity-70">未記録は集計対象外。症状は入力された日だけを集計します。</p>`;
+      <div class="border-t border-slate-500/30 pt-2 font-bold">症状別の記録</div><div class="flex flex-wrap justify-end gap-3 text-xs">${['軽度','中度','重度'].map((label,i)=>`<span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${['#e5c65d','#e99a50','#d56969'][i]}"></span> ${label}</span>`).join('')}</div>${[...symptoms.values()].map(t=>`<div class="space-y-1"><div class="flex items-center justify-between gap-2"><span class="break-all">${escapeHtml(t.icon)} ${escapeHtml(t.name)}</span><span class="shrink-0">${t.known?`${t.days}日（重度 ${t.severe}日）`:'未記録'}</span></div><div class="flex rounded overflow-hidden" style="height:16px;background:rgba(100,130,125,.16)" role="img" aria-label="${t.known?`軽度 ${t.levels[0]}日、中度 ${t.levels[1]}日、重度 ${t.levels[2]}日（最大31日）`:'未記録'}">${t.levels.map((v,i)=>`<div style="flex:0 0 ${v/31*100}%;background:${['#e5c65d','#e99a50','#d56969'][i]}" title="${['軽度','中度','重度'][i]} ${v}日"></div>`).join('')}</div></div>`).join('')}<div class="relative text-xs opacity-70" style="height:1.4em">${[0,5,10,15,20,25,31].map(v=>`<span style="position:absolute;left:${v/31*100}%;transform:translateX(${v===0?0:v===31?-100:-50}%)">${v}${v===31?'日':''}</span>`).join('')}</div><p class="opacity-70">未記録は集計対象外。症状は入力された日だけを集計します。</p>`;
     }
     function calculateHealthStreak(endDateStr = getTodayStr()) {
       const [y,m,d] = endDateStr.split('-').map(Number);
@@ -3517,8 +3633,8 @@
       const items=state.healthSymptoms.filter(x=>x.active!==false || Object.hasOwn(healthDayDraft.symptoms,x.id));
       items.forEach(item=>{
         const section=document.createElement('div'), title=document.createElement('div'), row=document.createElement('div');
-        title.className='text-sm font-bold mb-1';title.textContent=item.icon+' '+item.name+(item.active===false?'（非表示）':'');row.className='grid grid-cols-4 gap-1';section.append(title,row);list.append(section);
-        ['なし','軽度','中度','重度'].forEach((label,i)=>choice(row,label,healthDayDraft.symptoms[item.id]?.level===i,()=>{healthDayDraft.symptoms[item.id]={level:i,name:item.name,icon:item.icon};renderHealthDayChoices();},['#65a884','#d9b34e','#e99b45','#e57373'][i]));
+        title.className='text-sm font-bold mb-1';title.textContent=item.icon+' '+item.name+(item.active===false?'（非表示）':'');row.className='grid grid-cols-3 gap-1';section.append(title,row);list.append(section);
+        ['軽度','中度','重度'].forEach((label,index)=>{const i=index+1;choice(row,label,healthDayDraft.symptoms[item.id]?.level===i,()=>{healthDayDraft.symptoms[item.id]={level:healthDayDraft.symptoms[item.id]?.level===i?0:i,name:item.name,icon:item.icon};renderHealthDayChoices();},['#d9b34e','#e99b45','#e57373'][index]);});
       });
       if(!items.length) list.textContent='登録された症状はありません。';
     }
@@ -3533,9 +3649,9 @@
       const next={...state.healthRecords};
       if(remove) delete next[healthDayDate]; else next[healthDayDate]={...healthDayDraft,memo:document.getElementById('healthDayMemo').value};
       try{const key=childStorageKey(activeChildId),stored=JSON.parse(localStorage.getItem(key)||'{}');stored.healthRecords=next;localStorage.setItem(key,JSON.stringify(stored));}catch(e){console.error(e);showToast('体調記録を保存できませんでした');return;}
-      state.healthRecords=next;closeHealthDay(true);renderHealthMonth();renderMatrix();renderModalHealthSummary();if(document.getElementById('dayDetailModal').classList.contains('hidden'))document.querySelector('[data-health-date="'+healthDayDate+'"]')?.focus({preventScroll:true});showToast(remove?'体調記録を削除しました':'体調を記録しました');
+      state.healthRecords=next;closeHealthDay(true);renderCalendar();renderMatrix();renderModalHealthSummary();if(document.getElementById('dayDetailModal').classList.contains('hidden'))document.querySelector('[data-health-date="'+healthDayDate+'"]')?.focus({preventScroll:true});showToast(remove?'体調記録を削除しました':'体調を記録しました');
     }
-    function saveHealthDay(){if(healthDayDraft.condition===null){showToast('総合体調を選択してください');return;}persistHealthDay(false);}
+    function saveHealthDay(){if(healthDayDraft.condition===null){showToast('総合体調を選択してください');return;}for(const item of state.healthSymptoms){if(item.active!==false && !Object.hasOwn(healthDayDraft.symptoms,item.id))healthDayDraft.symptoms[item.id]={level:0,name:item.name,icon:item.icon};}persistHealthDay(false);}
     function deleteHealthDay(){if(confirm('この日の体調記録を削除しますか？'))persistHealthDay(true);}
     document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.getElementById('healthDayModal').classList.contains('hidden')){e.preventDefault();closeHealthDay();}});
 
@@ -5181,6 +5297,7 @@
         function button(text, action, disabled=false) {
           const b = document.createElement('button'); b.type='button'; b.textContent=text;
           b.className='inner-box rounded-lg px-2 py-1.5 text-xs font-bold disabled:opacity-30';
+          if(text==='削除') b.style.color='#dc2626';
           b.disabled=disabled; b.onclick=action; controls.append(b);
         }
         button('↑ 上へ',()=>moveHealthSymptom(i,-1),i===0);
@@ -5196,8 +5313,37 @@
         button(item.active===false?'再表示':'非表示',()=>{
           persistHealthSymptoms(state.healthSymptoms.map(x=>x.id===item.id?{...x,active:x.active===false}:x));
         });
+        button('削除',()=>deleteHealthSymptom(item.id));
         row.append(controls); list.append(row);
       });
+    }
+    function deleteHealthSymptom(id) {
+      const item=state.healthSymptoms.find(x=>x.id===id);
+      if(!item || !hasRegisteredChild(activeChildId)) return;
+      const records=structuredClone(state.healthRecords||{});
+      let count=0;
+      for(const record of Object.values(records)) {
+        if(record?.symptoms && Object.hasOwn(record.symptoms,id)) {
+          delete record.symptoms[id]; count++;
+        }
+      }
+      if(!confirm(`「${item.name}」を完全に削除しますか？\n\n過去の症状記録 ${count}日分も削除されます。この操作は取り消せません。\n記録を残したい場合は「非表示」を選んでください。`)) return;
+      const next=state.healthSymptoms.filter(x=>x.id!==id);
+      try {
+        const key=childStorageKey(activeChildId);
+        const stored=JSON.parse(localStorage.getItem(key)||'{}');
+        stored.healthSymptoms=next;
+        stored.healthRecords=records;
+        localStorage.setItem(key,JSON.stringify(stored));
+      } catch(e) { console.error(e); showToast('症状を削除できませんでした'); return; }
+      state.healthSymptoms=next;
+      state.healthRecords=records;
+      if(healthEditingId===id) resetHealthSymptomForm();
+      renderHealthSymptoms();
+      renderCalendar();
+      renderMatrix();
+      renderModalHealthSummary();
+      showToast('症状とその記録を削除しました');
     }
     function persistHealthSymptoms(next) {
       if (!hasRegisteredChild(activeChildId)) { showToast('先に利用者登録を完了してください'); return false; }
@@ -5208,6 +5354,7 @@
         localStorage.setItem(key,JSON.stringify(stored));
         state.healthSymptoms=next;
         renderHealthSymptoms();
+        renderCalendar();
         showToast('症状設定を保存しました');
         return true;
       } catch(e) { console.error(e); showToast('症状設定を保存できませんでした'); return false; }
